@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Bluetooth activation fragment -->
+    <string name="dialog_bt_not_supported_message">Für eine Verbindung mit dem Gürtel wird Bluetooth Low Energy benötigt. Ihr Gerät scheint Bluetooth Low Energy nicht zu unterstützen.</string>
+    <string name="dialog_bt_not_supported_ok">Abbrechen</string>
+    <string name="dialog_permission_request_rationale_message">Um den Gürtel zu verbinden, benötigt die App auch Zugriff auf den Ortungsdienst. (Das ist eine Beschränkung durch Android).</string>
+    <string name="dialog_permission_request_rationale_ok">Weiter</string>
+    <string name="dialog_enable_location_message">Um den Gürtel zu verbinden, muss der Ortungsdienst eingeschaltet sein. (Das ist eine Beschränkung durch Android).</string>
+    <string name="dialog_enable_location_ok">Weiter</string>
+
+</resources>

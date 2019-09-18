@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('fslib-android-2.0.0-b9.aar'))

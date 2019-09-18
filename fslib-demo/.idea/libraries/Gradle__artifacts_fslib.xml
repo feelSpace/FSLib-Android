@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: artifacts:fslib">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/fslib-android-ble-1.5.0-b6.aar/b98f33801654db03a99db06c6619da6d/annotations.zip!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/fslib-android-ble-1.5.0-b6.aar/b98f33801654db03a99db06c6619da6d/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/fslib-android-ble-1.5.0-b6.aar/b98f33801654db03a99db06c6619da6d/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

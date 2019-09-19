@@ -89,7 +89,7 @@ public enum BeltVibrationSignal {
     /**
      * A system signal that indicates with a vibration the level of the belt's battery. Any
      * customization of this signal (intensity, channel and stop other channel flag) will be
-     * ignored. The signal use the channel 0, the default intensity and other channels are not
+     * ignored. The signal use the channel 0 and the default intensity. Other channels are not
      * stopped when the signal is started.
      */
     BATTERY_LEVEL(false, false);

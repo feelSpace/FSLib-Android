@@ -46,6 +46,9 @@ public enum BeltMode {
 
     /**
      * Mode for assisting the crossing of a road.
+     *
+     * IMPORTANT: This mode has been added in firmware version 45. The application must check the
+     * firmware version before changing the mode to the Crossing mode.
      */
     CROSSING((byte)6),
 

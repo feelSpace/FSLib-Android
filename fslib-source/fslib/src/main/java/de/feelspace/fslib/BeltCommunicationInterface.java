@@ -64,7 +64,7 @@ public interface BeltCommunicationInterface extends BeltCommandInterface {
      * IMPORTANT: The reset command is only for testing purposes. It is recommended to
      * manually turn off and on the belt after a reset.
      *
-     * This command is available only from firmware 43.
+     * (This command is available only from firmware 43 which is the commercial firmware version.)
      *
      * @param parameterReset <code>true</code> to reset the parameters.
      * @param bluetoothReset <code>true</code> to reset the bluetooth module, including the
@@ -78,7 +78,7 @@ public interface BeltCommunicationInterface extends BeltCommandInterface {
     /**
      * Plays a buzzer tone pattern on the belt.
      *
-     * This command is available from belt firmware version 45.
+     * IMPORTANT: This command is available from belt firmware version 45.
      *
      * @param tonePattern the tone pattern to play.
      * @return <code>true</code> if the request has been sent, <code>false</code> if no belt is
@@ -88,6 +88,11 @@ public interface BeltCommunicationInterface extends BeltCommandInterface {
 
     /**
      * Sends a pulse command to the connected belt.
+     *
+     * IMPORTANT: This command is available only from belt firmware version 45. The application must
+     * check the firmware version before using it. For general public applications it is recommended
+     * to use {@link BeltCommunicationInterface#sendChannelConfigurationCommand(ChannelConfigurationCommand)}
+     * instead.
      *
      * @param command The command to send.
      * @return <code>true</code> if the command has been sent, <code>false</code> if no belt is

@@ -98,6 +98,12 @@ public interface BeltCommandInterface {
     /**
      * Starts a vibration pulse toward a direction relative to the magnetic north.
      *
+
+     * IMPORTANT: This command is available only from belt firmware version 45. The application must
+     * check the firmware version before using it. In case the firmware version is below 45, the
+     * method {@link BeltCommandInterface#vibrateAtMagneticBearing(float, Integer, BeltVibrationSignal, Integer, Boolean)}
+     * must be used instead.
+     *
      * @param direction The relative direction of the vibration in degrees. The value 0 represents
      *                  the magnetic north and positive angles are clockwise.
      * @param onDurationMs The duration of the vibration for one pulse in milliseconds. The
@@ -126,6 +132,12 @@ public interface BeltCommandInterface {
     /**
      * Starts a vibration pulse at a specific place (vibro-motor) given by an angle.
      *
+
+     * IMPORTANT: This command is available only from belt firmware version 45. The application must
+     * check the firmware version before using it. In case the firmware version is below 45, the
+     * method {@link BeltCommandInterface#vibrateAtAngle(float, Integer, BeltVibrationSignal, Integer, Boolean)}
+     * must be used instead.
+     *
      * @param angle The angle in degrees at which the belt must vibrate. The value 0 represents the
      *              front of the belt, and positive angles are clockwise.
      * @param onDurationMs The duration of the vibration for one pulse in milliseconds. The
@@ -153,6 +165,11 @@ public interface BeltCommandInterface {
 
     /**
      * Starts a vibration pulse at specific positions (vibration motors) given by index.
+     *
+     * IMPORTANT: This command is available only from belt firmware version 45. The application must
+     * check the firmware version before using it. In case the firmware version is below 45, the
+     * method {@link BeltCommandInterface#vibrateAtPositions(int[], Integer, BeltVibrationSignal, Integer, Boolean)}
+     * must be used instead.
      *
      * @param positions The positions as index. Index 0 represents the front of the belt, and
      *                  vibration motors are numbered clockwise. A maximum of 6 motors can vibrate
@@ -217,6 +234,8 @@ public interface BeltCommandInterface {
      * Requests the belt to change its mode. Listeners are notified of the mode change using
      * {@link BeltCommandListener#onBeltModeChanged(BeltMode)} when the mode change is
      * effective.
+     *
+     * IMPORTANT: The crossing mode is only available from firmware version 45.
      *
      * @param mode the mode requested.
      * @return <code>true</code> if the request has been sent successfully, <code>false</code> if

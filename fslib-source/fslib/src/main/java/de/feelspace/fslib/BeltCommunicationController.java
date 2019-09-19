@@ -1139,17 +1139,15 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                             ).getPacket());
                 case STRONG_WARNING:
                     return gattController.writeCharacteristic(vibrationCommandChar,
-                            new PulseCommand(
+                            new ChannelConfigurationCommand(
                                     channelIndex,
+                                    BeltVibrationPattern.SINGLE_LONG_PULSE,
+                                    intensity,
                                     OrientationType.BINARY_MASK,
                                     0b0001000100010001,
-                                    intensity,
-                                    500,
                                     3,
-                                    1,
                                     700,
-                                    2100,
-                                    ResetProgressOption.RESET_PROGRESS,
+                                    0,
                                     false,
                                     stopOtherChannels
                             ).getPacket());

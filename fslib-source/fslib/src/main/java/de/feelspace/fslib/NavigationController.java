@@ -75,7 +75,13 @@ public class NavigationController {
         if (beltConnection.getState() != BeltConnectionState.STATE_DISCONNECTED) {
             return;
         }
-        beltConnection.scanAndConnect();
+        try {
+            beltConnection.scanAndConnect();
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "Connection failed", e);
+            notifyBeltConnectionFailed();
+        }
+
     }
 
     /**
@@ -84,6 +90,15 @@ public class NavigationController {
     public void disconnectBelt() {
         beltConnection.stopScan();
         beltConnection.disconnect();
+    }
+
+    /**
+     * Returns the connection state.
+     *
+     * @return The connection state.
+     */
+    public BeltConnectionState getConnectionState() {
+        return beltConnection.getState();
     }
 
     /**

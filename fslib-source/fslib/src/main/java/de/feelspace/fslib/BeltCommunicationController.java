@@ -916,7 +916,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                 case DESTINATION_REACHED_REPEATED:
                 case DESTINATION_REACHED_SINGLE:
                 case OPERATION_WARNING:
-                case STRONG_WARNING:
+                case CRITICAL_WARNING:
                 case BATTERY_LEVEL:
                     // Non-directional signal, unreachable
                     return false;
@@ -1137,7 +1137,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                                     false,
                                     stopOtherChannels
                             ).getPacket());
-                case STRONG_WARNING:
+                case CRITICAL_WARNING:
                     return gattController.writeCharacteristic(vibrationCommandChar,
                             new ChannelConfigurationCommand(
                                     channelIndex,

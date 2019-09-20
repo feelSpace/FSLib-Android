@@ -84,7 +84,7 @@ public enum BeltVibrationSignal {
      * A strong warning signal to indicate a critical problem such as location inaccuracy during
      * navigation. It is recommended to use channel 0 for this signal.
      */
-    STRONG_WARNING(false, false),
+    CRITICAL_WARNING(false, false),
 
     /**
      * A system signal that indicates with a vibration the level of the belt's battery. Any

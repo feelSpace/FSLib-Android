@@ -38,15 +38,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="NavigationController.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="NavigationController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3060">
-              <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
+            <state relative-caret-position="629">
+              <caret line="798" column="52" lean-forward="true" selection-start-line="798" selection-start-column="52" selection-end-line="798" selection-end-column="52" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#309#336#0" expanded="true" />
                 <element signature="e#404#431#0" expanded="true" />
+                <element signature="e#4040#4041#0" expanded="true" />
+                <element signature="e#4091#4092#0" expanded="true" />
                 <element signature="e#10063#10064#0" expanded="true" />
                 <element signature="e#10100#10101#0" expanded="true" />
                 <element signature="e#23321#23322#0" expanded="true" />
@@ -62,29 +64,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ExampleInstrumentedTest.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ExampleInstrumentedTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/ExampleInstrumentedTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="20" column="41" lean-forward="true" selection-start-line="20" selection-start-column="41" selection-end-line="20" selection-end-column="41" />
+            <state relative-caret-position="272">
+              <caret line="23" column="5" lean-forward="true" selection-start-line="18" selection-start-column="4" selection-end-line="23" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BeltCommandListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandListener.java">
+      <file leaf-file-name="NavigationControllerTest.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/NavigationControllerTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="51" column="53" selection-start-line="51" selection-start-column="36" selection-end-line="51" selection-end-column="53" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NavigationEventListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="65" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="65" />
+            <state relative-caret-position="357">
+              <caret line="21" column="5" lean-forward="true" selection-start-line="21" selection-start-column="5" selection-end-line="21" selection-end-column="5" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -3414,16 +3410,17 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java" />
-        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationState.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/SimpleBeltController.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltMode.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationInterface.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandInterface.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationController.java" />
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltVibrationSignal.java" />
-        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java" />
-        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" />
         <option value="$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/ExampleInstrumentedTest.java" />
+        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationState.java" />
+        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java" />
+        <option value="$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/NavigationControllerTest.java" />
+        <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" />
       </list>
     </option>
   </component>
@@ -3751,17 +3748,17 @@
       <window_info id="Build Variants" order="2" side_tool="true" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32963374" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32963374" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Logcat" order="7" />
       <window_info id="Captures" order="3" weight="0.25" />
       <window_info id="Capture Tool" order="4" />
       <window_info id="Designer" order="5" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info anchor="bottom" id="Build" order="7" weight="0.32963374" />
       <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49833518" weight="0.32995737" />
-      <window_info anchor="right" id="Structure" order="3" visible="true" weight="0.25" />
+      <window_info active="true" anchor="right" id="Structure" order="3" visible="true" weight="0.25" />
       <window_info anchor="right" id="Device File Explorer" order="7" sideWeight="0.5016648" side_tool="true" weight="0.32995737" />
       <window_info anchor="right" id="Theme Preview" order="8" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -3787,6 +3784,8 @@
             <element signature="imports" expanded="true" />
             <element signature="e#309#336#0" expanded="true" />
             <element signature="e#404#431#0" expanded="true" />
+            <element signature="e#4040#4041#0" expanded="true" />
+            <element signature="e#4091#4092#0" expanded="true" />
             <element signature="e#10063#10064#0" expanded="true" />
             <element signature="e#10100#10101#0" expanded="true" />
             <element signature="e#23321#23322#0" expanded="true" />
@@ -3910,13 +3909,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="12" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionInterface.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="283">
@@ -3935,10 +3927,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationState.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="14" column="65" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="65" />
+        <state relative-caret-position="68">
+          <caret line="4" column="3" lean-forward="true" selection-start-line="4" selection-start-column="3" selection-end-line="4" selection-end-column="3" />
         </state>
       </provider>
     </entry>
@@ -3949,14 +3948,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/ExampleInstrumentedTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="23" column="5" lean-forward="true" selection-start-line="18" selection-start-column="4" selection-end-line="23" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/NavigationControllerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="21" column="5" lean-forward="true" selection-start-line="21" selection-start-column="5" selection-end-line="21" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3060">
-          <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
+        <state relative-caret-position="629">
+          <caret line="798" column="52" lean-forward="true" selection-start-line="798" selection-start-column="52" selection-end-line="798" selection-end-column="52" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#309#336#0" expanded="true" />
             <element signature="e#404#431#0" expanded="true" />
+            <element signature="e#4040#4041#0" expanded="true" />
+            <element signature="e#4091#4092#0" expanded="true" />
             <element signature="e#10063#10064#0" expanded="true" />
             <element signature="e#10100#10101#0" expanded="true" />
             <element signature="e#23321#23322#0" expanded="true" />
@@ -3968,13 +3986,6 @@
             <element signature="e#23763#23764#0" expanded="true" />
             <element signature="e#23815#23816#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/src/androidTest/java/de/feelspace/fslib/ExampleInstrumentedTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="20" column="41" lean-forward="true" selection-start-line="20" selection-start-column="41" selection-end-line="20" selection-end-column="41" />
         </state>
       </provider>
     </entry>

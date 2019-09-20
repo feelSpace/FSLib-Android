@@ -784,6 +784,18 @@ public class NavigationController {
 
         @Override
         public void onConnectionStateChange(BeltConnectionState state) {
+            if (state == BeltConnectionState.STATE_CONNECTED) {
+                beltController.setOrientationNotificationsActive(true);
+                beltController.changeCompassAccuracySignalState(compassAccuracySignalEnabled);
+                isPauseModeForNavigation = false;
+                if (navigationState == NavigationState.NAVIGATING) {
+                    if (beltController.getMode() == BeltMode.APP) {
+                        sendNavigationVibrationCommand();
+                    } else {
+                        beltController.changeMode(BeltMode.APP);
+                    }
+                }
+            }
             notifyBeltConnectionStateChanged(state);
         }
 

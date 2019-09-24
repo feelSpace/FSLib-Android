@@ -18,6 +18,11 @@ import android.support.annotation.Nullable;
 public interface BeltCommunicationInterface extends BeltCommandInterface {
 
     /**
+     * The code used for the default intensity in channel configuration commands and pulse commands.
+     */
+    public final static int DEFAULT_INTENSITY_CODE = 0xAAAA;
+
+    /**
      * Returns the firmware version of the connected belt. The firmware version is requested during
      * handshake.
      *

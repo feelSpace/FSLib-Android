@@ -102,6 +102,15 @@ public class NavigationController {
     }
 
     /**
+     * Returns the navigation state.
+     *
+     * @return The navigation state.
+     */
+    public NavigationState getNavigationState() {
+        return navigationState;
+    }
+
+    /**
      * Changes the default vibration intensity of the connected belt. The default vibration
      * intensity can be changed only when a belt is connected. Listeners are informed asynchronously
      * of the new intensity through the callback
@@ -282,7 +291,7 @@ public class NavigationController {
      * Pauses the navigation and changes the mode of the belt to Pause if connected and in App mode.
      */
     public void pauseNavigation() {
-        if (navigationState == NavigationState.PAUSED) {
+        if (navigationState != NavigationState.NAVIGATING) {
             return;
         }
         navigationState = NavigationState.PAUSED;
@@ -315,7 +324,9 @@ public class NavigationController {
      * @param shouldStopNavigation <code>true</code> to stop the navigation.
      */
     public void notifyDestinationReached(boolean shouldStopNavigation) {
-        stopNavigation();
+        if (shouldStopNavigation) {
+            stopNavigation();
+        }
         if (beltConnection.getState() == BeltConnectionState.STATE_CONNECTED) {
             beltController.signal(
                     BeltVibrationSignal.DESTINATION_REACHED_SINGLE,

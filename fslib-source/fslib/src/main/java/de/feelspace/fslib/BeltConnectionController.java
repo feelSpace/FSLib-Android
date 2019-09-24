@@ -147,8 +147,6 @@ class BeltConnectionController extends BeltConnectionInterface implements
     @Override
     public void onGattConnectionStateChange(GattConnectionState gattState) {
         boolean handshake = false;
-        boolean notifyConnectionLost = false;
-        boolean notifyConnectionFailed = false;
         synchronized (this) {
             switch (gattState) {
                 case GATT_DISCONNECTED:
@@ -161,13 +159,11 @@ class BeltConnectionController extends BeltConnectionInterface implements
                             return;
                         case STATE_CONNECTING:
                             state = BeltConnectionState.STATE_DISCONNECTED;
-                            notifyConnectionFailed = true;
                             break;
                         case STATE_RECONNECTING:
                         case STATE_HANDSHAKE:
                         case STATE_CONNECTED:
                             state = BeltConnectionState.STATE_DISCONNECTED;
-                            notifyConnectionLost = true;
                             break;
                     }
                     break;
@@ -193,10 +189,6 @@ class BeltConnectionController extends BeltConnectionInterface implements
         }
         if (handshake) {
             communicationController.startHandshake(this);
-        } else if (notifyConnectionFailed) {
-            notifyConnectionFailed();
-        } else if (notifyConnectionLost) {
-            notifyConnectionLost();
         }
         notifyState();
     }

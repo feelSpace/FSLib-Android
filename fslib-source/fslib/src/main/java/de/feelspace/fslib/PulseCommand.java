@@ -83,7 +83,8 @@ class PulseCommand {
                 }
                 break;
         }
-        if (intensity < 0 || (intensity>100 && intensity!=0xAA)) {
+        if (intensity < 0 || (intensity>100 &&
+                intensity!=BeltCommunicationInterface.DEFAULT_INTENSITY_CODE)) {
             throw new IllegalArgumentException("Illegal intensity value.");
         }
         if (onDurationMs < 0 || onDurationMs > 0xFFFF) {

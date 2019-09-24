@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Implementation of the communication interface.
  */
-public class BeltCommunicationController implements BeltCommunicationInterface,
+class BeltCommunicationController implements BeltCommunicationInterface,
         GattController.GattEventListener {
 
     // Debug
@@ -753,9 +753,11 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             return false;
         }
         // Default intensity if intensity parameter is null
-        intensity = (intensity == null)?(0xAA):(intensity);
+        intensity = (intensity == null)?(BeltCommunicationInterface.DEFAULT_INTENSITY_CODE):
+                (intensity);
         // Check intensity range
-        if (intensity < 0 || (intensity > 100 && intensity != 0xAA)) {
+        if (intensity < 0 || (intensity > 100 && intensity !=
+                BeltCommunicationInterface.DEFAULT_INTENSITY_CODE)) {
             Log.e(DEBUG_TAG, "BeltCommunicationController: Intensity value out of range.");
             return false;
         } else if (intensity > 0 && intensity < 5) {
@@ -976,9 +978,11 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             iterations = 0;
         }
         // Default intensity if intensity parameter is null
-        intensity = (intensity == null)?(0xAA):(intensity);
+        intensity = (intensity == null)?(BeltCommunicationInterface.DEFAULT_INTENSITY_CODE):
+                (intensity);
         // Check intensity range
-        if (intensity < 0 || (intensity > 100 && intensity != 0xAA)) {
+        if (intensity < 0 || (intensity > 100 && intensity !=
+                BeltCommunicationInterface.DEFAULT_INTENSITY_CODE)) {
             Log.e(DEBUG_TAG, "BeltCommunicationController: Intensity value out of range.");
             return false;
         } else if (intensity > 0 && intensity < 5) {
@@ -1053,9 +1057,11 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             return startSystemSignal(BeltSystemSignal.BATTERY_LEVEL);
         }
         // Default intensity if intensity parameter is null
-        intensity = (intensity == null)?(0xAA):(intensity);
+        intensity = (intensity == null)?(BeltCommunicationInterface.DEFAULT_INTENSITY_CODE):
+                (intensity);
         // Check intensity range
-        if (intensity < 0 || (intensity > 100 && intensity != 0xAA)) {
+        if (intensity < 0 || (intensity > 100 &&
+                intensity != BeltCommunicationInterface.DEFAULT_INTENSITY_CODE)) {
             Log.e(DEBUG_TAG, "BeltCommunicationController: Intensity value out of range.");
             return false;
         } else if (intensity > 0 && intensity < 5) {
@@ -1120,10 +1126,12 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                                     1,
                                     2500,
                                     0,
-                                    false,
+                                    true,
                                     stopOtherChannels
                             ).getPacket());
                 case OPERATION_WARNING:
+                    // Note: exclusive channel is true because firmware 43 only support 4
+                    // simultaneous vibration.
                     return gattController.writeCharacteristic(vibrationCommandChar,
                             new ChannelConfigurationCommand(
                                     channelIndex,
@@ -1131,13 +1139,15 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                                     intensity,
                                     OrientationType.VIBROMOTOR_INDEX,
                                     0,
-                                    1,
-                                    1000,
+                                    2,
+                                    500,
                                     0,
-                                    false,
+                                    true,
                                     stopOtherChannels
                             ).getPacket());
                 case CRITICAL_WARNING:
+                    // Note: exclusive channel is true because firmware 43 only support 4
+                    // simultaneous vibration.
                     return gattController.writeCharacteristic(vibrationCommandChar,
                             new ChannelConfigurationCommand(
                                     channelIndex,
@@ -1148,7 +1158,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                                     3,
                                     700,
                                     0,
-                                    false,
+                                    true,
                                     stopOtherChannels
                             ).getPacket());
                 case BATTERY_LEVEL:

@@ -20,17 +20,17 @@ public enum BeltButton {
     /**
      * Compass button.
      */
-    COMPASS((byte)2),
+    COMPASS((byte)3),
 
     /**
      * Home button.
      */
-    HOME((byte)3),
+    HOME((byte)4),
 
     /**
      * Pause button.
      */
-    PAUSE((byte)4);
+    PAUSE((byte)2);
 
     /**
      * Value of the item

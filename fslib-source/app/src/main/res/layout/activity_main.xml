@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/default_small_horizontal_margin"
+            android:paddingLeft="@dimen/default_horizontal_margin"
+            android:paddingRight="@dimen/default_vertical_margin"
+            android:paddingTop="@dimen/default_small_vertical_margin"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/colorPrimary">
+
+            <!-- Title -->
+            <TextView
+                android:text="@string/app_name"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:textAppearance="@android:style/TextAppearance.Large"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <!-- FeelSpace logo -->
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_feelspace_logo"/>
+
+        </LinearLayout>
+
+        <!-- Content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                android:layout_marginLeft="@dimen/default_small_horizontal_margin"
+                android:layout_marginRight="@dimen/default_small_vertical_margin"
+                android:layout_marginTop="@dimen/default_small_vertical_margin"
+                android:orientation="vertical">
+
+                <!-- Section: connection -->
+                <TextView
+                    android:text="@string/activity_main_connection_scan_connection_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Search and connect button -->
+                <Button
+                    android:id="@+id/activity_main_search_and_connect_button"
+                    android:text="@string/activity_main_search_and_connect_button_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin" />
+
+                <!-- Disconnect button -->
+                <Button
+                    android:id="@+id/activity_main_disconnect_button"
+                    android:text="@string/activity_main_disconnect_button_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin" />
+
+                <!-- Connection state label -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_connection_status_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_connection_status_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+                <!-- Section: Default vibration intensity -->
+                <TextView
+                    android:text="@string/activity_main_default_intensity_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Default intensity -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_default_intensity_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_default_intensity_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Default intensity slider -->
+                <TextView
+                    android:text="@string/activity_main_set_intensity_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <SeekBar
+                        android:id="@+id/activity_main_set_intensity_slider"
+                        android:max="95"
+                        android:progress="45"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+                    <Button
+                        android:id="@+id/activity_main_set_intensity_button"
+                        android:text="@string/activity_main_set_intensity_default_button_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+                <!-- Section: Orientation -->
+                <TextView
+                    android:text="@string/activity_main_orientation_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Belt heading -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_belt_heading_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_belt_heading_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Orientation accuracy flag -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_orientation_accurate_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_orientation_accurate_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Enable/disable compass accuracy signal -->
+                <Button
+                    android:id="@+id/activity_main_enable_compass_accuracy_signal_button"
+                    android:text="@string/activity_main_enable_compass_accuracy_signal_button_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin" />
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+                <!-- Section: Battery -->
+                <TextView
+                    android:text="@string/activity_main_battery_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Power status -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_power_status_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_power_status_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Battery level -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_battery_level_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_battery_level_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Notify battery level -->
+                <Button
+                    android:id="@+id/activity_main_notify_battery_button"
+                    android:text="@string/activity_main_notify_battery_button_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin" />
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+                <!-- Section: Navigation signal -->
+                <TextView
+                    android:text="@string/activity_main_navigation_signal_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Direction slider -->
+                <TextView
+                    android:text="@string/activity_main_navigation_direction_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading" />
+                <SeekBar
+                    android:id="@+id/activity_main_navigation_direction_slider"
+                    android:max="359"
+                    android:progress="0"
+                    android:layout_marginBottom="@dimen/default_vertical_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <!-- Magnetic bearing switch -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_magnetic_bearing_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1">
+                        <Switch
+                            android:id="@+id/activity_main_mag_bearing_navigation_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:checked="true"
+                            android:layout_marginBottom="@dimen/default_small_vertical_margin" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <!-- Signal type spinner -->
+                <TextView
+                    android:text="@string/activity_main_signal_type_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading" />
+                <Spinner
+                    android:id="@+id/activity_main_signal_type_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorLabel" />
+
+                <!-- Start/Resume/Stop/Pause buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/activity_main_start_navigation_button"
+                        android:text="@string/activity_main_start_navigation_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center" />
+                    <Button
+                        android:id="@+id/activity_main_pause_navigation_button"
+                        android:text="@string/activity_main_pause_navigation_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/activity_main_destination_reached_button"
+                        android:text="@string/activity_main_destination_reached_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"/>
+                    <Button
+                        android:id="@+id/activity_main_stop_navigation_button"
+                        android:text="@string/activity_main_stop_navigation_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"/>
+                </LinearLayout>
+
+                <!-- Navigation state -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:text="@string/activity_main_navigation_state_heading_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorHeading" />
+                    <TextView
+                        android:id="@+id/activity_main_navigation_state_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textAppearance="@android:style/TextAppearance.Medium"
+                        android:textColor="@color/colorLabel" />
+                </LinearLayout>
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+                <!-- Section: Notification signals -->
+                <TextView
+                    android:text="@string/activity_main_notification_signals_section_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading"
+                    android:textStyle="bold" />
+
+                <!-- Notification direction slider -->
+                <TextView
+                    android:text="@string/activity_main_notify_direction_heading_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_vertical_margin"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/colorHeading" />
+                <SeekBar
+                    android:id="@+id/activity_main_notify_direction_slider"
+                    android:max="359"
+                    android:progress="0"
+                    android:layout_marginBottom="@dimen/default_vertical_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <!-- Notify direction buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/activity_main_notify_bearing_button"
+                        android:text="@string/activity_main_notify_bearing_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"  />
+                    <Button
+                        android:id="@+id/activity_main_notify_direction_button"
+                        android:text="@string/activity_main_notify_direction_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"  />
+                </LinearLayout>
+
+                <!-- Notify warning -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/default_small_vertical_margin"
+                    android:orientation="horizontal">
+                    <Button
+                        android:id="@+id/activity_main_notify_warning_button"
+                        android:text="@string/activity_main_notify_warning_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"  />
+                    <Button
+                        android:id="@+id/activity_main_notify_warning_critical_button"
+                        android:text="@string/activity_main_notify_warning_critical_button_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center"  />
+                </LinearLayout>
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="@dimen/default_small_horizontal_margin"
+                    android:layout_marginBottom="@dimen/default_small_horizontal_margin"
+                    android:background="@android:color/darker_gray" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

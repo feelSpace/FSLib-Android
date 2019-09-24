@@ -81,7 +81,7 @@ public enum BeltVibrationSignal {
     OPERATION_WARNING(false, false),
 
     /**
-     * A strong warning signal to indicate a critical problem such as location inaccuracy during
+     * A strong warning signal to indicate a critical problem such as compass inaccuracy during
      * navigation. It is recommended to use channel 0 for this signal.
      */
     CRITICAL_WARNING(false, false),

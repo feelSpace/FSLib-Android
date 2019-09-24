@@ -85,7 +85,8 @@ public class ChannelConfigurationCommand {
                 }
                 break;
         }
-        if (intensity < 0 || (intensity>100 && intensity!=0xAA)) {
+        if (intensity < 0 || (intensity>100 &&
+                intensity!=BeltCommunicationInterface.DEFAULT_INTENSITY_CODE)) {
             throw new IllegalArgumentException("Illegal intensity value.");
         }
         if (iterations > 127 || iterations < -128) {

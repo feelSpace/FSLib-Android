@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="navigation_signal_types">
+        <item>Continuous</item>
+        <item>Navigation</item>
+        <item>Approaching destination</item>
+        <item>Turn ongoing</item>
+        <item>Next waypoint long distance</item>
+        <item>Next waypoint medium distance</item>
+        <item>Next waypoint short distance</item>
+        <item>Next waypoint area reached</item>
+        <item>Destination reached</item>
+    </string-array>
+</resources>

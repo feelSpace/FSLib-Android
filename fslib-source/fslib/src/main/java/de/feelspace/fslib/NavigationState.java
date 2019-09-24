@@ -11,4 +11,17 @@ public enum NavigationState {
     /** Ongoing navigation */
     NAVIGATING;
 
+
+    @Override
+    public String toString() {
+        switch (this) {
+            case STOPPED:
+                return "Stopped";
+            case PAUSED:
+                return "Paused";
+            case NAVIGATING:
+                return "Navigating";
+        }
+        return "Unknown";
+    }
 }

@@ -8,8 +8,24 @@ FSLib-Android is an Android library to control the feelSpace naviBelt from your 
 * [FSLib for Android](#fslib-for-android)
   * [Structure of the repository](#structure-of-the-repository)
   * [Integration of the FSLib module in an Android project](#integration-of-the-fslib-module-in-an-android-project)
-  * [Application permissions](#application-permissions)
+    * [Using the AAR package](#using-the-aar-package)
+    * [Linking the source code of the module](#linking-the-source-code-of-the-module)
+  * [Setup of your project](#setup-of-your-project)
+    * [Minimum Android SDK version](#minimum-android-sdk-version)
+    * [Application permissions](#application-permission)	
   * [Structure of the FSLib module](#structure-of-the-fslib-module)
+* [Navigation API](#navigation-api)
+  * [Introduction](#introduction)
+  * [Bluetooth activation and permission granting](#bluetooth-activation-and-permission-granting)
+  * [Connection and disconnect of a belt](#connection-and-disconnection-of-a-belt)
+  * [Navigation state and belt mode](#navigation-state-and-belt-mode)
+  * [Belt button press](#belt-button-press)
+  * [Continuous and repeated vibration signals](#continuous-and-repeated-vibration-signals)
+  * [Vibration notifications](#vibration-notifications)
+  * [Vibration intensity](#vibration-intensity)
+  * [Belt orientation](#belt-orientation)
+  * [Belt battery level](#belt-battery-level)
+  * [Compass accuracy signal](#compass-accuracy-signal)
 
 ## Copyright and license notice
 
@@ -60,7 +76,7 @@ dependencies {
 
 For additional information on adding module in Android Studio please refer to: https://developer.android.com/studio/projects/android-library#AddDependency
 
-### Link the source code of the module
+### Linking the source code of the module
 
 In ` settings.gradle` adds:
 ```gradle
@@ -188,7 +204,7 @@ If you want to implement your own procedure for location permission and Bluetoot
 - Bluetooth must be activated. See documentation: [Set up BLE](https://developer.android.com/guide/topics/connectivity/bluetooth-le#setup)
 - Other Bluetooth problems are listed [here](https://github.com/iDevicesInc/SweetBlue/wiki/Android-BLE-Issues).
 
-## Connection and disconnect of a belt
+## Connection and disconnection of a belt
 
 To connect and control a belt you must, first, create an instance of the navigation controller for your application. The first argument of the constructor is a `Context` (because accessing the Bluetooth service requires a `Context`), the second argument indicates if the compass accuracy signal is enabled when your application is connected to the belt (see [Compass accuracy signal](#compass-accuracy-signal)).
 
@@ -216,17 +232,52 @@ The connection state can be retrieved from the navigation controller with `getCo
 - `onBeltConnectionFailed()` when the connection failed.
 - `onNoBeltFound()` when no belt has been found during the connection procedure.
 
-## Control of the belt mode
+## Navigation state and belt mode
 
+The navigation controller automatically manages the mode of the belt according to the state of the navigation. The navigation state can be changed by the application when calling `startNavigation()`, `stopNavigation()` or `pauseNavigation()`. The state can also change when a belt is connected and a button on the belt is pressed. For instance, pressing the pause button of the belt when the navigation state is `NavigationState.NAVIGATING`, changes the navigation state to `NavigationState.PAUSE` (and the mode of the belt will also be changed to Pause mode). The application controls the vibration of the belt only when in `NAVIGATING` state.
+
+The navigation state can be retrieve with `getNavigationState()`. When the navigation state changes, listeners are informed with the callback `onNavigationStateChanged(NavigationState state)`.
+
+It is possible to change the navigation state even if no belt is connected (e.g. by calling `startNavigation()`). If a belt is connected when the navigation state is `NAVIGATING`, then the belt will start signalizing the navigation signal when connected. In this way, it is possible to use most of the method of the navigation controller without having to consider if a belt is connected or not.
+
+## Belt button press
+
+The navigation controller already manages most of the behavior on button press and mode change. The application must only define a behavior when the home button is pressed, and the navigation is started or stopped. The callback to implement for handling home button press is `onBeltHomeButtonPressed()`.
+
+The detailed behavior of the navigation controller on a button press is the following:
+- **Home button**: If the navigation is stopped or started, listeners of navigation events are informed of the button press via `onBeltHomeButtonPressed()`. If the navigation is paused and the belt is not in pause mode, the navigation is resumed automatically. If the navigation is paused and the belt is in pause mode, the vibration intensity is changed.
+- **Power button**: On short press, the battery level vibration is started without callback to the application. On long press, the belt is switched off and navigation listeners are informed of the disconnection via `onBeltConnectionStateChanged()` (the callback `onBeltConnectionLost()` is NOT called because the connection is not lost, just stopped).
+- **Pause button**: If the navigation is started when the pause button is pressed, the navigation is automatically paused. If the belt was in pause mode from navigation, the navigation is automatically resumed.
+- **Compass button**: If the navigation is started when the compass button is pressed, the navigation is paused automatically and the belt goes to compass, crossing or calibration mode according to the type of press. In case the belt is in pause mode, the vibration intensity is changed.
 
 ## Continuous and repeated vibration signals
 
+The vibration signal is defined when calling `startNavigation()` and `updateNavigationSignal()`. The `direction` parameter is the orientation of the vibration in degree. This orientation is relative to magnetic North if the parameter `isMagneticBearing` is `true`, otherwise the orientation is relative to the belt itself. The type of vibration is defined by the `signal` parameter. To stop the vibration without stopping the navigation it is possible to specify the value `null` for the parameter `signal`.
+
 ## Vibration notifications
+
+In addition to continuous or repeated vibration signals, some temporary vibration signals can be started.
+- **notifyDestinationReached()**: Starts a single iteration of the destination reached signal. Using this method, it is possible to stop the navigation when the signal is performed.
+- **notifyDirection()**: Starts a temporary vibration in a given direction.
+- **notifyWarning()**: Starts a warning vibration signal.
+- **notifyBeltBatteryLevel()**: Starts the battery level signal of the belt.
+
+## Vibration intensity
+
+For all vibration signals except the operation warning, the default vibration intensity of the belt is used. When a belt is connected, the default intensity can be retrieved with `getDefaultVibrationIntensity()`. To change the default vibration intensity the method `changeDefaultVibrationIntensity()` must be used. When a belt is connected, listeners of the navigation controller are informed of vibration intensity changes via the callback `onBeltDefaultVibrationIntensityChanged()`. Note that the vibration intensity can be changed using the buttons of the belt.
 
 ## Belt orientation
 
-## Belt battery status
+The orientation of the belt (relative to magnetic North) is notified to listeners via the callback `onBeltOrientationUpdated()`. The orientation is updated every 500 milliseconds. The last orientation value can also be retrieved with the method `getBeltHeading()`.
+
+## Belt battery level
+
+The battery level of the belt is notified to listeners via the callback `onBeltBatteryLevelUpdated()`. The last known value of the belt battery level can also be retrieved with the method `getBeltBatteryLevel()`.
 
 ## Compass accuracy signal
+
+The belt emits a vibration signal to indicate that the internal compass is inaccurate. This may happen when the belt is used indoor or in a place with magnetic interferences. This compass accuracy signal is performed in compass mode, crossing mode and in application mode (the mode used in navigation). For some applications it is preferable to disable the compass accuracy signal, for instance, because vibration signals are not relative to magnetic North or orientation accuracy is not critical.
+
+The state of the compass accuracy signal can be defined when the navigation controller is instantiated, and also using the method `setCompassAccuracySignal()`.
 
 

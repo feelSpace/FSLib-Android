@@ -1,5 +1,6 @@
-# FSLib-Android-BLE
-FSLib for Android
+# FSLib-Android Documentation
+
+FSLib-Android is an Android library to control the feelSpace naviBelt from your application.
 
 # Content
 
@@ -12,13 +13,18 @@ FSLib for Android
 
 ## Copyright and license notice
 
-Copyright feelSpace GmbH, 2017-2019.
+Copyright 2017-2019, feelSpace GmbH.
 
-This agreement applies to the software modules, the source code and the documentation that are hereinafter referred to as “FSLib”, “FSLib API” or “FSLib SDK”. Only individuals, research groups or business entities agreed with in writing by feelSpace GmbH may use the FSLib SDK.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
-The FSLib SDK is distributed by feelSpace with no warranty, expressed or implied. Do not redistribute, sell, or publish for any purpose, any portion of the FSLib SDK (including the documentation) without the prior explicit written consent of feelSpace GmbH.
+http://www.apache.org/licenses/LICENSE-2.0
 
-All rights reserved by feelSpace GmbH.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the [License](../LICENSE) for the specific language governing permissions and
+limitations under the License.
 
 **Note on using feelSpace Trademarks and Copyrights:**
 
@@ -30,11 +36,18 @@ All rights reserved by feelSpace GmbH.
 
 ## Structure of the repository
 
-The repository contains two directories:
+The repository contains three directories:
+* **docs**: The documentation of the FSLib for Android.
 * **fslib-aar**: The FSLib module as an AAR archive. Two JAR files are also provided with the javadoc and the source-code of the public interfaces. These two JAR files can be used in Android Studio to obtain contextual documentation.
-* **fslib-demo**: A demo application that illustrates how to use the FSLib. This demo is ready to use and the source code can be easily copied-pasted in your project.
+* **fslib-source**: An Android Studio project containing the source code of the FSLib and a demo application.
 
 ## Integration of the FSLib module in an Android project
+
+You have two options to integrate the FSLib into your project. You can 1) use the AAR package of the library, or 2) link the source code of the FSLib in your project.
+
+:construction: The FSLib will be later available as maven repository.
+
+### Using the AAR package
 
 To use the FSLib in a project you must import the library “fslib-android-ble-[version number].aar” into your project. In Android Studio, the right way to import the library is:
 
@@ -56,6 +69,12 @@ dependencies {
 For additional information on adding module in Android Studio please refer to: https://developer.android.com/studio/projects/android-library#AddDependency
 
 Note that the minimum Android SDK version for the FSLib is 18. In the `build.gradle` of your application the `minSdkVersion` must have a value of 18 or higher.
+
+### Link the source code of the module
+
+
+## Structure of the FSLib module
+
 
 ## Application permissions
 

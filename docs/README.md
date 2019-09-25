@@ -37,11 +37,11 @@ The repository contains three directories:
 
 You have two options to integrate the FSLib into your project. You can 1) use the AAR package of the library, or 2) link the source code of the FSLib in your project.
 
-:construction: The FSLib will be later available as maven repository.
+:construction: The FSLib will be soon available as maven repository.
 
 ### Using the AAR package
 
-To use the FSLib in a project you must import the library “fslib-android-ble-[version number].aar” into your project. In Android Studio, the right way to import the library is:
+The AAR package of the FSLib is available in the `fslib-aar\` directory of the repository. To import the package:
 
 * Select in menu “File” > “New Module”,
 * Select the option “Import .JAR/.AAR Package” then “Next” ,
@@ -52,7 +52,7 @@ The name of the library should appear in the `settings.gradle`. You must also ad
 ```gradle
 dependencies {
     // FSLib
-    implementation project(':fslib-android-ble-[version number]')
+    implementation project(':fslib-android-[version number]')
     
     // ...
 }
@@ -60,15 +60,31 @@ dependencies {
 
 For additional information on adding module in Android Studio please refer to: https://developer.android.com/studio/projects/android-library#AddDependency
 
-Note that the minimum Android SDK version for the FSLib is 18. In the `build.gradle` of your application the `minSdkVersion` must have a value of 18 or higher.
-
 ### Link the source code of the module
 
+In ` settings.gradle` adds:
+```gradle
+include ':fslib
+project(':fslib').projectDir = new File('PathToFSLibModule')
+```
 
-## Structure of the FSLib module
+In ` app/build.gradle`
+```gradle
+dependencies {
+    implementation project(':fslib')
+    ...
+}
+```
 
+:anger: If you find it unintuitive, it is normal, Google didn't find it useful to provide simple way to reuse source code between projects.
 
-## Application permissions
+## Setup of your project
+
+### Minimum Android SDK version
+
+Note that the minimum Android SDK version for the FSLib is 18 because Bluetooth low-energy is only supported from SDK version version 18. In the `build.gradle` of your application the minSdkVersion must have a value of 18 or higher.
+
+### Application permissions
 
 The FSLib module uses 4 permissions declared in its own “AndroidManifest.xml”:
 
@@ -81,46 +97,136 @@ The FSLib module uses 4 permissions declared in its own “AndroidManifest.xml�
 
 These permissions are automatically merged: https://developer.android.com/studio/build/manifest-merge.html
 
-Note that the Location permissions are necessary for Bluetooth Low-Energy scan. In addition, the Location service must be enabled for scanning. (This is a joke from Google: https://issuetracker.google.com/issues/37065090.) In the FSLib, the `BluetoothActivationFragment` is provided to simplify the activation of required services.
+:anger: Note that the Location permissions are necessary for Bluetooth Low-Energy scan. In addition, the Location service must be enabled for scanning. (This is a joke from Google: https://issuetracker.google.com/issues/37065090.) 
+
+In the FSLib, the `BluetoothActivationFragment` is provided to simplify the activation of required services.
 
 ## Structure of the FSLib module
 
-In the FSLib two classes are exposed to connect a belt and send commands:
-* **BeltConnectionInterface.java** This is the class that manages the connection with the belt.
-* **BeltCommunicationInterface.java** This is the class to control the belt when a connection is established.
+The FSLib proposes two approaches for connecting and controlling a belt:
 
-### In short
+- **The navigation API:** It is the recommended approach. The navigation API provides simple methods to connect and control a belt. The main class to start developing with the navigation API is the `NavigationController`.
+- **The general API:** The general API provides a large set of methods to control the belt for complex applications. Your application must manage the mode of the belt and the belt's button events. The main interfaces of the general API are the `BeltConnectionInterface`, the `BeltCommandInterface`, and for advanced belt instructions the `BeltCommunicationInterface`. In any case it is recommended to look at the implementation of the `NavigationController` before you start using the general API.
 
-You retrieve and initialize the connection manager, then retrieve the communication manager:
+# Navigation API
 
+## Introduction
+
+The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to the control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt).
+
+The main class to connect a belt and control the vibration is the `NavigationController`. You must also implement a `NavigationEventListener` to handle the callback of the navigation controller.
+
+It is recommended to look at the demo application that illustrates how to use the navigation controller. The relevant part of the code is located in the `MainActivity` class of the `app` module.
+
+## Bluetooth activation and permission granting
+
+In order to search for a belt (i.e. scan) your application requires a permission for location data (Not a joke, thanks Google). For more details see [here]( https://developer.android.com/guide/topics/connectivity/bluetooth-le#permissions). You can implement your own procedure for location permission and Bluetooth activation, or use the `BluetoothActivationFragment` provided by the FSLib.
+
+Create and attach a `BluetoothActivationFragment` to the activity that will initiate the connection. The activity must implement the interface `OnBluetoothActivationCallback`.
 ```java
-// Retrieve the connection and command manager
-BeltConnectionInterface beltConnectionManager = BeltConnectionInterface.getInstance();
-beltConnectionManager.init(getApplicationContext(), 0);
-BeltCommunicationInterface beltController = beltConnectionManager.getCommunicationInterface();
-```
-You can use the `BluetoothActivationFragment` to check and activate Bluetooth, and when Bluetooth is ON and Location services are activated you can connect a belt:
+public class MainActivity extends AppCompatActivity implements OnBluetoothActivationCallback {
 
-```java
-beltConnectionManager.searchAndConnect();
-```
+    // Fragment to check BT activation and check permissions
+    private BluetoothActivationFragment bluetoothActivationFragment;
+    protected static final String BLUETOOTH_ACTIVATION_FRAGMENT_TAG =
+            "MainActivity.BLUETOOTH_ACTIVATION_FRAGMENT_TAG";
 
-To control the vibration of the belt you must use the methods of the `BeltCommunicationInterface`. The belt must be in APP mode to start a vibration:
+    // Belt navigation controller
+    private NavigationController navigationController;
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Add BT activation and permission-checker fragment
+        FragmentManager fm = getSupportFragmentManager();
+        bluetoothActivationFragment = (BluetoothActivationFragment) fm.findFragmentByTag(
+                BLUETOOTH_ACTIVATION_FRAGMENT_TAG);
+        if (bluetoothActivationFragment == null) {
+            bluetoothActivationFragment = new BluetoothActivationFragment();
+            fm.beginTransaction().add(bluetoothActivationFragment,
+                    BLUETOOTH_ACTIVATION_FRAGMENT_TAG).commit();
+        }
+        // Create the navigation controller
+        navigationController = new NavigationController(getApplicationContext(), false);
+    }
+    
+    @Override
+    public void onBluetoothActivated() {
+        // Bluetooth is active, continue with connection
+        navigationController.searchAndConnectBelt();
+    }
 
-```java
-if (beltController.getBeltMode() != BeltMode.BELT_MODE_APP) {
-    beltController.switchToMode(BeltMode.BELT_MODE_APP);
+    @Override
+    public void onBluetoothActivationRejected() {
+        // Inform user that the connection cannot be performed without Bluetooth
+    }
+
+    @Override
+    public void onBluetoothActivationFailed() {
+        // Inform user that the Bluetooth activation has failed
+    }
 }
+``` 
+
+Before you start the connection procedure you must call the method `activateBluetooth()` of the `BluetoothActivationFragment`, and then start the connection procedure in the callback `onBluetoothActivated()`.
+
+```
+    private void connectBelt() {
+        bluetoothActivationFragment.activateBluetooth();
+    }
+    @Override
+    public void onBluetoothActivated() {
+        // Bluetooth is active, continue with connection
+        navigationController.searchAndConnectBelt();
+    }
 ```
 
-In APP mode you can use the methods `vibrateAtMagneticBearing`, `vibrateAtAngle`, `signal` and `stopVibration` to control the vibration.
+If you want to implement your own procedure for location permission and Bluetooth activation, pay attention to the following:
+- Scanning for a belt requires a location permission granted (not only declared in the `AndroidManifest.xml` but also asked via `requestPermissions()`). See documentation: [Request app permissions]( https://developer.android.com/training/permissions/requesting).
+- Scanning for a belt cannot work without location service enabled. See documentation: [Prompt the user to change location settings](https://developer.android.com/training/location/change-location-settings#prompt)
+- You may scan with a filter to avoid the activation of the location service, but scan filters seem broken.
+- Bluetooth must be activated. See documentation: [Set up BLE](https://developer.android.com/guide/topics/connectivity/bluetooth-le#setup)
+- Other Bluetooth problems are listed [here](https://github.com/iDevicesInc/SweetBlue/wiki/Android-BLE-Issues).
+
+## Connection and disconnect of a belt
+
+To connect and control a belt you must, first, create an instance of the navigation controller for your application. The first argument of the constructor is a `Context` (because accessing the Bluetooth service requires a `Context`), the second argument indicates if the compass accuracy signal is enabled when your application is connected to the belt (see [Compass accuracy signal](#compass-accuracy-signal)).
 
 ```java
-// Starts a vibration on the rigth (90°) with the default intensity
-beltController.vibrateAtAngle(90, 
-                              null, // Default intensity
-                              BeltCommunicationInterface.PATTERN_CONTINUOUS, // Vibration pattern
-                              1, // Vibration channel
-                              true // Stop other channels
-                              );
+navigationController = new NavigationController(getApplicationContext(), false);
 ```
+
+You must also implement and register the listener interface for the callbacks of the navigation controller. If the listener is an Activity or Fragment, you should register it in `onResume()` and remove it `onPause()`.
+```java
+navigationController.addNavigationEventListener(this);
+```
+
+To search and connect a belt call `searchAndConnectBelt()`, and for disconnecting `disconnectBelt()`. Note that if you use the `BluetoothActivationFragment`, the connection must be requested in the callback `onBluetoothActivated()`.
+```java
+    @Override
+    public void onBluetoothActivated() {
+        // Bluetooth is active, continue with connection
+        navigationController.searchAndConnectBelt();
+    }
+```
+
+The connection state can be retrieved from the navigation controller with `getConnectionState()`. The listeners are also informed of connection events with the callbacks:
+- `onBeltConnectionStateChanged(BeltConnectionState state)` when the connection state changed.
+- `onBeltConnectionLost()` when the connection with the belt has been lost.
+- `onBeltConnectionFailed()` when the connection failed.
+- `onNoBeltFound()` when no belt has been found during the connection procedure.
+
+## Control of the belt mode
+
+
+## Continuous and repeated vibration signals
+
+## Vibration notifications
+
+## Belt orientation
+
+## Belt battery status
+
+## Compass accuracy signal
+
+

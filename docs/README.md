@@ -12,7 +12,7 @@ FSLib-Android is an Android library to control the feelSpace naviBelt from your 
     * [Linking the source code of the module](#linking-the-source-code-of-the-module)
   * [Setup of your project](#setup-of-your-project)
     * [Minimum Android SDK version](#minimum-android-sdk-version)
-    * [Application permissions](#application-permission)	
+    * [Application permissions](#application-permissions)	
   * [Structure of the FSLib module](#structure-of-the-fslib-module)
 * [Navigation API](#navigation-api)
   * [Introduction](#introduction)

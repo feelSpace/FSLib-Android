@@ -37,12 +37,13 @@ public class NavigationController {
     // State of the navigation
     private @NonNull NavigationState navigationState;
 
-    // State of compass accuracy signal
-    private boolean compassAccuracySignalEnabled;
-
     // Flag that indicate that the current pause mode has been set by the application
     private boolean isPauseModeForNavigation = false;
 
+    // Flag for compass accuracy signal
+    private Boolean compassAccuracySignalEnabled = null;
+
+    // Listeners
     private @NonNull ArrayList<NavigationEventListener> listeners = new ArrayList<>();
 
     // Channel constant
@@ -52,19 +53,15 @@ public class NavigationController {
      * Constructor.
      *
      * @param applicationContext The application context to access Bluetooth service.
-     * @param enableCompassAccuracySignal if <code>false</code> the compass accuracy signal will be
-     *                                    disabled when a belt is connected.
      * @throws IllegalArgumentException If the context is <code>null</code>.
      */
     public NavigationController(
-            Context applicationContext,
-            boolean enableCompassAccuracySignal) throws NullPointerException {
+            Context applicationContext) throws NullPointerException {
         beltConnection = BeltConnectionInterface.create(applicationContext);
         beltController = beltConnection.getCommandInterface();
         BeltListener beltListener = new BeltListener();
         beltConnection.addConnectionListener(beltListener);
         beltController.addCommandListener(beltListener);
-        this.compassAccuracySignalEnabled = enableCompassAccuracySignal;
         this.navigationState = NavigationState.STOPPED;
     }
 
@@ -88,6 +85,11 @@ public class NavigationController {
      * Disconnects the belt.
      */
     public void disconnectBelt() {
+        if (navigationState == NavigationState.PAUSED && isPauseModeForNavigation &&
+                beltConnection.getState() == BeltConnectionState.STATE_CONNECTED) {
+            // TODO Check if mode change with timeout is necessary, or delayed disconnection
+            beltController.changeMode(BeltMode.WAIT);
+        }
         beltConnection.stopScan();
         beltConnection.disconnect();
     }
@@ -203,29 +205,34 @@ public class NavigationController {
     }
 
     /**
-     * Enables or disables the compass accuracy signal on the belt for the current and next
-     * connections.
+     * Enables or disables the compass accuracy signal on the belt. The compass accuracy signal
+     * state is modified for the navigation, and also for compass and crossing modes.
+     *
+     * IMPORTANT: If the configuration of the compass accuracy signal is saved on the belt (i.e. the
+     * <code>persistent</code> parameter is set to true), the user must be informed of this new
+     * configuration as it will also impact the compass and crossing mode when no app is connected
+     * to the belt.
      *
      * @param enable <code>true</code> to enable the compass accuracy signal, <code>false</code> to
      *               disable it.
+     * @param persistent <code>true</code> to save the configuration on the belt, <code>false</code>
+     *                   to set the configuration only for the current power-cycle of the belt (i.e.
+     *                   this configuration is reset when the belt is powered off).
      */
-    public void setCompassAccuracySignal(boolean enable) {
-        if (enable == compassAccuracySignalEnabled) {
-            return;
-        }
-        compassAccuracySignalEnabled = enable;
+    public void setCompassAccuracySignal(boolean enable, boolean persistent) {
         if (beltConnection.getState() == BeltConnectionState.STATE_CONNECTED) {
-            beltController.changeCompassAccuracySignalState(enable);
+            beltController.changeCompassAccuracySignalState(enable, persistent);
         }
     }
 
     /**
-     * Returns the state of the compass accuracy signal.
+     * Returns the state of the compass accuracy signal. The value may be unknown for a short period
+     * after the connection to a belt.
      *
      * @return <code>true</code> if the compass accuracy signal is enable for the current and next
-     * connections, <code>false</code> otherwise.
+     * connections, <code>false</code> otherwise. Returns <code>null</code> if the value is unknown.
      */
-    public boolean isCompassAccuracySignalEnabled() {
+    public Boolean isCompassAccuracySignalEnabled() {
         return compassAccuracySignalEnabled;
     }
 
@@ -569,6 +576,23 @@ public class NavigationController {
     }
 
     /**
+     * Notifies listeners that the compass accuracy signal state has been retrieved or changed.
+     * @param enabled <code>true</code> if the signal is enabled, <code>false</code> otherwise.
+     */
+    private void notifyCompassAccuracySignalStateUpdated(boolean enabled) {
+        ArrayList<NavigationEventListener> targets;
+        synchronized (this) {
+            if (listeners.isEmpty()) {
+                return;
+            }
+            targets = new ArrayList<>(listeners);
+        }
+        for (NavigationEventListener l: targets) {
+            l.onCompassAccuracySignalStateUpdated(enabled);
+        }
+    }
+
+    /**
      * Notifies listeners that the connection failed.
      */
     private void notifyBeltConnectionFailed() {
@@ -786,11 +810,8 @@ public class NavigationController {
 
         @Override
         public void onBeltCompassAccuracySignalStateNotified(boolean signalEnabled) {
-            // Should be same flag
-            if (signalEnabled != compassAccuracySignalEnabled) {
-                Log.w(DEBUG_TAG, "NavigationController: Belt parameter out of sync.");
-                setCompassAccuracySignal(compassAccuracySignalEnabled);
-            }
+            compassAccuracySignalEnabled = signalEnabled;
+            notifyCompassAccuracySignalStateUpdated(compassAccuracySignalEnabled);
         }
 
         @Override
@@ -810,10 +831,11 @@ public class NavigationController {
 
         @Override
         public void onConnectionStateChange(BeltConnectionState state) {
+            isPauseModeForNavigation = false;
+            compassAccuracySignalEnabled = null;
             if (state == BeltConnectionState.STATE_CONNECTED) {
                 beltController.setOrientationNotificationsActive(true);
-                beltController.changeCompassAccuracySignalState(compassAccuracySignalEnabled);
-                isPauseModeForNavigation = false;
+                beltController.requestCompassAccuracySignalState();
                 if (navigationState == NavigationState.NAVIGATING) {
                     if (beltController.getMode() == BeltMode.APP) {
                         sendNavigationVibrationCommand();

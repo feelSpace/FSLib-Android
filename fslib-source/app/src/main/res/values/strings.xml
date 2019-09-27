@@ -59,6 +59,7 @@
 
     <string name="activity_main_enable_compass_accuracy_signal_button_text">Enable compass accuracy signal</string>
     <string name="activity_main_disable_compass_accuracy_signal_button_text">Disable compass accuracy signal</string>
+    <string name="activity_main_unknown_compass_accuracy_signal_button_text">Compass signal accuracy state unknown</string>
     <string name="activity_main_navigation_signal_section_heading_text">Navigation signal</string>
     <string name="activity_main_navigation_direction_heading_text">Navigation direction:</string>
     <string name="activity_main_magnetic_bearing_heading_text">Magnetic bearing:</string>
@@ -75,6 +76,14 @@
     <string name="activity_main_destination_reached_button_text">Destination reached</string>
     <string name="activity_main_stop_navigation_button_text">Stop navigation</string>
     <string name="activity_main_signal_type_heading_text">Signal type:</string>
+
+    <string name="dialog_disable_accuracy_signal_message">Disable the compass accuracy signal?</string>
+    <string name="dialog_disable_accuracy_signal_temporary_button_text">Disable temporarily</string>
+    <string name="dialog_disable_accuracy_signal_persistent_button_text">Disable and save setting on belt</string>
+    <string name="cancel_button_text">Cancel</string>
+    <string name="dialog_enable_accuracy_signal_message">Enable the compass accuracy signal?</string>
+    <string name="dialog_enable_accuracy_signal_temporary_button_text">Enable temporarily</string>
+    <string name="dialog_enable_accuracy_signal_persistent_button_text">Enable and save setting on belt</string>
 
     <string name="toast_bt_activation_rejected_text">BT activation has been rejected.</string>
     <string name="toast_bt_activation_failed_text">BT activation failed.</string>

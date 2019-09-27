@@ -336,20 +336,25 @@ public interface BeltCommandInterface {
     void removeCommandListener(BeltCommandListener listener);
 
     /**
-     * Enables or disables the vibration signal for inaccurate compass. The state of the signal is
-     * changed only for the current power cycle of the belt, i.e. this
-     * configuration is reset when the belt is powered off. Disabling the inaccurate compass signal
-     * is useful for non-navigation application.
+     * Enables or disables the vibration signal for inaccurate compass.
+     *
+     * IMPORTANT: If the configuration of the compass accuracy signal is saved on the belt (i.e. the
+     * <code>persistent</code> parameter is set to true), the user must be informed of this new
+     * configuration as it will also impact the compass and crossing mode when no app is connected
+     * to the belt.
      *
      * Listeners are informed when the state of the signal is changed with the callback
      * {@link BeltCommandListener#onBeltCompassAccuracySignalStateNotified(boolean)}.
      *
      * @param enableSignal <code>true</code> to enable the inaccurate compass signal,
      *                     <code>false</code> to disable it.
+     * @param persistent <code>true</code> to save the configuration on the belt, <code>false</code>
+     *                   to set the configuration only for the current power-cycle of the belt (i.e.
+     *                   this configuration is reset when the belt is powered off).
      * @return <code>true</code> if the request has been sent, <code>false</code> if no belt is
      * connected.
      */
-    boolean changeCompassAccuracySignalState(boolean enableSignal);
+    boolean changeCompassAccuracySignalState(boolean enableSignal, boolean persistent);
 
     /**
      * Requests the state of the inaccurate compass signal. The state of the signal is notified with

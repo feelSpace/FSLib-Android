@@ -5,10 +5,12 @@
  */
 package de.feelspace.fslibandroiddemo;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
         setContentView(R.layout.activity_main);
 
         // Retrieve the navigation controller
-        navigationController = new NavigationController(getApplicationContext(), false);
+        navigationController = new NavigationController(getApplicationContext());
 
         // Add BT activation and permission-checker fragment
         FragmentManager fm = getSupportFragmentManager();
@@ -182,9 +184,55 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
             enableCompassAccuracySignalButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    boolean signalEnabled = navigationController.isCompassAccuracySignalEnabled();
-                    navigationController.setCompassAccuracySignal(!signalEnabled);
-                    updateCompassAccuracySignalStateUI();
+                    Boolean signalEnabled = navigationController.isCompassAccuracySignalEnabled();
+                    if (signalEnabled == null) {
+                        // Do nothing
+                    } else if (signalEnabled) {
+                        // Ask for disable temporary or save
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(R.string.dialog_disable_accuracy_signal_message);
+                        builder.setPositiveButton(R.string.dialog_disable_accuracy_signal_temporary_button_text,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        MainActivity.this.navigationController.
+                                                setCompassAccuracySignal(false, false);
+                                    }
+                                });
+                        builder.setNegativeButton(R.string.dialog_disable_accuracy_signal_persistent_button_text,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        MainActivity.this.navigationController.
+                                                setCompassAccuracySignal(false, true);
+                                    }
+                                });
+                        builder.setNeutralButton(R.string.cancel_button_text, null);
+                        builder.create().show();
+                    } else {
+                        // Ask for enable temporary or save
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage(R.string.dialog_enable_accuracy_signal_message);
+                        builder.setPositiveButton(R.string.dialog_enable_accuracy_signal_temporary_button_text,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        MainActivity.this.navigationController.
+                                                setCompassAccuracySignal(true, false);
+                                    }
+                                });
+                        builder.setNegativeButton(R.string.dialog_enable_accuracy_signal_persistent_button_text,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        MainActivity.this.navigationController.
+                                                setCompassAccuracySignal(true, true);
+                                    }
+                                });
+                        builder.setNeutralButton(R.string.cancel_button_text, null);
+                        builder.create().show();
+                    }
+
                 }
             });
         }
@@ -499,13 +547,19 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
             public void run() {
                 // Enable compass accuracy signal button
                 if (enableCompassAccuracySignalButton != null) {
-                    boolean signalEnabled = navigationController.isCompassAccuracySignalEnabled();
-                    if (signalEnabled) {
+                    Boolean signalEnabled = navigationController.isCompassAccuracySignalEnabled();
+                    if (signalEnabled == null) {
+                        enableCompassAccuracySignalButton.setText(
+                                R.string.activity_main_unknown_compass_accuracy_signal_button_text);
+                        enableCompassAccuracySignalButton.setEnabled(false);
+                    } else if (signalEnabled) {
                         enableCompassAccuracySignalButton.setText(
                                 R.string.activity_main_disable_compass_accuracy_signal_button_text);
+                        enableCompassAccuracySignalButton.setEnabled(true);
                     } else {
                         enableCompassAccuracySignalButton.setText(
                                 R.string.activity_main_enable_compass_accuracy_signal_button_text);
+                        enableCompassAccuracySignalButton.setEnabled(true);
                     }
                 }
             }
@@ -654,6 +708,11 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
     @Override
     public void onBeltBatteryLevelUpdated(int batteryLevel, PowerStatus status) {
         updateBatteryUI();
+    }
+
+    @Override
+    public void onCompassAccuracySignalStateUpdated(boolean enabled) {
+        updateCompassAccuracySignalStateUI();
     }
 
     @Override

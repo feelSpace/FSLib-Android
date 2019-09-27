@@ -47,6 +47,13 @@ public interface NavigationEventListener {
     void onBeltBatteryLevelUpdated(int batteryLevel, PowerStatus status);
 
     /**
+     * Called when the state of the compass accuracy signal has been retrieved or modified.
+     *
+     * @param enabled <code>true</code> if the signal is enabled, <code>false</code> otherwise.
+     */
+    void onCompassAccuracySignalStateUpdated(boolean enabled);
+
+    /**
      * Called when the connection state has changed.
      *
      * @param state The new connection state.

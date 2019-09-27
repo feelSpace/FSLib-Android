@@ -1311,11 +1311,11 @@ class BeltCommunicationController implements BeltCommunicationInterface,
     }
 
     @Override
-    public boolean changeCompassAccuracySignalState(boolean enableSignal) {
+    public boolean changeCompassAccuracySignalState(boolean enableSignal, boolean persistent) {
         return changeParameterValue(
                 BeltParameter.ACCURACY_SIGNAL_STATE,
                 (enableSignal)?(3):(0),
-                false);
+                persistent);
     }
 
     @Override

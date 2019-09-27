@@ -45,6 +45,31 @@
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="fslib-source" type="f1a62948:ProjectNode" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name=":fslib" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -57,8 +82,8 @@
       <file leaf-file-name="MainActivity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="472">
-              <caret line="227" column="79" selection-start-line="227" selection-start-column="79" selection-end-line="227" selection-end-column="79" />
+            <state relative-caret-position="353">
+              <caret line="220" column="57" selection-start-line="220" selection-start-column="57" selection-end-line="220" selection-end-column="57" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#8236#11211#0" expanded="true" />
@@ -105,35 +130,17 @@
       <file leaf-file-name="NavigationController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="453">
-              <caret line="90" column="53" lean-forward="true" selection-start-line="90" selection-start-column="53" selection-end-line="90" selection-end-column="53" />
+            <state relative-caret-position="232">
+              <caret line="209" column="6" selection-start-line="209" selection-start-column="6" selection-end-line="209" selection-end-column="6" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BeltCommandInterface.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandInterface.java">
+      <file leaf-file-name="NavigationEventListener.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="697">
-              <caret line="243" column="12" selection-start-line="243" selection-start-column="12" selection-end-line="243" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strings.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="347">
-              <caret line="86" selection-start-line="86" selection-end-line="86" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BluetoothActivationFragment.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothActivationFragment.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="66">
-              <caret line="201" selection-start-line="201" selection-end-line="221" selection-end-column="52" />
+            <state relative-caret-position="346">
+              <caret line="53" column="61" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="61" />
             </state>
           </provider>
         </entry>
@@ -3566,7 +3573,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Gradle.fslib-source:fslib [sourcesJar]">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -3639,23 +3646,6 @@
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
-    <configuration name="fslib-source:app [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-    </configuration>
     <configuration name="fslib-source:app [lintFix]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -3702,6 +3692,23 @@
         <option name="taskNames">
           <list>
             <option value="javadocJar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+    </configuration>
+    <configuration name="fslib-source:fslib [javadoc]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="javadoc" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -3781,19 +3788,19 @@
     </configuration>
     <list>
       <item itemvalue="Android App.app" />
-      <item itemvalue="Gradle.fslib-source:app [build]" />
       <item itemvalue="Gradle.fslib-source:app [lintFix]" />
       <item itemvalue="Gradle.fslib-source:fslib [javadocJar]" />
       <item itemvalue="Gradle.fslib-source:fslib [sourcesJar]" />
       <item itemvalue="Gradle.fslib-source:fslib [build]" />
+      <item itemvalue="Gradle.fslib-source:fslib [javadoc]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.fslib-source:fslib [javadoc]" />
         <item itemvalue="Gradle.fslib-source:fslib [build]" />
         <item itemvalue="Gradle.fslib-source:fslib [sourcesJar]" />
         <item itemvalue="Gradle.fslib-source:fslib [javadocJar]" />
         <item itemvalue="Gradle.fslib-source:app [lintFix]" />
-        <item itemvalue="Gradle.fslib-source:app [build]" />
       </list>
     </recent_temporary>
   </component>
@@ -3812,7 +3819,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="Android Profiler" order="7" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -3821,7 +3827,7 @@
       <window_info id="Build Variants" order="2" side_tool="true" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32963374" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32963374" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Logcat" order="7" weight="0.49611542" />
@@ -3831,8 +3837,8 @@
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16897655" />
       <window_info anchor="bottom" id="Build" order="7" weight="0.32963374" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32963374" />
-      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49833518" weight="0.32995737" />
-      <window_info active="true" anchor="right" id="Structure" order="10" sideWeight="0.5016648" side_tool="true" visible="true" weight="0.32995737" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49668875" visible="true" weight="0.32995737" />
+      <window_info anchor="right" id="Structure" order="10" sideWeight="0.5033113" side_tool="true" visible="true" weight="0.32995737" />
       <window_info anchor="right" id="Device File Explorer" order="7" side_tool="true" />
       <window_info anchor="right" id="Theme Preview" order="8" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39955604" />
@@ -4155,13 +4161,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="53" column="24" selection-start-line="53" selection-start-column="24" selection-end-line="53" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="720">
@@ -4192,15 +4191,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="347">
+        <state relative-caret-position="449">
           <caret line="86" selection-start-line="86" selection-end-line="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandInterface.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="243" column="12" selection-start-line="243" selection-start-column="12" selection-end-line="243" selection-end-column="12" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="227" column="79" selection-start-line="227" selection-start-column="79" selection-end-line="227" selection-end-column="79" />
+        <state relative-caret-position="353">
+          <caret line="220" column="57" selection-start-line="220" selection-start-column="57" selection-end-line="220" selection-end-column="57" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#8236#11211#0" expanded="true" />
@@ -4243,17 +4249,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommandInterface.java">
+    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationEventListener.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="697">
-          <caret line="243" column="12" selection-start-line="243" selection-start-column="12" selection-end-line="243" selection-end-column="12" />
+        <state relative-caret-position="346">
+          <caret line="53" column="61" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="61" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="453">
-          <caret line="90" column="53" lean-forward="true" selection-start-line="90" selection-start-column="53" selection-end-line="90" selection-end-column="53" />
+        <state relative-caret-position="232">
+          <caret line="209" column="6" selection-start-line="209" selection-start-column="6" selection-end-line="209" selection-end-column="6" />
         </state>
       </provider>
     </entry>

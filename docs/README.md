@@ -202,14 +202,16 @@ If you want to implement your own procedure for location permission and Bluetoot
 - Scanning for a belt cannot work without location service enabled. See documentation: [Prompt the user to change location settings](https://developer.android.com/training/location/change-location-settings#prompt)
 - You may scan with a filter to avoid the activation of the location service, but scan filters seem broken.
 - Bluetooth must be activated. See documentation: [Set up BLE](https://developer.android.com/guide/topics/connectivity/bluetooth-le#setup)
-- Other Bluetooth problems are listed [here](https://github.com/iDevicesInc/SweetBlue/wiki/Android-BLE-Issues).
+- Other Bluetooth problems are listed [here](https://github.com/iDevicesInc/SweetBlue/wiki/Android-BLE-Issues). :tada:
 
 ## Connection and disconnection of a belt
 
-To connect and control a belt you must, first, create an instance of the navigation controller for your application. The first argument of the constructor is a `Context` (because accessing the Bluetooth service requires a `Context`), the second argument indicates if the compass accuracy signal is enabled when your application is connected to the belt (see [Compass accuracy signal](#compass-accuracy-signal)).
+To connect and control a belt you must, first, create an instance of the navigation controller for your application. The argument of the constructor is a `Context`, because accessing the Bluetooth service requires it.
+
+You can use the same navigation controller instance for succesive connections. For complex applications you may instanciate it in your `Application` or `Service` subclass.
 
 ```java
-navigationController = new NavigationController(getApplicationContext(), false);
+navigationController = new NavigationController(getApplicationContext());
 ```
 
 You must also implement and register the listener interface for the callbacks of the navigation controller. If the listener is an Activity or Fragment, you should register it in `onResume()` and remove it `onPause()`.
@@ -278,6 +280,6 @@ The battery level of the belt is notified to listeners via the callback `onBeltB
 
 The belt emits a vibration signal to indicate that the internal compass is inaccurate. This may happen when the belt is used indoor or in a place with magnetic interferences. This compass accuracy signal is performed in compass mode, crossing mode and in application mode (the mode used in navigation). For some applications it is preferable to disable the compass accuracy signal, for instance, because vibration signals are not relative to magnetic North or orientation accuracy is not critical.
 
-The state of the compass accuracy signal can be defined when the navigation controller is instantiated, and also using the method `setCompassAccuracySignal()`.
+You can retrieve the compass accuracy signal state via `isCompassAccuracySignalEnabled()`. However, the value may be unknown for a short period after connection. The state of the compass accuracy signal can be changed when a belt is connected using the method `setCompassAccuracySignal(boolean enable, boolean persistent)`. Any update to the parameter (including the first reading of the parameter after connection) is notified to listeners via the callback `onCompassAccuracySignalStateUpdated(boolean enabled)`.
 
-
+:warning: The accuracy signal state setting can be temporary, i.e. defined for the current power cycle of the belt and reset when the belt is powered-off, or the setting can be persistent and saved on the belt. In case the setting is saved on the belt, it is important to inform the user of this new configuration as it will also impact the compass and crossing mode when no app is connected to the belt.

@@ -78,7 +78,23 @@ public class NavigationController {
             Log.e(DEBUG_TAG, "Connection failed", e);
             notifyBeltConnectionFailed();
         }
+    }
 
+    /**
+     * Connects a belt.
+     *
+     * @param device The belt Bluetooth device.
+     */
+    public void connectBelt(BluetoothDevice device) {
+        if (beltConnection.getState() != BeltConnectionState.STATE_DISCONNECTED) {
+            return;
+        }
+        try {
+            beltConnection.connect(device);
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "Connection failed", e);
+            notifyBeltConnectionFailed();
+        }
     }
 
     /**

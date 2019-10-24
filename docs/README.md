@@ -128,7 +128,7 @@ The FSLib proposes two approaches for connecting and controlling a belt:
 
 ## Introduction
 
-The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to the control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt).
+The navigation API provides simple methods to connect and control a belt. Although the term "navigation" is used, this API can be used in different scenarios to control the orientation of a vibration signal. The orientation of the vibration can be a magnetic bearing (i.e. an angle relative to magnetic North) or a position on the belt (e.g. 90 degrees for the right side of the belt).
 
 The main class to connect a belt and control the vibration is the `NavigationController`. You must also implement a `NavigationEventListener` to handle the callback of the navigation controller.
 

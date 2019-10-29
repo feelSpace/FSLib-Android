@@ -98,11 +98,8 @@ class GattController extends BluetoothGattCallback {
     /**
      * Constructor.
      */
-    GattController() {
-        executor = new ScheduledThreadPoolExecutor(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            executor.setRemoveOnCancelPolicy(true);
-        }
+    GattController(@NonNull ScheduledThreadPoolExecutor executor) {
+        this.executor = executor;
     }
 
     /**

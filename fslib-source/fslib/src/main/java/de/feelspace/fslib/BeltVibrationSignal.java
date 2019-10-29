@@ -9,7 +9,13 @@
 package de.feelspace.fslib;
 
 /**
- * Enumeration of vibration signals that can be oriented.
+ * Enumeration of predefined vibration signals.
+ *
+ * <P>
+ * This enumeration contains all types of signal. A vibration signal can be either repeated
+ * indefinitely or temporary, and it can be oriented or non-oriented. The functions
+ * {@link BeltVibrationSignal#isRepeated()} and {@link BeltVibrationSignal#isDirectional()} can be
+ * used to determine the type of signal.
  */
 public enum BeltVibrationSignal {
 

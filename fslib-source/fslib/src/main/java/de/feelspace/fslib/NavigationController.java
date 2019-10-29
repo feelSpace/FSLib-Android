@@ -7,6 +7,10 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The navigation controller simplifies connection and interaction with a belt. It is design for
@@ -28,6 +32,21 @@ public class NavigationController {
     // Navigation signal
     private @Nullable BeltVibrationSignal navigationSignal;
 
+    // Flag for scheduled vibration command
+    private @NonNull AtomicBoolean isVibrationCommandScheduled = new AtomicBoolean(false);
+
+    // Executor for delayed vibration command
+    private @NonNull ScheduledThreadPoolExecutor executor;
+
+    // Scheduled vibration command
+    private @Nullable ScheduledFuture vibrationCommandTask;
+
+    // Last vibration command send time
+    private long lastVibrationCommandNanoTime = 0;
+
+    // Minimum period between two vibration command
+    private static final long MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_NANO = 100*1000000;
+
     // Direction of the navigation
     private int navigationDirection = 0;
 
@@ -46,8 +65,10 @@ public class NavigationController {
     // Listeners
     private @NonNull ArrayList<NavigationEventListener> listeners = new ArrayList<>();
 
-    // Channel constant
-    private static final int NAVIGATION_SIGNAL_CHANNEL = 2;
+    /**
+     * Channel index used for the navigation signal.
+     */
+    protected static final int NAVIGATION_SIGNAL_CHANNEL = 2;
 
     /**
      * Constructor.
@@ -63,6 +84,7 @@ public class NavigationController {
         beltConnection.addConnectionListener(beltListener);
         beltController.addCommandListener(beltListener);
         this.navigationState = NavigationState.STOPPED;
+        executor = beltConnection.getExecutor();
     }
 
     /**
@@ -133,13 +155,16 @@ public class NavigationController {
      * intensity can be changed only when a belt is connected. Listeners are informed asynchronously
      * of the new intensity through the callback
      * {@link NavigationEventListener#onBeltDefaultVibrationIntensityChanged(int)}. When the
-     * intensity is changed, a vibration feedback is started on the belt.
+     * intensity is changed, a vibration feedback can be started on the belt.
      *
      * @param intensity The intensity to set in range [5-100]. This intensity is saved on the belt
      *                  and used for the navigation and compass mode.
+     * @param vibrationFeedback <code>true</code> if a vibration feedback must be started when the
+     *                          intensity has been changed, <code>false</code> otherwise.
      * @throws IllegalArgumentException If the intensity is not in range [5-100].
      */
-    public void changeDefaultVibrationIntensity(int intensity) throws IllegalArgumentException {
+    public void changeDefaultVibrationIntensity(int intensity, boolean vibrationFeedback)
+            throws IllegalArgumentException {
         if (intensity < 5 || intensity > 100) {
             throw new IllegalArgumentException("The default vibration intensity must be in range " +
                     "[5-100].");
@@ -147,7 +172,7 @@ public class NavigationController {
         if (beltConnection.getState() != BeltConnectionState.STATE_CONNECTED) {
             return;
         }
-        beltController.changeDefaultVibrationIntensity(intensity, true);
+        beltController.changeDefaultVibrationIntensity(intensity, vibrationFeedback);
     }
 
     /**
@@ -257,12 +282,12 @@ public class NavigationController {
      * connected. If the navigation is active when a belt is connected, the mode will be
      * automatically changed to the app mode with the right signal.
      *
-     * @param direction The direction of the vibration signal in degree. The value 0 represents the
+     * @param direction The direction of the vibration signal in degrees. The value 0 represents the
      *                  magnetic North or heading of the belt, and angles are clockwise.
      * @param isMagneticBearing <code>true</code> if the direction is relative to magnetic North,
      *                          <code>false</code> if the direction is relative to the belt itself.
      * @param signal The type of vibration signal to use. If <code>null</code> is given, there is
-     *               no vibration. Only both directional and repeated signals can be used.
+     *               no vibration. Only repeated signals can be used.
      * @throws IllegalArgumentException If a temporary signal is given in argument.
      */
     public void startNavigation(int direction, boolean isMagneticBearing,
@@ -280,7 +305,7 @@ public class NavigationController {
         navigationState = NavigationState.NAVIGATING;
         if (beltConnection.getState() == BeltConnectionState.STATE_CONNECTED) {
             if (beltController.getMode() == BeltMode.APP) {
-                sendNavigationVibrationCommand();
+                scheduleOrSendVibrationCommand();
             } else {
                 beltController.changeMode(BeltMode.APP);
             }
@@ -296,18 +321,18 @@ public class NavigationController {
      * @param isMagneticBearing <code>true</code> if the direction is relative to magnetic North,
      *                          <code>false</code> if the direction is relative to the belt itself.
      * @param signal The type of vibration signal to use. If <code>null</code> is given, there is
-     *               no vibration. Only both directional and repeated signals can be used.
+     *               no vibration. Only repeated signals can be used.
      * @throws IllegalArgumentException If a temporary signal is given in argument.
      */
     public void updateNavigationSignal(int direction, boolean isMagneticBearing,
-                                       BeltVibrationSignal signal) {
+                                       BeltVibrationSignal signal) throws IllegalArgumentException {
         if (signal != null && !signal.isRepeated()) {
             throw new IllegalArgumentException("The navigation signal must be a repeated signal.");
         }
         navigationDirection = direction;
         isMagneticBearingDirection = isMagneticBearing;
         navigationSignal = signal;
-        sendNavigationVibrationCommand();
+        scheduleOrSendVibrationCommand();
     }
 
     /**
@@ -467,35 +492,89 @@ public class NavigationController {
     }
 
     /**
-     * Sends the command for the navigation signal.
+     * Schedules or sends the vibration command for the navigation command according to the last
+     * update time.
+     *
+     * This is used to avoid flooding the Bluetooth interface.
      */
-    private void sendNavigationVibrationCommand() {
-        if (beltConnection.getState() != BeltConnectionState.STATE_CONNECTED ||
-                beltController.getMode() != BeltMode.APP) {
+    private void scheduleOrSendVibrationCommand() {
+        if (isVibrationCommandScheduled.compareAndSet(false, true)) {
+            long currentTimeNano = System.nanoTime();
+            if (lastVibrationCommandNanoTime+MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_NANO <
+                    currentTimeNano) {
+                // Send command
+                lastVibrationCommandNanoTime = System.nanoTime();
+                sendVibrationCommand(beltConnection, navigationDirection,
+                        isMagneticBearingDirection, navigationSignal);
+                isVibrationCommandScheduled.set(false);
+            } else {
+                // Schedule command
+                try {
+                    vibrationCommandTask = executor.schedule(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendVibrationCommand(beltConnection, navigationDirection,
+                                    isMagneticBearingDirection, navigationSignal);
+                            vibrationCommandTask = null;
+                            isVibrationCommandScheduled.set(false);
+                        }
+                    }, MINIMUM_VIBRATION_COMMAND_UPDATE_PERIOD_NANO, TimeUnit.NANOSECONDS);
+                } catch (Exception e) {
+                    Log.e(DEBUG_TAG, "NavigationController: Unable to delay the " +
+                            "vibration command.");
+                    // Send command
+                    lastVibrationCommandNanoTime = System.nanoTime();
+                    sendVibrationCommand(beltConnection, navigationDirection,
+                            isMagneticBearingDirection, navigationSignal);
+                    isVibrationCommandScheduled.set(false);
+                }
+            }
+        } // Else: a vibration command is already scheduled
+    }
+
+    /**
+     * Sends the command for the navigation signal.
+     *
+     * <P>
+     * This method can be overridden to customize the vibration signal.
+     *
+     * @param connection The belt connection.
+     * @param direction The direction of the vibration signal in degree. The value 0 represents the
+     *                  magnetic North or heading of the belt, and angles are clockwise.
+     * @param isMagneticBearing <code>true</code> if the direction is relative to magnetic North,
+     *                          <code>false</code> if the direction is relative to the belt itself.
+     * @param signal The type of vibration signal to use. If <code>null</code> is given, there is
+     *               no vibration. Only both directional and repeated signals can be used.
+     */
+    protected void sendVibrationCommand(BeltConnectionInterface connection, int direction,
+            boolean isMagneticBearing, BeltVibrationSignal signal) {
+        BeltCommandInterface controller = connection.getCommandInterface();
+        if (connection.getState() != BeltConnectionState.STATE_CONNECTED ||
+                controller.getMode() != BeltMode.APP) {
             return;
         }
-        if (navigationSignal == null) {
+        if (signal == null || !signal.isRepeated()) {
             // Stop the vibration
-            beltController.stopVibration(NAVIGATION_SIGNAL_CHANNEL);
-        } else if (navigationSignal.isDirectional()) {
-            if (isMagneticBearingDirection) {
-                beltController.vibrateAtMagneticBearing(
-                        navigationDirection,
+            controller.stopVibration(NAVIGATION_SIGNAL_CHANNEL);
+        } else if (signal.isDirectional()) {
+            if (isMagneticBearing) {
+                controller.vibrateAtMagneticBearing(
+                        direction,
                         null,
-                        navigationSignal,
+                        signal,
                         NAVIGATION_SIGNAL_CHANNEL,
                         null);
             } else {
-                beltController.vibrateAtAngle(
-                        navigationDirection,
+                controller.vibrateAtAngle(
+                        direction,
                         null,
-                        navigationSignal,
+                        signal,
                         NAVIGATION_SIGNAL_CHANNEL,
                         null);
             }
         } else {
-            beltController.signal(
-                    navigationSignal,
+            controller.signal(
+                    signal,
                     null,
                     NAVIGATION_SIGNAL_CHANNEL,
                     null);
@@ -704,7 +783,7 @@ public class NavigationController {
                             beltController.changeMode(BeltMode.PAUSE);
                         }
                     } else {
-                        sendNavigationVibrationCommand();
+                        scheduleOrSendVibrationCommand();
                     }
                     break;
                 case PAUSE:
@@ -798,7 +877,7 @@ public class NavigationController {
                                 navigationSignal);
                     }
                 } // Note: Pause button changes the mode in any other cases.
-            } else {
+            } else if (beltButtonPressEvent.getSubsequentMode() != BeltMode.APP) {
                 // Pause the navigation if navigating
                 // Note: The mode cannot be changed to app mode with a button press.
                 if (navigationState == NavigationState.NAVIGATING) {
@@ -854,7 +933,7 @@ public class NavigationController {
                 beltController.requestCompassAccuracySignalState();
                 if (navigationState == NavigationState.NAVIGATING) {
                     if (beltController.getMode() == BeltMode.APP) {
-                        sendNavigationVibrationCommand();
+                        scheduleOrSendVibrationCommand();
                     } else {
                         beltController.changeMode(BeltMode.APP);
                     }

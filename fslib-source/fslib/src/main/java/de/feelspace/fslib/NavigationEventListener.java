@@ -41,7 +41,7 @@ public interface NavigationEventListener {
     /**
      * Called when the battery level of the belt has been notified.
      *
-     * @param batteryLevel The battery levelt of the belt in percent.
+     * @param batteryLevel The battery level of the belt in percent.
      * @param status The power status of the belt.
      */
     void onBeltBatteryLevelUpdated(int batteryLevel, PowerStatus status);
@@ -61,7 +61,7 @@ public interface NavigationEventListener {
     void onBeltConnectionStateChanged(BeltConnectionState state);
 
     /**
-     * Called when the connection with a belt has been lost.
+     * Called when the connection with the belt has been unexpectedly lost.
      */
     void onBeltConnectionLost();
 

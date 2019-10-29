@@ -10,9 +10,12 @@ package de.feelspace.fslib;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Implementation of the belt connection interface.
@@ -48,6 +51,11 @@ class BeltConnectionController extends BeltConnectionInterface implements
     private @NonNull BeltCommunicationController communicationController;
 
     /**
+     * Executor for timeout task and other delayed tasks.
+     */
+    private @NonNull ScheduledThreadPoolExecutor executor;
+
+    /**
      * Flag for pending connect.
      */
     private boolean connectOnFirstBeltFound = false;
@@ -63,10 +71,14 @@ class BeltConnectionController extends BeltConnectionInterface implements
             throw new IllegalArgumentException("Null context.");
         }
         this.applicationContext = applicationContext;
-        gattController = new GattController();
+        executor = new ScheduledThreadPoolExecutor(1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            executor.setRemoveOnCancelPolicy(true);
+        }
+        gattController = new GattController(executor);
         gattController.addGattEventListener(this);
         communicationController = new BeltCommunicationController(gattController);
-        scanner = new BluetoothScanner(this);
+        scanner = new BluetoothScanner(executor,this);
     }
 
     @Override
@@ -132,6 +144,10 @@ class BeltConnectionController extends BeltConnectionInterface implements
         }
         gattController.disconnect();
         notifyState();
+    }
+
+    @Override protected @NonNull ScheduledThreadPoolExecutor getExecutor() {
+        return executor;
     }
 
     @Override

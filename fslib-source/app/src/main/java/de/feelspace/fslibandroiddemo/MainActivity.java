@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
                     if (setIntensitySlider != null && navigationController.getConnectionState() ==
                                     BeltConnectionState.STATE_CONNECTED) {
                         int intensity = setIntensitySlider.getProgress()+5;
-                        navigationController.changeDefaultVibrationIntensity(intensity);
+                        navigationController.changeDefaultVibrationIntensity(intensity, true);
                     }
                 }
             });

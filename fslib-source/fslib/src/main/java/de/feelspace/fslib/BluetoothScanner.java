@@ -63,12 +63,10 @@ class BluetoothScanner {
      * Constructor with a callback for results of the scan procedure.
      * @param callback The callback for returning results of scan.
      */
-    public BluetoothScanner(@NonNull BluetoothScannerDelegate callback) {
+    public BluetoothScanner(@NonNull ScheduledThreadPoolExecutor executor,
+            @NonNull BluetoothScannerDelegate callback) {
         this.callback = callback;
-        executor = new ScheduledThreadPoolExecutor(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            executor.setRemoveOnCancelPolicy(true);
-        }
+        this.executor = executor;
     }
 
     /**

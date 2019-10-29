@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * The belt connection interface provides a set of methods for connecting a belt via Bluetooth
@@ -218,6 +219,13 @@ public abstract class BeltConnectionInterface {
             l.onBeltFound(belt);
         }
     }
+
+    /**
+     * Returns an executor to run timeout task and other delayed tasks related to this connection.
+     *
+     * @return an executor to run timeout task and other delayed tasks related to this connection.
+     */
+    protected abstract @NonNull ScheduledThreadPoolExecutor getExecutor();
 
     /**
      * Adds a listener for connection events.

@@ -1,17 +1,26 @@
 apply plugin: 'com.android.library'
 
+ext {
+    fslibVersion = "2.1.0"
+    fslibBuild = 10
+
+    fslibArchiveBaseName = "fslib-android"
+    fslibArchiveName = "${fslibArchiveBaseName}-${fslibVersion}-b${fslibBuild}.aar"
+    fslibGroupId = "de.feelspace"
+    fslibArtifactId = "fslib"
+}
+
 android {
     compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 28
-        versionCode 10
-        archivesBaseName = "fslib-android"
-        versionName "2.1.0"
-        project.version = android.defaultConfig.versionName
+        versionCode fslibBuild
+        archivesBaseName = fslibArchiveBaseName
+        versionName fslibVersion
+        project.version = fslibVersion
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -27,7 +36,7 @@ android {
     libraryVariants.all { variant ->
         variant.outputs.all { output ->
             if (outputFile != null && outputFileName.endsWith('.aar')) {
-                outputFileName = "${archivesBaseName}-${defaultConfig.versionName}-b${defaultConfig.versionCode}.aar"
+                outputFileName = fslibArchiveName
             }
         }
     }
@@ -61,3 +70,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 //    javadocDeps 'com.android.support:support-annotations:27.1.1'
 }
+
+apply from: 'fslib-bintray-deploy.gradle'

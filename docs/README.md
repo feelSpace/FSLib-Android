@@ -51,9 +51,29 @@ The repository contains three directories:
 
 ## Integration of the FSLib module in an Android project
 
-You have two options to integrate the FSLib into your project. You can 1) use the AAR package of the library, or 2) link the source code of the FSLib in your project.
+You have three options to integrate the FSLib into your project. You can 1) add FSLib in your dependencies, 2) use the AAR package of the library, or 3) link the source code of the FSLib in your project. Note that the first option, using the dependency, is recommended.
 
-:construction: The FSLib will be soon available as maven repository.
+### Adding FSLib in your project dependency
+
+In the `build.gradle` of your application module, add the following dependency:
+
+```gradle
+dependencies {
+    implementation 'de.feelspace:fslib:2.1.1'
+    // ...
+}
+```
+
+You should also check that `jcenter` is listed in your repositories. In the top-level `build.gradle` you must have `jcenter()` in the `repositories` section:
+
+```gradle
+allprojects {
+    repositories {
+        jcenter()
+        // ...
+    }
+}
+```
 
 ### Using the AAR package
 

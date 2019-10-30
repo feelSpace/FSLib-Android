@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    fslibVersion = "2.1.0"
-    fslibBuild = 10
+    fslibVersion = "2.1.1"
+    fslibBuild = 11
 
     fslibArchiveBaseName = "fslib-android"
     fslibArchiveName = "${fslibArchiveBaseName}-${fslibVersion}-b${fslibBuild}.aar"
@@ -35,7 +35,7 @@ android {
      */
     libraryVariants.all { variant ->
         variant.outputs.all { output ->
-            if (outputFile != null && outputFileName.endsWith('.aar')) {
+            if (outputFile != null && outputFileName.endsWith('-release.aar')) {
                 outputFileName = fslibArchiveName
             }
         }
@@ -59,6 +59,11 @@ task javadoc(type: Javadoc) {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
 }
 
 dependencies {

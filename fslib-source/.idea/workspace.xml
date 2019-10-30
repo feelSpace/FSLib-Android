@@ -51,18 +51,18 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="fslib-source" type="f1a62948:ProjectNode" />
-                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name=":app" type="2d1252cf:ModuleNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="fslib-source" type="f1a62948:ProjectNode" />
-                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name=":app" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="fslib-source" type="f1a62948:ProjectNode" />
-                <item name=":fslib" type="2d1252cf:ModuleNode" />
+                <item name=":app" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
@@ -78,17 +78,35 @@
       <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="408">
-              <caret line="24" column="70" selection-start-line="24" selection-start-column="70" selection-end-line="24" selection-end-column="70" />
+            <state relative-caret-position="323">
+              <caret line="19" selection-start-line="19" selection-end-line="26" selection-end-column="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fslib-bintray-deploy.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="119">
+              <caret line="7" selection-start-line="7" selection-end-line="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fslib/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="680">
+              <caret line="40" column="5" selection-start-line="40" selection-start-column="5" selection-end-line="40" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/fslib/build.gradle">
+        <entry file="file://$PROJECT_DIR$/app/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
+            <state relative-caret-position="374">
+              <caret line="22" selection-start-line="22" selection-end-line="22" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -3719,14 +3737,14 @@
         <option value="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" />
         <option value="$PROJECT_DIR$/fslib-bintray-deploy.gradle" />
         <option value="$PROJECT_DIR$/fslib/build.gradle" />
+        <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle" />
         <option value="$PROJECT_DIR$/app/build.gradle" />
-        <option value="$PROJECT_DIR$/build.gradle" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-1928" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
     <option name="height" value="1056" />
@@ -3784,7 +3802,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.fslib-source:fslib [javadocJar]">
+  <component name="RunManager" selected="Gradle.fslib-source:app [cleanBuildCache]">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -3857,6 +3875,40 @@
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
+    <configuration name="fslib-source:app [cleanBuildCache]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="cleanBuildCache" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+    </configuration>
+    <configuration name="fslib-source:app [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/app" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+    </configuration>
     <configuration name="fslib-source:fslib [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -3874,7 +3926,7 @@
         <option name="vmOptions" />
       </ExternalSystemSettings>
     </configuration>
-    <configuration name="fslib-source:fslib [cleanBuildCache]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="fslib-source:fslib [cleanForBintrayDeployment]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
@@ -3885,7 +3937,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="cleanBuildCache" />
+            <option value="cleanForBintrayDeployment" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -3903,40 +3955,6 @@
         <option name="taskNames">
           <list>
             <option value="deployBintrayRelease" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-    </configuration>
-    <configuration name="fslib-source:fslib [javadocJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="javadocJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-    </configuration>
-    <configuration name="fslib-source:fslib [sourcesJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="sourcesJar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -3999,19 +4017,19 @@
     </configuration>
     <list>
       <item itemvalue="Android App.app" />
-      <item itemvalue="Gradle.fslib-source:fslib [javadocJar]" />
-      <item itemvalue="Gradle.fslib-source:fslib [sourcesJar]" />
+      <item itemvalue="Gradle.fslib-source:fslib [cleanForBintrayDeployment]" />
       <item itemvalue="Gradle.fslib-source:fslib [build]" />
       <item itemvalue="Gradle.fslib-source:fslib [deployBintrayRelease]" />
-      <item itemvalue="Gradle.fslib-source:fslib [cleanBuildCache]" />
+      <item itemvalue="Gradle.fslib-source:app [clean]" />
+      <item itemvalue="Gradle.fslib-source:app [cleanBuildCache]" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.fslib-source:fslib [cleanBuildCache]" />
+        <item itemvalue="Gradle.fslib-source:app [cleanBuildCache]" />
+        <item itemvalue="Gradle.fslib-source:app [clean]" />
         <item itemvalue="Gradle.fslib-source:fslib [deployBintrayRelease]" />
         <item itemvalue="Gradle.fslib-source:fslib [build]" />
-        <item itemvalue="Gradle.fslib-source:fslib [sourcesJar]" />
-        <item itemvalue="Gradle.fslib-source:fslib [javadocJar]" />
+        <item itemvalue="Gradle.fslib-source:fslib [cleanForBintrayDeployment]" />
       </list>
     </recent_temporary>
   </component>
@@ -4032,7 +4050,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1928" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
       <window_info anchor="bottom" id="Android Profiler" order="7" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -4041,17 +4059,17 @@
       <window_info id="Build Variants" order="2" side_tool="true" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32963374" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32963374" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Logcat" order="7" weight="0.49611542" />
       <window_info id="Captures" order="3" weight="0.25" />
       <window_info id="Capture Tool" order="4" />
       <window_info id="Designer" order="5" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17590618" />
-      <window_info anchor="bottom" id="Build" order="7" weight="0.32963374" />
-      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49500555" visible="true" weight="0.26492536" />
-      <window_info anchor="right" id="Structure" order="10" sideWeight="0.50499445" side_tool="true" weight="0.32995737" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17590618" />
+      <window_info anchor="bottom" id="Build" order="7" visible="true" weight="0.32963374" />
+      <window_info anchor="right" id="Gradle" order="6" sideWeight="0.49389568" visible="true" weight="0.26439232" />
+      <window_info anchor="right" id="Structure" order="10" sideWeight="0.50610435" side_tool="true" weight="0.26439232" />
       <window_info anchor="right" id="Device File Explorer" order="7" side_tool="true" />
       <window_info anchor="right" id="Theme Preview" order="8" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39955604" />
@@ -4333,13 +4351,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="701" column="14" selection-start-line="701" selection-start-column="14" selection-end-line="701" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -4381,31 +4392,38 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle">
+    <entry file="file://$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-161">
-          <caret line="47" column="29" selection-start-line="47" selection-start-column="29" selection-end-line="47" selection-end-column="29" />
+        <state relative-caret-position="283">
+          <caret line="165" column="47" selection-start-line="165" selection-start-column="16" selection-end-line="165" selection-end-column="47" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+    <entry file="file://$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="4" />
+        <state relative-caret-position="119">
+          <caret line="7" selection-start-line="7" selection-end-line="7" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="24" column="70" selection-start-line="24" selection-start-column="70" selection-end-line="24" selection-end-column="70" />
+        <state relative-caret-position="323">
+          <caret line="19" selection-start-line="19" selection-end-line="26" selection-end-column="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fslib/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
+        <state relative-caret-position="680">
+          <caret line="40" column="5" selection-start-line="40" selection-start-column="5" selection-end-line="40" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" selection-start-line="22" selection-end-line="22" selection-end-column="45" />
         </state>
       </provider>
     </entry>

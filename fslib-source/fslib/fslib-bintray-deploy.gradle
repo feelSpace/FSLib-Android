@@ -4,10 +4,14 @@ apply plugin: 'com.jfrog.bintray'
 Properties bintrayProperties = new Properties()
 bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInputStream())
 
+// TODO: Check why artifacts are in two locations
+
 publishing {
     publications {
         Production(MavenPublication) {
             artifact("$buildDir/outputs/aar/${fslibArchiveName}")
+            artifact sourcesJar
+            artifact javadocJar
             groupId fslibGroupId
             artifactId fslibArtifactId
             version fslibVersion

@@ -22,7 +22,7 @@ allprojects {
         google()
         jcenter()
         // To be removed when FSLib is published on JCenter
-        maven { url 'https://dl.bintray.com/feelspace/fslib-android' }
+//        maven { url 'https://dl.bintray.com/feelspace/fslib-android' }
     }
 }
 

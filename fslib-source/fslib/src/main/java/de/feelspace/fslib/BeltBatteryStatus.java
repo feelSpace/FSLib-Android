@@ -124,7 +124,7 @@ public class BeltBatteryStatus implements Parcelable {
      * Returns the battery voltage in milli-volt.
      * @return the battery voltage in milli-volt.
      */
-    protected float getVoltage() {
+    public float getVoltage() {
         return voltage;
     }
 

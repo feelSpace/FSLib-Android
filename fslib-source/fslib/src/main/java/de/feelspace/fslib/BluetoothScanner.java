@@ -86,6 +86,8 @@ class BluetoothScanner {
             scanning = true;
             // Clear list of belts found
             beltsFound.clear();
+            // TODO Add paired devices?
+            // bluetoothAdapter.getBondedDevices()
             // Initialize scan callback
             if (android.os.Build.VERSION.SDK_INT < 21) {
                 if (scanCallBackPre21 == null) {

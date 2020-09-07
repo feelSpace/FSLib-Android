@@ -67,6 +67,9 @@ freeline.py
 freeline/
 freeline_project_description.json
 
+# Bintray credential
+*bintray.properties
+
 # fastlane
 **/fastlane/report.xml
 **/fastlane/Preview.html

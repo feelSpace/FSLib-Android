@@ -1,5 +1,5 @@
-apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 
 Properties bintrayProperties = new Properties()
 bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInputStream())
@@ -9,7 +9,7 @@ bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInp
 publishing {
     publications {
         Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/${fslibArchiveName}")
+            artifact("$buildDir/outputs/aar/${fslibReleaseArchiveName}")
             artifact sourcesJar
             artifact javadocJar
             groupId fslibGroupId

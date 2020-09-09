@@ -8,7 +8,6 @@
 package de.feelspace.fslib;
 
 import android.bluetooth.BluetoothDevice;
-import android.support.annotation.NonNull;
 
 /**
  * Listener for connection state changes and scan events.

@@ -7,7 +7,7 @@
  */
 package de.feelspace.fslib;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Describes a buzzer tone pattern to be played by the belt.

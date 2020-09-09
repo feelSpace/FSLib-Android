@@ -10,8 +10,8 @@ package de.feelspace.fslib;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
 
 import static de.feelspace.fslib.GattOperationState.STATE_FAILED;
 import static de.feelspace.fslib.GattOperationState.STATE_STARTED;

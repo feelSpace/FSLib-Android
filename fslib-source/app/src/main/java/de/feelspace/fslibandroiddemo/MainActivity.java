@@ -7,11 +7,6 @@ package de.feelspace.fslibandroiddemo;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,19 +14,23 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.FragmentManager;
 
 import java.text.DecimalFormat;
 
 import de.feelspace.fslib.BeltConnectionState;
 import de.feelspace.fslib.BeltVibrationSignal;
-import de.feelspace.fslib.BluetoothActivationFragment;
 import de.feelspace.fslib.NavigationController;
 import de.feelspace.fslib.NavigationEventListener;
 import de.feelspace.fslib.NavigationState;
-import de.feelspace.fslib.OnBluetoothActivationCallback;
 import de.feelspace.fslib.PowerStatus;
 
 public class MainActivity extends AppCompatActivity implements OnBluetoothActivationCallback,
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
     private SeekBar setIntensitySlider;
     private SeekBar navigationDirectionSlider;
     private SeekBar notificationOrientationSlider;
-    private Switch magBearingNavigationSwitch;
+    private SwitchCompat magBearingNavigationSwitch;
     private Spinner navigationSignalTypeSpinner;
     private Button setIntensityButton;
     private Button enableCompassAccuracySignalButton;

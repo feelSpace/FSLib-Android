@@ -11,13 +11,48 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="773efad0-128f-4715-90ae-2c92ca59c34c" name="Default" comment="" />
+    <list default="true" id="773efad0-128f-4715-90ae-2c92ca59c34c" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_support_constraint_constraint_layout_solver_1_1_2_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_sf_kxml_kxml2_2_3_0_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltBatteryStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltBatteryStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltButtonPressEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltButtonPressEvent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltMode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltOrientation.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltOrientation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BinaryUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BinaryUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothActivationFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/BluetoothActivationFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothScanner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BuzzerTonePattern.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BuzzerTonePattern.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperation.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationReadCharacteristic.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationReadCharacteristic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationSetNotification.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationSetNotification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationWriteCharacteristic.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationWriteCharacteristic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/OnBluetoothActivationCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/OnBluetoothActivationCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="ImCoSys_SWW17_API_22" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="R58M839M7NE" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -26,7 +61,67 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
-        <projects_view />
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <task path="$PROJECT_DIR$/fslib">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="android" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="other" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="fslib-source" type="f1a62948:ProjectNode" />
+                <item name="fslib" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="verification" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
       </state>
     </system>
   </component>
@@ -47,7 +142,12 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="de.feelspace.fslibandroiddemo" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Android App.app">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
@@ -142,6 +242,101 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="fslib-source [javadocJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="javadocJar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="fslib-source [javadoc]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="javadoc" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="fslib-source [sourcesJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="sourcesJar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="fslib-source:fslib [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="fslib-source:fslib [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/fslib" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="TestNG">
       <option name="TEST_OBJECT" value="CLASS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -151,6 +346,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.fslib-source:fslib [build]" />
+        <item itemvalue="Gradle.fslib-source [sourcesJar]" />
+        <item itemvalue="Gradle.fslib-source [javadoc]" />
+        <item itemvalue="Gradle.fslib-source [javadocJar]" />
+        <item itemvalue="Gradle.fslib-source:fslib [clean]" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -179,6 +383,27 @@
     </option>
   </component>
   <component name="WindowStateProjectService">
+    <state x="-1164" y="378" width="415" height="290" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1599650262457">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-1164" y="378" width="415" height="290" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1599650262457" />
+    <state x="756" y="378" width="408" height="290" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1599553638568" />
+    <state width="1877" height="281" key="GridCell.Tab.0.bottom" timestamp="1599563695090">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="281" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1599563695090" />
+    <state width="1877" height="281" key="GridCell.Tab.0.center" timestamp="1599563695089">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="281" key="GridCell.Tab.0.center/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1599563695089" />
+    <state width="1877" height="281" key="GridCell.Tab.0.left" timestamp="1599563695089">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="281" key="GridCell.Tab.0.left/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1599563695089" />
+    <state width="1877" height="281" key="GridCell.Tab.0.right" timestamp="1599563695089">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="281" key="GridCell.Tab.0.right/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1599563695089" />
     <state x="-1459" y="162" key="SettingsEditor" timestamp="1599480942378">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>

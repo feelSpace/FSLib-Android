@@ -12,47 +12,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="773efad0-128f-4715-90ae-2c92ca59c34c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_android_support_constraint_constraint_layout_solver_1_1_2_jar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_sf_kxml_kxml2_2_3_0_jar.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/fslib-bintray-deploy.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltBatteryStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltBatteryStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltButtonPressEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltButtonPressEvent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltCommunicationListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltConnectionListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltMode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltOrientation.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BeltOrientation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BinaryUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BinaryUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothActivationFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/BluetoothActivationFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BluetoothScanner.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BuzzerTonePattern.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/BuzzerTonePattern.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperation.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationReadCharacteristic.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationReadCharacteristic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationSetNotification.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationSetNotification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationWriteCharacteristic.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/GattOperationWriteCharacteristic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/NavigationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fslib/src/main/java/de/feelspace/fslib/OnBluetoothActivationCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/de/feelspace/fslibandroiddemo/OnBluetoothActivationCallback.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="R58M839M7NE" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="ImCoSys_SWW17_API_22" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />

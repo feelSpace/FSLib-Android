@@ -1,21 +1,20 @@
 apply plugin: 'com.android.library'
 
 ext {
-    fslibVersion = "2.1.1"
-    fslibBuild = 11
-
+    fslibVersion = "2.2.0"
+    fslibBuild = 12
     fslibArchiveBaseName = "fslib-android"
-    fslibArchiveName = "${fslibArchiveBaseName}-${fslibVersion}-b${fslibBuild}.aar"
+    fslibReleaseArchiveName = "${fslibArchiveBaseName}-${fslibVersion}-b${fslibBuild}-release.aar"
     fslibGroupId = "de.feelspace"
     fslibArtifactId = "fslib"
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode fslibBuild
         archivesBaseName = fslibArchiveBaseName
         versionName fslibVersion
@@ -33,10 +32,19 @@ android {
     /*
      * Rename the .AAR with the base name, version name and build (version code).
      */
-    libraryVariants.all { variant ->
-        variant.outputs.all { output ->
-            if (outputFile != null && outputFileName.endsWith('-release.aar')) {
-                outputFileName = fslibArchiveName
+//    libraryVariants.all { variant ->
+//        variant.outputs.all { output ->
+//            if (outputFile != null && outputFileName.endsWith('-release.aar')) {
+//                outputFileName = fslibReleaseArchiveName
+//            }
+//        }
+//    }
+    afterEvaluate {
+        android.libraryVariants.all { variant ->
+            variant.variantData.outputFactory.apkDataList.each { apkData ->
+                if (apkData.outputFileName.endsWith('-release.aar')) {
+                    apkData.outputFileName = fslibReleaseArchiveName
+                }
             }
         }
     }
@@ -45,19 +53,18 @@ android {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    classpath += configurations.javadocDeps
     failOnError false
     options.memberLevel = JavadocMemberLevel.PUBLIC
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
@@ -68,12 +75,10 @@ artifacts {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation "androidx.annotation:annotation:1.1.0"
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-//    javadocDeps 'com.android.support:support-annotations:27.1.1'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
 
 apply from: 'fslib-bintray-deploy.gradle'

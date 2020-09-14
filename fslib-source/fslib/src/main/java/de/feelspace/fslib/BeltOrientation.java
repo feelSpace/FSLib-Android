@@ -7,7 +7,7 @@
  */
 package de.feelspace.fslib;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Belt's orientation information.

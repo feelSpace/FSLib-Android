@@ -5,7 +5,7 @@
  * Developer contact: dev@feelspace.de
  * General information contact: info@feelspace.de
  */
-package de.feelspace.fslib;
+package de.feelspace.fslibandroiddemo;
 
 /**
  * Callback interface for the 'BluetoothActivationFragment'.

@@ -7,7 +7,7 @@
  */
 package de.feelspace.fslib;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Button press event.
@@ -17,7 +17,8 @@ public class BeltButtonPressEvent {
     /**
      * The pressed button.
      */
-    private @NonNull BeltButton button;
+    private @NonNull
+    BeltButton button;
 
     /**
      * The mode before the button press.

@@ -9,15 +9,14 @@ package de.feelspace.fslib;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
-import static de.feelspace.fslib.GattOperationState.STATE_CANCELLED;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import static de.feelspace.fslib.GattOperationState.STATE_NOT_STARTED;
 import static de.feelspace.fslib.GattOperationState.STATE_STARTED;
 import static de.feelspace.fslib.GattOperationState.STATE_SUCCESS;
-import static de.feelspace.fslib.GattOperationState.STATE_TIMED_OUT;
 
 /**
  * Encapsulation of a GATT operation initiated by the client application.

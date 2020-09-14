@@ -7,8 +7,6 @@
  */
 package de.feelspace.fslib;
 
-import android.support.annotation.NonNull;
-
 /**
  * Interface to listen to belt communication events.
  */

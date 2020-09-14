@@ -5,7 +5,7 @@
  * Developer contact: dev@feelspace.de
  * General information contact: info@feelspace.de
  */
-package de.feelspace.fslib;
+package de.feelspace.fslibandroiddemo;
 
 import android.Manifest;
 import android.app.Activity;
@@ -20,10 +20,11 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 /**
  * Utility fragment to check and activate Bluetooth on the device.
@@ -107,8 +108,8 @@ public class BluetoothActivationFragment extends Fragment {
                     public void run() {
                         try {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage(R.string.dialog_bt_not_supported_message);
-                            builder.setPositiveButton(R.string.dialog_bt_not_supported_ok,
+                            builder.setMessage(de.feelspace.fslib.R.string.dialog_bt_not_supported_message);
+                            builder.setPositiveButton(de.feelspace.fslib.R.string.dialog_bt_not_supported_ok,
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -200,8 +201,8 @@ public class BluetoothActivationFragment extends Fragment {
                     public void run() {
                         try {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage(R.string.dialog_permission_request_rationale_message);
-                            builder.setPositiveButton(R.string.dialog_permission_request_rationale_ok,
+                            builder.setMessage(de.feelspace.fslib.R.string.dialog_permission_request_rationale_message);
+                            builder.setPositiveButton(de.feelspace.fslib.R.string.dialog_permission_request_rationale_ok,
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -257,8 +258,8 @@ public class BluetoothActivationFragment extends Fragment {
                     public void run() {
                         try {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setMessage(R.string.dialog_enable_location_message);
-                            builder.setPositiveButton(R.string.dialog_enable_location_ok,
+                            builder.setMessage(de.feelspace.fslib.R.string.dialog_enable_location_message);
+                            builder.setPositiveButton(de.feelspace.fslib.R.string.dialog_enable_location_ok,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

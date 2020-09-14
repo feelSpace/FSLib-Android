@@ -4,8 +4,6 @@ apply plugin: 'maven-publish'
 Properties bintrayProperties = new Properties()
 bintrayProperties.load(project.rootProject.file('bintray.properties').newDataInputStream())
 
-// TODO: Check why artifacts are in two locations
-
 publishing {
     publications {
         Production(MavenPublication) {
@@ -39,7 +37,6 @@ bintray {
     user = bintrayProperties.getProperty('user')
     key = bintrayProperties.get('key')
     publications = ['Production']
-    //configurations = ['archives'] // ! This should probably be removed
 
     // Default: false. Whether to run this as dry-run, without deploying
     dryRun = false // false to deploy

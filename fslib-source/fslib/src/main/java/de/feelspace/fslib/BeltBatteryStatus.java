@@ -17,8 +17,7 @@ import androidx.annotation.NonNull;
 public class BeltBatteryStatus implements Parcelable {
 
     /** Power supply status of the belt. */
-    private @NonNull
-    PowerStatus powerStatus;
+    private @NonNull PowerStatus powerStatus;
 
     /** The battery level in percents. */
     private float level;

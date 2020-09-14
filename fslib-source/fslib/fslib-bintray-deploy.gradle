@@ -39,9 +39,10 @@ bintray {
     user = bintrayProperties.getProperty('user')
     key = bintrayProperties.get('key')
     publications = ['Production']
-    configurations = ['archives']
+    //configurations = ['archives'] // ! This should probably be removed
+
     // Default: false. Whether to run this as dry-run, without deploying
-    dryRun = false
+    dryRun = false // false to deploy
     // Default: false. Whether to override version artifacts already published
     override = false
     // Default: false. Whether version should be auto published after an upload

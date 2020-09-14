@@ -19,8 +19,8 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':fslib') // For local library import
-    // implementation 'de.feelspace:fslib:2.1.1' // To test remote dependency
+    // implementation project(path: ':fslib') // For local library import
+    implementation 'de.feelspace:fslib:2.2.0' // To test remote dependency
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation "androidx.constraintlayout:constraintlayout:2.0.1"

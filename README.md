@@ -11,7 +11,7 @@ FSLib-Android is an Android library to control the feelSpace naviBelt from your 
 You can add FSLib to your dependencies in your `build.gradle`:
 ```
 dependencies {
-    implementation 'de.feelspace:fslib:2.1.1'
+    implementation 'de.feelspace:fslib:2.2.0'
 }
 ```
 
@@ -23,7 +23,7 @@ dependencies {
 
 ## Copyright and license notice
 
-Copyright 2017-2019, feelSpace GmbH.
+Copyright 2017-2020, feelSpace GmbH.
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 

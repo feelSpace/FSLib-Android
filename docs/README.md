@@ -29,7 +29,7 @@ FSLib-Android is an Android library to control the feelSpace naviBelt from your 
 
 ## Copyright and license notice
 
-Copyright 2017-2019, feelSpace GmbH.
+Copyright 2017-2020, feelSpace GmbH.
 
 Licensed under the Apache License, Version 2.0:
 http://www.apache.org/licenses/LICENSE-2.0
@@ -59,7 +59,7 @@ In the `build.gradle` of your application module, add the following dependency:
 
 ```gradle
 dependencies {
-    implementation 'de.feelspace:fslib:2.1.1'
+    implementation 'de.feelspace:fslib:2.2.0'
     // ...
 }
 ```
@@ -77,7 +77,7 @@ allprojects {
 
 ### Using the AAR package
 
-The AAR package of the FSLib is available in the `fslib-aar\` directory of the repository. To import the package:
+The AAR package of the FSLib is attached to the [release](https://github.com/feelSpace/FSLib-Android/releases). To import the package:
 
 * Select in menu “File” > “New Module”,
 * Select the option “Import .JAR/.AAR Package” then “Next” ,

@@ -17,6 +17,21 @@ dependencies {
 
 * For more details and alternatives, see the documentation: [Adding FSLib to your project](docs/README.md#integration-of-the-fslib-module-in-an-android-project)
 
+## Coding convention
+
+### Naming convention
+
+We use the java-style 'convention' for names, see e.g. https://google.github.io/styleguide/javaguide.html. No `m`, `p`, `s`, `mm` prefix to indicate the scope of variables.
+
+### Event notification (implementation of the observer pattern)
+
+For public interfaces of the library see https://www.codeaffine.com/2015/03/11/getting-java-event-notification-right/.
+
+### @NonNull and @Nullable annotations
+
+These annotations can be used by methods that are not accessible outside of the library. However, the @NonNull and @Nullable annotations must not be used in public interfaces of the library. The parameters of public interface methods must always be checked for null value. Please also note that the annotations are not automatically added to the javadoc.
+
+
 ## About feelSpace
 
 * Learn more about feelSpace at [www.feelspace.de](https://www.feelspace.de/?lang=en)

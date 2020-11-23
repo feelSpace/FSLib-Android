@@ -1,5 +1,13 @@
 # Smart-FSLib-Android
-FSLib-Android is an Android library to control the feelSpace naviBelt from your application. The feelSpace naviBelt is a device that provides tactile feedback using vibration motors located in a belt. The naviBelt can be controlled by an application via Bluetooth Low-Energy. The FSLib can be used in various domains, for instance in navigation applications, VR, simulation, research experiments that require tactile feedback, outdoor and video-games, applications that require tactile feedback to improve focus or attention.
+FSLib-Android is an Android library to control the feelSpace naviBelt from your application. The feelSpace naviBelt is a device that provides tactile feedback using vibration motors located in a belt. The naviBelt can be controlled by an application via Bluetooth Low-Energy.
+
+The naviBelt can be used in various domains, for instance:
+* navigation applications, 
+* VR, 
+* simulation, 
+* research experiments that require tactile feedback,
+* outdoor and video-games,
+* applications that require tactile feedback to improve focus or attention.
 
 ## Documentation
 

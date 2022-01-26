@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
@@ -825,11 +826,28 @@ class GattController extends BluetoothGattCallback {
 
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+        Log.i(DEBUG_TAG, "GattController: Service discovered, status :"+status+" (0=OK).");
         // Note: No update of last GATT server activity time because services may be in cache
         boolean reconnect = false;
         synchronized (this) {
             if (connectionState == GATT_DISCOVERING_SERVICES) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
+                    // TODO: Start quick fix
+                    BluetoothGattService controlService = gatt.getService(
+                            BeltCommunicationController.BELT_CONTROL_SERVICE_UUID);
+                    if (controlService == null) {
+                        // Not all services discovered
+                        Log.w(DEBUG_TAG, "GattController: Not all service discovered, continue service discovery.");
+                        return;
+                    }
+                    BluetoothGattService sensorService = gatt.getService(
+                            BeltCommunicationController.SENSOR_SERVICE_UUID);
+                    if (sensorService == null) {
+                        // Not all services discovered
+                        Log.w(DEBUG_TAG, "GattController: Not all service discovered, continue service discovery.");
+                        return;
+                    }
+                    // TODO: End quick fix
                     cancelServiceDiscoveryTimeout();
                     connectionState = GATT_CONNECTED;
                     startGattSupervision();

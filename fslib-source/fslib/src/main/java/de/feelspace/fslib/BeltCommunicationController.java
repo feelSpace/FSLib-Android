@@ -52,7 +52,8 @@ class BeltCommunicationController implements BeltCommunicationInterface,
             UUID.fromString("65333333-A115-11E2-9E9A-0800200CA100");
 
     /** Belt control service UUID. */
-    private static final UUID BELT_CONTROL_SERVICE_UUID =
+    // TODO: This should be changed to private
+    public static final UUID BELT_CONTROL_SERVICE_UUID =
             UUID.fromString("0000FE51-0000-1000-8000-00805F9B34FB");
 
     /** Firmware information characteristic UUID. */
@@ -100,7 +101,8 @@ class BeltCommunicationController implements BeltCommunicationInterface,
     private boolean batteryStatusNotificationsActive = false;
 
     /** Belt sensor service UUID. */
-    private static final UUID SENSOR_SERVICE_UUID =
+    // TODO: This should be changed to private
+    public static final UUID SENSOR_SERVICE_UUID =
             UUID.fromString("0000FE52-0000-1000-8000-00805F9B34FB");
 
     /** Sensor parameter request characteristic UUID. */

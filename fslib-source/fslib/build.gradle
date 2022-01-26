@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    fslibVersion = "2.2.0"
-    fslibBuild = 12
+    fslibVersion = "2.2.1"
+    fslibBuild = 13
     fslibArchiveBaseName = "fslib-android"
     fslibReleaseArchiveName = "${fslibArchiveBaseName}-${fslibVersion}-b${fslibBuild}-release.aar"
     fslibGroupId = "de.feelspace"
@@ -81,4 +81,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
 
-apply from: 'fslib-bintray-deploy.gradle'
+//apply from: 'fslib-bintray-deploy.gradle'

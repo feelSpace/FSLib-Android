@@ -25,22 +25,16 @@ public class BeltBatteryStatus implements Parcelable {
     /** The time to empty or time to full in seconds. */
     private float tteTtf;
 
-    /** The battery current in milli-ampere. */
-    private float current;
-
-    /** The battery voltage in milli-volt. */
-    private float voltage;
+    /** Optional extra readings (only for debug purpose) */
+    private Float[] extraProperties = new Float[]{null, null, null, null};
 
     /**
      * Constructor.
      */
-    protected BeltBatteryStatus(@NonNull PowerStatus status, float level, float tteTtf,
-                                float current, float voltage) {
+    protected BeltBatteryStatus(@NonNull PowerStatus status, float level, float tteTtf) {
         this.powerStatus = status;
         this.level = level;
         this.tteTtf = tteTtf;
-        this.current = current;
-        this.voltage = voltage;
     }
 
     /**
@@ -55,8 +49,16 @@ public class BeltBatteryStatus implements Parcelable {
         powerStatus = PowerStatus.fromValue(packet[0], PowerStatus.UNKNOWN);
         level = ((float)(packet[2] & 0xFF)) + (((float)(packet[1] & 0xFF)) / 256.f);
         tteTtf = ((float)(((packet[4] & 0xFF) << 8) | (packet[3] & 0xFF)))*5.625f;
-        current = (packet[6] << 8) | (packet[5] & 0xFF);
-        voltage = ((packet[8]  & 0xFF) << 8) | (packet[7] & 0xFF);
+        extraProperties[0] = (float) ((packet[6] << 8) | (packet[5] & 0xFF)); // int16 mA
+        extraProperties[1] = (float) (((packet[8]  & 0xFF) << 8) | (packet[7] & 0xFF)); // uint16 mV
+        if (packet.length >= 11) {
+            extraProperties[2] = (float) ((packet[10] << 8) | (packet[9] & 0xFF)); // int16 dC
+            extraProperties[2] /= 256.f;
+        }
+        if (packet.length >= 13) {
+            extraProperties[3] = (float) (((packet[12]  & 0xFF) << 8) | (packet[11] & 0xFF)); // uint16 %C
+            extraProperties[3] /= 256.f;
+        }
     }
 
     /**
@@ -68,8 +70,10 @@ public class BeltBatteryStatus implements Parcelable {
         powerStatus = PowerStatus.fromValue((byte)in.readInt(), PowerStatus.UNKNOWN);
         level = in.readFloat();
         tteTtf = in.readFloat();
-        current = in.readFloat();
-        voltage = in.readFloat();
+        extraProperties[0] = (Float) in.readValue(Float.class.getClassLoader());
+        extraProperties[1] = (Float) in.readValue(Float.class.getClassLoader());
+        extraProperties[2] = (Float) in.readValue(Float.class.getClassLoader());
+        extraProperties[3] = (Float) in.readValue(Float.class.getClassLoader());
     }
 
     /**
@@ -113,19 +117,11 @@ public class BeltBatteryStatus implements Parcelable {
     }
 
     /**
-     * Returns the battery current in milli-ampere.
-     * @return the battery current in milli-ampere.
+     * Returns the extra properties (only for debug purposes).
+     * @return the extra properties.
      */
-    public float getCurrent() {
-        return current;
-    }
-
-    /**
-     * Returns the battery voltage in milli-volt.
-     * @return the battery voltage in milli-volt.
-     */
-    public float getVoltage() {
-        return voltage;
+    public Float[] getExtra() {
+        return extraProperties;
     }
 
     @Override
@@ -138,7 +134,9 @@ public class BeltBatteryStatus implements Parcelable {
         dest.writeInt(powerStatus.getValue());
         dest.writeFloat(level);
         dest.writeFloat(tteTtf);
-        dest.writeFloat(current);
-        dest.writeFloat(voltage);
+        dest.writeValue(extraProperties[0]);
+        dest.writeValue(extraProperties[1]);
+        dest.writeValue(extraProperties[2]);
+        dest.writeValue(extraProperties[3]);
     }
 }

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FSLib Test</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="scanning">Scanning</string>
+    <string name="connecting">Connecting</string>
+    <string name="reconnecting">Reconnecting</string>
+    <string name="discovering_services">Discovering services</string>
+    <string name="handshake">Handshake</string>
+    <string name="connected">Connected</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+</resources>

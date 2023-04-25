@@ -636,7 +636,7 @@ public class GattController extends BluetoothGattCallback {
             } else if (operation instanceof GattOperationRequest) {
                 GattOperationRequest request = (GattOperationRequest) operation;
                 for (GattEventListener l : targets) {
-                    l.onCharacteristicWrite(request.getNotifiedCharacteristic(),
+                    l.onRequestCompleted(request.getRequestId(),
                             request.getNotifiedValue(), operation.succeed());
                 }
             } else {
@@ -743,12 +743,15 @@ public class GattController extends BluetoothGattCallback {
      * @param notifyCharacteristic The characteristic for the notification.
      * @param writeValue The value to write.
      * @param notifyPattern The notification pattern to wait.
+     * @param requestId The request ID.
      * @return <code>true</code> if the request has been correctly been sent.
      */
-    public boolean request(@Nullable BluetoothGattCharacteristic writeCharacteristic,
-                           @Nullable BluetoothGattCharacteristic notifyCharacteristic,
-                           @NonNull byte[] writeValue,
-                           @Nullable Byte[] notifyPattern) {
+    public boolean request(
+            @Nullable BluetoothGattCharacteristic writeCharacteristic,
+            @Nullable BluetoothGattCharacteristic notifyCharacteristic,
+            @NonNull byte[] writeValue,
+            @Nullable Byte[] notifyPattern,
+            int requestId) {
         synchronized (this) {
             if (writeCharacteristic == null || notifyCharacteristic == null) {
                 Log.e(DEBUG_TAG, "GattController: Operation on null characteristic.");
@@ -763,7 +766,7 @@ public class GattController extends BluetoothGattCallback {
                 return false;
             }
             operationQueue.add(new GattOperationRequest(gattServer, writeCharacteristic,
-                    notifyCharacteristic, writeValue, notifyPattern));
+                    notifyCharacteristic, writeValue, notifyPattern, requestId));
         }
         checkAndStartGattOperation();
         return true;
@@ -1134,7 +1137,6 @@ public class GattController extends BluetoothGattCallback {
          * @param notifiedCharacteristic The notified characteristic.
          * @param notifiedValue The notified value.
          */
-        void onRequestCompleted(@Nullable BluetoothGattCharacteristic notifiedCharacteristic,
-                                @Nullable byte[] notifiedValue);
+        void onRequestCompleted(int requestId, @Nullable byte[] notifiedValue, boolean success);
     }
 }

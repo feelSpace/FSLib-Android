@@ -42,6 +42,9 @@ class GattOperationRequest extends GattOperation {
     /** Pattern for the response. */
     private @Nullable Byte[] notifyPattern;
 
+    /** Request ID */
+    private int requestId;
+
     /** Notified value. */
     private @Nullable byte[] notifyValue;
 
@@ -56,12 +59,14 @@ class GattOperationRequest extends GattOperation {
      * @param notifyCharacteristic The characteristic to be notified.
      * @param writeValue The value to be written.
      * @param notifyPattern The pattern for the notification.
+     * @param requestId ID to identify the request and callback.
      */
     GattOperationRequest(@NonNull BluetoothGatt gatt,
                          @NonNull BluetoothGattCharacteristic writeCharacteristic,
                          @NonNull BluetoothGattCharacteristic notifyCharacteristic,
                          @NonNull byte[] writeValue,
-                         @Nullable Byte[] notifyPattern) {
+                         @Nullable Byte[] notifyPattern,
+                         int requestId) {
         super(gatt, null);
         this.writeCharacteristic = writeCharacteristic;
         this.notifyCharacteristic = notifyCharacteristic;
@@ -70,6 +75,7 @@ class GattOperationRequest extends GattOperation {
         if (notifyPattern != null) {
             this.notifyPattern = Arrays.copyOf(notifyPattern, notifyPattern.length);
         }
+        this.requestId = requestId;
     }
 
     @Override
@@ -100,6 +106,14 @@ class GattOperationRequest extends GattOperation {
      */
     protected @Nullable byte[] getNotifiedValue() {
         return notifyValue;
+    }
+
+    /**
+     * Returns the request ID.
+     * @return the request ID.
+     */
+    protected int getRequestId() {
+        return requestId;
     }
 
     @Override

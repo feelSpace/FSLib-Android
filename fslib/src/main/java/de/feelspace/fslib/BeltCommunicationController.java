@@ -106,7 +106,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             UUID.fromString("0000FE52-0000-1000-8000-00805F9B34FB");
 
     /** Sensor parameter request characteristic UUID. */
-    private static final UUID SENSOR_PARAM_REQUEST_CHAR_UUID =
+    public static final UUID SENSOR_PARAM_REQUEST_CHAR_UUID =
             UUID.fromString("0000FE0A-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic sensorParamRequestChar;
 
@@ -1633,8 +1633,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     }
 
     @Override
-    public void onRequestCompleted(@Nullable BluetoothGattCharacteristic notifiedCharacteristic,
-                                   @Nullable byte[] notifiedValue) {
+    public void onRequestCompleted(int requestId, @Nullable byte[] notifiedValue, boolean success) {
         // Nothing to do, the notifications are handled in 'onCharacteristicChanged'
     }
 

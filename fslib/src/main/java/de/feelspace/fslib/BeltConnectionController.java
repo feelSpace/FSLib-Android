@@ -294,8 +294,7 @@ class BeltConnectionController extends BeltConnectionInterface implements
     }
 
     @Override
-    public void onRequestCompleted(@Nullable BluetoothGattCharacteristic notifiedCharacteristic,
-                                   @Nullable byte[] notifiedValue) {
+    public void onRequestCompleted(int requestId, @Nullable byte[] notifiedValue, boolean success) {
         // Nothing to do
     }
 

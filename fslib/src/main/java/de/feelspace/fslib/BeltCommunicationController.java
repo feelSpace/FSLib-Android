@@ -23,7 +23,7 @@ import java.util.UUID;
 /**
  * Implementation of the communication interface.
  */
-class BeltCommunicationController implements BeltCommunicationInterface,
+public class BeltCommunicationController implements BeltCommunicationInterface,
         GattController.GattEventListener {
 
     // Debug
@@ -111,7 +111,7 @@ class BeltCommunicationController implements BeltCommunicationInterface,
     private @Nullable BluetoothGattCharacteristic sensorParamRequestChar;
 
     /** Sensor parameter notification characteristic UUID. */
-    private static final UUID SENSOR_PARAM_NOTIFICATION_CHAR_UUID =
+    public static final UUID SENSOR_PARAM_NOTIFICATION_CHAR_UUID =
             UUID.fromString("0000FE0B-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic sensorParamNotificationChar;
     private boolean sensorParamNotificationsActive = false;
@@ -122,6 +122,16 @@ class BeltCommunicationController implements BeltCommunicationInterface,
     private @Nullable BluetoothGattCharacteristic orientationDataChar;
     private boolean orientationDataNotificationsActive = false;
 
+    /** Debug service */
+    public static final UUID DEBUG_SERVICE_UUID =
+            UUID.fromString("0000FE53-0000-1000-8000-00805F9B34FB");
+    public static final UUID DEBUG_INPUT_CHAR_UUID =
+            UUID.fromString("0000FE13-0000-1000-8000-00805F9B34FB");
+    private @Nullable BluetoothGattCharacteristic debugInputChar;
+    public static final UUID DEBUG_OUTPUT_CHAR_UUID =
+            UUID.fromString("0000FE14-0000-1000-8000-00805F9B34FB");
+    private @Nullable BluetoothGattCharacteristic debugOutputChar;
+    private boolean debugOutputNotificationsActive = false;
     /**
      * Local values of belt state and parameters.
      */
@@ -157,6 +167,17 @@ class BeltCommunicationController implements BeltCommunicationInterface,
     BeltCommunicationController(@NonNull GattController gattController) {
         this.gattController = gattController;
         gattController.addGattEventListener(this);
+    }
+
+    /**
+     * Returns the GATT controller.
+     * <p>
+     * This is only for development and debug purposes.
+     * </p>
+     * @return the GATT controller.
+     */
+    public GattController getGattController() {
+        return gattController;
     }
 
     /**
@@ -304,6 +325,21 @@ class BeltCommunicationController implements BeltCommunicationInterface,
                     "in GATT profile.");
             return false;
         }
+        BluetoothGattService debugService = gattServer.getService(DEBUG_SERVICE_UUID);
+        if (debugService == null) {
+            Log.e(DEBUG_TAG, "BeltCommunicationController: No debug service found " +
+                    "in GATT profile.");
+            /* Not critical */
+        } else {
+            debugInputChar = debugService.getCharacteristic(DEBUG_INPUT_CHAR_UUID);
+            debugOutputChar = debugService.getCharacteristic(DEBUG_OUTPUT_CHAR_UUID);
+            if (debugInputChar == null || debugOutputChar == null) {
+                /* Not critical */
+                Log.e(DEBUG_TAG, "BeltCommunicationController: Missing debug characteristic " +
+                        "in GATT profile.");
+            }
+        }
+
         return true;
     }
 
@@ -1357,6 +1393,9 @@ class BeltCommunicationController implements BeltCommunicationInterface,
                 batteryStatusNotificationsActive = false;
                 sensorParamNotificationsActive = false;
                 orientationDataNotificationsActive = false;
+                debugInputChar = null;
+                debugOutputChar = null;
+                debugOutputNotificationsActive = false;
                 break;
             case GATT_CONNECTING:
                 break;
@@ -1407,6 +1446,8 @@ class BeltCommunicationController implements BeltCommunicationInterface,
                 sensorParamNotificationsActive = enable;
             } else if (characteristic == orientationDataChar) {
                 orientationDataNotificationsActive = enable;
+            } else if (characteristic == debugOutputChar) {
+                debugOutputNotificationsActive = enable;
             }
         }
     }

@@ -15,7 +15,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="10dp">
 
             <Button
                 android:id="@+id/activity_main_connect_button"
@@ -31,6 +32,37 @@
 
             <TextView
                 android:id="@+id/activity_main_connection_state_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <Button
+                android:id="@+id/activity_main_start_sensor_notifications_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_sensor_notifications" />
+
+            <Button
+                android:id="@+id/activity_main_stop_sensor_notifications_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_sensor_notifications" />
+
+            <Button
+                android:id="@+id/activity_main_start_sensor_recording_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_sensor_recording" />
+
+            <Button
+                android:id="@+id/activity_main_stop_sensor_recording_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_sensor_recording" />
+
+            <TextView
+                android:id="@+id/activity_main_sensor_recording_count_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="" />

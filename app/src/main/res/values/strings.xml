@@ -10,4 +10,8 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
     <string name="pairing">Pairing</string>
+    <string name="start_sensor_notifications">Start sensor notifications</string>
+    <string name="stop_sensor_notifications">Stop sensor notifications</string>
+    <string name="start_sensor_recording">Start sensor recording</string>
+    <string name="stop_sensor_recording">Stop sensor recording</string>
 </resources>

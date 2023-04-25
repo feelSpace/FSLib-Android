@@ -39,7 +39,7 @@ import static de.feelspace.fslib.GattConnectionState.GATT_RECONNECTING;
 /**
  * Encapsulation of the GATT server with the addition of a queue of operations.
  */
-class GattController extends BluetoothGattCallback {
+public class GattController extends BluetoothGattCallback {
 
     // Debug
     @SuppressWarnings("unused")
@@ -160,6 +160,14 @@ class GattController extends BluetoothGattCallback {
             notifyConnectionFailed();
         }
         notifyGattConnectionStateChange();
+    }
+
+    /**
+     * Returns the GATT server managed by this controller.
+     * @return the GATT server.
+     */
+    public BluetoothGatt getBluetoothGatt() {
+        return gattServer;
     }
 
     /**
@@ -789,7 +797,7 @@ class GattController extends BluetoothGattCallback {
                             cancelConnectionTimeout();
 
                             // TODO To be refactored
-                            
+
                             Handler mainHandler = new Handler(Looper.getMainLooper());
                             Runnable disc = new Runnable() {
                                 @Override
@@ -850,22 +858,18 @@ class GattController extends BluetoothGattCallback {
         synchronized (this) {
             if (connectionState == GATT_DISCOVERING_SERVICES) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    // TODO: Start quick fix
-                    BluetoothGattService controlService = gatt.getService(
-                            BeltCommunicationController.BELT_CONTROL_SERVICE_UUID);
-                    if (controlService == null) {
-                        // Not all services discovered
+                    // Check discovered services
+                    if (gatt.getService(
+                            BeltCommunicationController.BELT_CONTROL_SERVICE_UUID) == null ||
+                        gatt.getService(
+                                BeltCommunicationController.SENSOR_SERVICE_UUID) == null ||
+                        gatt.getService(
+                                BeltCommunicationController.DEBUG_SERVICE_UUID) == null) {
+                        // Service discovery not completed
                         Log.w(DEBUG_TAG, "GattController: Not all service discovered, continue service discovery.");
                         return;
                     }
-                    BluetoothGattService sensorService = gatt.getService(
-                            BeltCommunicationController.SENSOR_SERVICE_UUID);
-                    if (sensorService == null) {
-                        // Not all services discovered
-                        Log.w(DEBUG_TAG, "GattController: Not all service discovered, continue service discovery.");
-                        return;
-                    }
-                    // TODO: End quick fix
+                    // Service discovery completed
                     cancelServiceDiscoveryTimeout();
                     connectionState = GATT_CONNECTED;
                     startGattSupervision();
@@ -1067,7 +1071,7 @@ class GattController extends BluetoothGattCallback {
     /**
      * Callback interface for GATT events.
      */
-    protected interface GattEventListener {
+    public interface GattEventListener {
 
         /**
          * Callback for connection state change.

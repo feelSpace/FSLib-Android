@@ -12,28 +12,24 @@ import de.feelspace.fslib.NavigationState;
 import de.feelspace.fslib.PowerStatus;
 
 public class MainActivity extends BluetoothCheckActivity implements BluetoothCheckCallback,
-        NavigationEventListener {
+        NavigationEventListener, AdvancedBeltListener {
 
     // Application controller
     private AppController appController;
-
-    // TODO TBR
-//    // For permission and pairing
-//    private static final int ENABLE_LOCATION_PERMISSION_CODE = 5;
-//    private static final int BLUETOOTH_CONNECT_PERMISSION_CODE = 6;
-//    private static final int SELECT_DEVICE_REQUEST_CODE = 7;
-//    private Executor executor = new Executor() {
-//        @Override
-//        public void execute(Runnable runnable) {
-//            runnable.run();
-//        }
-//    };
-//    private PairingStatusBroadcastReceiver pairingStatusBroadcastReceiver;
 
     // UI components
     private Button connectButton;
     private Button disconnectButton;
     private TextView connectionStateTextView;
+    private Button startSensorNotificationsButton;
+    private Button stopSensorNotificationsButton;
+    private Button startSensorRecordingButton;
+    private Button stopSensorRecordingButton;
+    private TextView sensorRecordingCountTextView;
+
+    // UI update parameters
+    private static final int MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
+    private long lastErrorToastTimeMillis = 0;
 
     // MARK: Activity methods overriding
 
@@ -49,13 +45,8 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         // Navigation controller
         appController.getNavigationController().addNavigationEventListener(this);
 
-        // TODO TBR
-//        // Receiver for pairing events
-//        pairingStatusBroadcastReceiver = new PairingStatusBroadcastReceiver();
-//        pairingStatusBroadcastReceiver.register();
-//
-//        // Set navigation controller
-//        navigationController = new NavigationController(getApplicationContext());
+        // Advanced belt controller
+        appController.getAdvancedBeltController().addAdvancedBeltListener(this);
 
         // Connection state
         connectionStateTextView = findViewById(R.id.activity_main_connection_state_text_view);
@@ -66,7 +57,6 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             activateBluetooth(this);
         });
 
-
         // Disconnect button
         disconnectButton = findViewById(R.id.activity_main_disconnect_button);
         disconnectButton.setOnClickListener(view -> {
@@ -76,213 +66,39 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             }
         });
 
+        // Start notifications button
+        startSensorNotificationsButton = findViewById(R.id.activity_main_start_sensor_notifications_button);
+        startSensorNotificationsButton.setOnClickListener(view -> {
+            appController.getAdvancedBeltController().setRawSensorNotificationsEnable(true);
+        });
+
+        // Stop notification button
+        stopSensorNotificationsButton = findViewById(R.id.activity_main_stop_sensor_notifications_button);
+        stopSensorNotificationsButton.setOnClickListener(view -> {
+            appController.getAdvancedBeltController().setRawSensorNotificationsEnable(false);
+        });
+
+        // Start recording
+        startSensorRecordingButton = findViewById(R.id.activity_main_start_sensor_recording_button);
+        startSensorRecordingButton.setOnClickListener(view -> {
+            // TODO
+        });
+
+        // Stop recording
+        stopSensorRecordingButton = findViewById(R.id.activity_main_stop_sensor_recording_button);
+        stopSensorRecordingButton.setOnClickListener(view -> {
+            // TODO
+        });
+
+        // Recordings count
+        sensorRecordingCountTextView = findViewById(R.id.activity_main_sensor_recording_count_text_view);
+
         // Update UI
         updateUI();
     }
 
-    // TODO TBR
-//
-//    @Override
-//    protected void onDestroy() {
-//        if (pairingStatusBroadcastReceiver != null) {
-//            pairingStatusBroadcastReceiver.unregister();
-//        }
-//        super.onDestroy();
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        if (requestCode == SELECT_DEVICE_REQUEST_CODE) {
-//            if (resultCode == Activity.RESULT_OK && data != null) {
-//                try {
-//                    android.bluetooth.le.ScanResult deviceToPair = data.getParcelableExtra(
-//                            CompanionDeviceManager.EXTRA_DEVICE
-//                    );
-//                    BluetoothDevice ble = deviceToPair.getDevice();
-//                    if (Build.VERSION.SDK_INT <= 30) {
-//                        if (ActivityCompat.checkSelfPermission(
-//                                this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-//                                PackageManager.PERMISSION_GRANTED) {
-//                            showToast("No location permission to connect!");
-//                            return;
-//                        }
-//                        ble.createBond();
-//                    } else {
-//                        if (ActivityCompat.checkSelfPermission(
-//                                this, android.Manifest.permission.BLUETOOTH_CONNECT) !=
-//                                PackageManager.PERMISSION_GRANTED) {
-//                            showToast("No BLE connect permission to connect!");
-//                            return;
-//                        }
-//                        ble.createBond();
-//                    }
-//                } catch (Exception e) {
-//                    showToast("Error when retrieving BLE device!");
-//                }
-//            }
-//        } else {
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-//                                           @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == ENABLE_LOCATION_PERMISSION_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                startConnectionProcedure();
-//            } else {
-//                showToast("Location permission rejected!");
-//            }
-//        } else if (requestCode == BLUETOOTH_CONNECT_PERMISSION_CODE) {
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                startConnectionProcedure();
-//            } else {
-//                showToast("BLE connection permission rejected!");
-//            }
-//        }
-//    }
 
     // MARK: Private methods
-
-    // TODO TBR
-//    private void checkPermissionAndConnect() {
-//
-//        if (Build.VERSION.SDK_INT <= 30) {
-//
-//            if (ActivityCompat.checkSelfPermission(
-//                    this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-//                    PackageManager.PERMISSION_GRANTED) {
-//                requestPermissions(new String[]{
-//                        Manifest.permission.ACCESS_FINE_LOCATION},
-//                        ENABLE_LOCATION_PERMISSION_CODE);
-//            } else {
-//                startConnectionProcedure();
-//            }
-//
-//        } else {
-//
-//            if (ActivityCompat.checkSelfPermission(
-//                    this, Manifest.permission.BLUETOOTH_CONNECT) !=
-//                    PackageManager.PERMISSION_GRANTED) {
-//                requestPermissions(new String[]{
-//                                Manifest.permission.BLUETOOTH_CONNECT},
-//                        BLUETOOTH_CONNECT_PERMISSION_CODE);
-//            } else {
-//                startConnectionProcedure();
-//            }
-//
-//        }
-//    }
-
-    // TODO TBR
-//    private void startConnectionProcedure() {
-//
-//        // From: https://developer.android.com/guide/topics/connectivity/companion-device-pairing#implement
-//        if (Build.VERSION.SDK_INT >= 33) {
-//
-//            CompanionDeviceManager deviceManager =
-//                    (CompanionDeviceManager) getSystemService(
-//                            Context.COMPANION_DEVICE_SERVICE
-//                    );
-//
-//            // To skip filtering based on name and supported feature flags,
-//            // do not include calls to setNamePattern() and addServiceUuid(),
-//            // respectively. This example uses Bluetooth.
-//            BluetoothLeDeviceFilter deviceFilter =
-//                    new BluetoothLeDeviceFilter.Builder()
-//                            .setNamePattern(Pattern.compile("(?i)naviguertel.*"))
-//                            .build();
-//
-//            // The argument provided in setSingleDevice() determines whether a single
-//            // device name or a list of device names is presented to the user as
-//            // pairing options.
-//            AssociationRequest pairingRequest = new AssociationRequest.Builder()
-//                    .addDeviceFilter(deviceFilter)
-//                    .setSingleDevice(true)
-//                    .build();
-//
-//            // When the app tries to pair with the Bluetooth device, show the
-//            // appropriate pairing request dialog to the user.
-//            deviceManager.associate(pairingRequest, executor, new CompanionDeviceManager.Callback() {
-//
-//                // Called when a device is found. Launch the IntentSender so the user can
-//                // select the device they want to pair with.
-//                @Override
-//                public void onDeviceFound(IntentSender chooserLauncher) {
-//                    try {
-//                        startIntentSenderForResult(
-//                                chooserLauncher, SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0
-//                        );
-//                    } catch (IntentSender.SendIntentException e) {
-//                        Log.e("MainActivity", "Failed to send intent");
-//                    }
-//                }
-//
-//                @Override
-//                public void onAssociationCreated(AssociationInfo associationInfo) {
-//                    // AssociationInfo object is created and get association id and the
-//                    // macAddress.
-//                    int associationId = associationInfo.getId();
-//                    MacAddress macAddress = associationInfo.getDeviceMacAddress();
-//                }
-//
-//                @Override
-//                public void onFailure(CharSequence errorMessage) {
-//                    // Handle the failure.
-//                    showToast("Belt not found!");
-//                }
-//
-//            });
-//
-//        } else {
-//
-//            CompanionDeviceManager deviceManager =
-//                    (CompanionDeviceManager) getSystemService(
-//                            Context.COMPANION_DEVICE_SERVICE
-//                    );
-//
-//            // To skip filtering based on name and supported feature flags,
-//            // don't include calls to setNamePattern() and addServiceUuid(),
-//            // respectively. This example uses Bluetooth.
-//            BluetoothLeDeviceFilter deviceFilter =
-//                    new BluetoothLeDeviceFilter.Builder()
-//                            .setNamePattern(Pattern.compile("(?i)naviguertel.*"))
-//                            .build();
-//
-//            // The argument provided in setSingleDevice() determines whether a single
-//            // device name or a list of device names is presented to the user as
-//            // pairing options.
-//            AssociationRequest pairingRequest = new AssociationRequest.Builder()
-//                    .addDeviceFilter(deviceFilter)
-//                    .setSingleDevice(true)
-//                    .build();
-//
-//            // When the app tries to pair with the Bluetooth device, show the
-//            // appropriate pairing request dialog to the user.
-//            deviceManager.associate(pairingRequest,
-//                    new CompanionDeviceManager.Callback() {
-//                        @Override
-//                        public void onDeviceFound(IntentSender chooserLauncher) {
-//                            try {
-//                                startIntentSenderForResult(chooserLauncher,
-//                                        SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0);
-//                            } catch (IntentSender.SendIntentException e) {
-//                                // failed to send the intent
-//                                showToast("Scan request failed!");
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onFailure(CharSequence error) {
-//                            // handle failure to find the companion device
-//                            showToast("Belt not found!");
-//                        }
-//                    }, null);
-//
-//        }
-//    }
 
     private void showToast(final String message) {
         runOnUiThread(() -> Toast.makeText(
@@ -292,6 +108,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateUI() {
         updateConnectionLabel();
         updateConnectionButtons();
+        updateSensorNotificationsButtons();
     }
 
     private void updateConnectionLabel() {
@@ -355,6 +172,24 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
+    private void updateSensorNotificationsButtons() {
+        runOnUiThread(() -> {
+            AdvancedBeltController beltController = appController.getAdvancedBeltController();
+            if (beltController != null) {
+                if (beltController.areRawSensorNotificationsEnabled()) {
+                    startSensorNotificationsButton.setEnabled(false);
+                    stopSensorNotificationsButton.setEnabled(true);
+                } else {
+                    startSensorNotificationsButton.setEnabled(true);
+                    stopSensorNotificationsButton.setEnabled(false);
+                }
+            } else {
+                startSensorNotificationsButton.setEnabled(false);
+                stopSensorNotificationsButton.setEnabled(false);
+            }
+        });
+    }
+
     // MARK: Implementation of NavigationEventListener
 
     @Override
@@ -390,6 +225,12 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     @Override
     public void onBeltConnectionStateChanged(BeltConnectionState state) {
         updateUI();
+        if (state == BeltConnectionState.STATE_CONNECTED) {
+            // Enable debug notifications
+            appController.getAdvancedBeltController().setDebugNotificationsEnable(true);
+            // Retrieve calibration
+            appController.getAdvancedBeltController().getSensorCalibration();
+        }
     }
 
     @Override
@@ -432,47 +273,44 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         showToast("Unsupported BLE feature!");
     }
 
-    // TODO TBR
-//    // MARK: Pairing status broadcast receiver
-//
-//    private class PairingStatusBroadcastReceiver extends BroadcastReceiver {
-//
-//        private boolean registered = false;
-//
-//        public void register() {
-//            if (!registered) {
-//                try {
-//                    MainActivity.this.registerReceiver(this,
-//                            new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-//                    registered = true;
-//                } catch (Exception e) {
-//                    // TODO Log error
-//                }
-//            }
-//        }
-//
-//        public void unregister() {
-//            if (registered) {
-//                try {
-//                    MainActivity.this.unregisterReceiver(this);
-//                    registered = false;
-//                } catch (Exception e) {
-//                    // TODO Log error
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getAction() != null &&
-//                    intent.getAction().matches(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-//                // TODO get extra `EXTRA_BOND_STATE`
-//                // If value is BOND_BONDED, connect belt
-//                // Device is given in EXTRA_DEVICE
-//                // Add a property pendingBelt to check that it is the expected device.
-//            }
-//            // TODO connect!
-//        }
-//
-//    }
+
+    // MARK: Implementation of `AdvancedBeltListener`
+
+    @Override
+    public void onRawSensorNotificationsStateChanged(boolean enable) {
+        updateSensorNotificationsButtons();
+    }
+
+    @Override
+    public void onDebugNotificationsStateChanged(boolean enable) {
+
+    }
+
+    @Override
+    public void onSensorCalibrationRetrieved(float[] magOffsets, float[] magGains, float magCalibError, float[] gyroOffsets) {
+
+    }
+
+    @Override
+    public void onRawSensorRecordNotified(int sensorId, int[] values) {
+
+    }
+
+    @Override
+    public void onRawSensorNotificationSequenceError() {
+        long timeMillis = (System.nanoTime()/1000000);
+        if ((timeMillis-lastErrorToastTimeMillis) > MIN_PERIOD_ERROR_TOAST_MILLIS) {
+            showToast("Error on sensor notification sequence!");
+            lastErrorToastTimeMillis = timeMillis;
+        }
+    }
+
+    @Override
+    public void onErrorNotified(int errorCode) {
+        long timeMillis = (System.nanoTime()/1000000);
+        if ((timeMillis-lastErrorToastTimeMillis) > MIN_PERIOD_ERROR_TOAST_MILLIS) {
+            showToast("Error belt: 0x"+Integer.toHexString(errorCode));
+            lastErrorToastTimeMillis = timeMillis;
+        }
+    }
 }

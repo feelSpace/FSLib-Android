@@ -27,6 +27,11 @@ public class AppController {
     // Belt controller
     private NavigationController navigationController;
 
+    // Advanced belt controller
+    private AdvancedBeltController advancedBeltController;
+
+    private boolean rawSensorNotificationsActive = false;
+
     /**
      * Private constructor for singleton.
      */
@@ -62,11 +67,16 @@ public class AppController {
             this.applicationContext = applicationContext;
             // Initialize the navigation controller
             this.navigationController = new NavigationController(applicationContext);
+            advancedBeltController = new AdvancedBeltController(navigationController.getBeltConnection());
         }
     }
 
     public NavigationController getNavigationController() {
         return navigationController;
+    }
+
+    public AdvancedBeltController getAdvancedBeltController() {
+        return advancedBeltController;
     }
 
 }

@@ -10,7 +10,7 @@ package de.feelspace.fslib;
 /**
  * States of the GATT controller.
  */
-enum GattConnectionState {
+public enum GattConnectionState {
 
     /**
      * No GATT connection.

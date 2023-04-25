@@ -16,6 +16,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -760,7 +762,7 @@ class GattController extends BluetoothGattCallback {
     }
 
     @Override
-    public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+    public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
         boolean reconnect = false;
         synchronized (this) {
             if (gatt != gattServer) {
@@ -785,12 +787,20 @@ class GattController extends BluetoothGattCallback {
                         case GATT_RECONNECTING:
                             // Continue with service discovery
                             cancelConnectionTimeout();
-                            if (gatt.discoverServices()) {
-                                connectionState = GATT_DISCOVERING_SERVICES;
-                                scheduleServiceDiscoveryTimeout();
-                            } else {
-                                reconnect = true;
-                            }
+                            Handler mainHandler = new Handler(Looper.getMainLooper());
+                            Runnable disc = new Runnable() {
+                                @Override
+                                public void run() {
+                                    gatt.discoverServices();
+                                }
+                            };
+                            mainHandler.post(disc);
+//                            if (gatt.discoverServices()) {
+//                                connectionState = GATT_DISCOVERING_SERVICES;
+//                                scheduleServiceDiscoveryTimeout();
+//                            } else {
+//                                reconnect = true;
+//                            }
                             break;
                         case GATT_DISCOVERING_SERVICES:
                         case GATT_CONNECTED:

@@ -69,6 +69,15 @@ public abstract class BeltConnectionInterface {
     public abstract void stopScan();
 
     /**
+     * Pairs and connect the given device.
+     *
+     * @param device The device to pair and connect.
+     * @throws IllegalArgumentException If the device is `null`.
+     * @throws SecurityException If permissions to pair are not granted.
+     */
+    public abstract void pairAndConnect(BluetoothDevice device) throws IllegalArgumentException, SecurityException;
+
+    /**
      * Connects a belt.
      *
      * @param device the bluetooth device to connect to.
@@ -81,7 +90,7 @@ public abstract class BeltConnectionInterface {
      *
      * @throws IllegalStateException if an error occurs with the Bluetooth service.
      */
-    public abstract void scanAndConnect() throws IllegalStateException;
+    public abstract void scanPairAndConnect() throws IllegalStateException;
 
     /**
      * Closes the current connection.
@@ -163,6 +172,23 @@ public abstract class BeltConnectionInterface {
         }
         for (BeltConnectionListener l: targets) {
             l.onScanFailed();
+        }
+    }
+
+    /**
+     * Notifies listeners that the scan procedure failed to start.
+     */
+    protected void notifyPairingFailed() {
+        if (DEBUG) Log.i(DEBUG_TAG, "BeltConnectionInterface: Pairing failed.");
+        ArrayList<BeltConnectionListener> targets;
+        synchronized (this) {
+            if (listeners.isEmpty()) {
+                return;
+            }
+            targets = new ArrayList<>(listeners);
+        }
+        for (BeltConnectionListener l: targets) {
+            l.onPairingFailed();
         }
     }
 

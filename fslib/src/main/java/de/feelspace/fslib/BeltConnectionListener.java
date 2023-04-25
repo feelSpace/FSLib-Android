@@ -48,4 +48,9 @@ public interface BeltConnectionListener {
      */
     void onConnectionFailed();
 
+    /**
+     * Called when the pairing failed.
+     */
+    void onPairingFailed();
+
 }

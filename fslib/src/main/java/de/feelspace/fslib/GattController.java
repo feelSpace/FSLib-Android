@@ -787,11 +787,19 @@ class GattController extends BluetoothGattCallback {
                         case GATT_RECONNECTING:
                             // Continue with service discovery
                             cancelConnectionTimeout();
+
+                            // TODO To be refactored
+                            
                             Handler mainHandler = new Handler(Looper.getMainLooper());
                             Runnable disc = new Runnable() {
                                 @Override
                                 public void run() {
-                                    gatt.discoverServices();
+                                    if (gatt.discoverServices()) {
+                                        connectionState = GATT_DISCOVERING_SERVICES;
+                                        scheduleServiceDiscoveryTimeout();
+                                    } else {
+                                        reconnect();
+                                    }
                                 }
                             };
                             mainHandler.post(disc);

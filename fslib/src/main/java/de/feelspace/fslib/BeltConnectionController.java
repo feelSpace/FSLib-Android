@@ -10,7 +10,6 @@ package de.feelspace.fslib;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  */
 class BeltConnectionController extends BeltConnectionInterface implements
         GattController.GattEventListener, BluetoothScanner.BluetoothScannerDelegate,
-        BeltCommunicationController.HandshakeCallback {
+        BeltCommunicationController.HandshakeCallback,
+        BluetoothPairingManager.BluetoothPairingDelegate {
 
     // Debug
     @SuppressWarnings("unused")
@@ -34,27 +34,32 @@ class BeltConnectionController extends BeltConnectionInterface implements
     /**
      * The application context to establish connection.
      */
-    private @NonNull Context applicationContext;
+    private final @NonNull Context applicationContext;
 
     /**
      * The GATT controller.
      */
-    private @NonNull GattController gattController;
+    private final @NonNull GattController gattController;
 
     /**
      * The Bluetooth scanner.
      */
-    private @NonNull BluetoothScanner scanner;
+    private final @NonNull BluetoothScanner scanner;
+
+    /**
+     * The pairing manager.
+     */
+    private final @NonNull BluetoothPairingManager pairingManager;
 
     /**
      * The communication controller.
      */
-    private @NonNull BeltCommunicationController communicationController;
+    private final @NonNull BeltCommunicationController communicationController;
 
     /**
      * Executor for timeout task and other delayed tasks.
      */
-    private @NonNull ScheduledThreadPoolExecutor executor;
+    private final @NonNull ScheduledThreadPoolExecutor executor;
 
     /**
      * Flag for pending connect.
@@ -73,13 +78,12 @@ class BeltConnectionController extends BeltConnectionInterface implements
         }
         this.applicationContext = applicationContext;
         executor = new ScheduledThreadPoolExecutor(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            executor.setRemoveOnCancelPolicy(true);
-        }
+        executor.setRemoveOnCancelPolicy(true);
         gattController = new GattController(executor);
         gattController.addGattEventListener(this);
         communicationController = new BeltCommunicationController(gattController);
         scanner = new BluetoothScanner(executor,this);
+        pairingManager = new BluetoothPairingManager(applicationContext, executor,this);
     }
 
     @Override
@@ -94,6 +98,32 @@ class BeltConnectionController extends BeltConnectionInterface implements
     }
 
     @Override
+    public void pairAndConnect(BluetoothDevice device) throws IllegalArgumentException, SecurityException {
+        synchronized (this) {
+            if (device == null) {
+                throw new IllegalArgumentException("Cannot pair with a null device.");
+            }
+            connectOnFirstBeltFound = false;
+            if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
+                // Connect without pairing
+                state = BeltConnectionState.STATE_CONNECTING;
+            } else {
+                // Start pairing
+                state = BeltConnectionState.STATE_PAIRING;
+            }
+        }
+        // Stop pairing/scan before any pairing/connection attempt, even when not scanning
+        scanner.stopScan();
+        pairingManager.stopPairing();
+        if (state == BeltConnectionState.STATE_PAIRING) {
+            pairingManager.startPairing(device);
+        } else {
+            gattController.connect(applicationContext, device);
+        }
+        notifyState();
+    }
+
+    @Override
     public void connect(BluetoothDevice device) throws IllegalArgumentException {
         synchronized (this) {
             if (device == null) {
@@ -102,14 +132,15 @@ class BeltConnectionController extends BeltConnectionInterface implements
             connectOnFirstBeltFound = false;
             state = BeltConnectionState.STATE_CONNECTING;
         }
-        // Stop scan before any connection attempt, even when not scanning
+        // Stop pairing/scan before any connection attempt, even when not scanning
         scanner.stopScan();
+        pairingManager.stopPairing();
         gattController.connect(applicationContext, device);
         notifyState();
     }
 
     @Override
-    public void scanAndConnect() throws IllegalStateException {
+    public void scanPairAndConnect() throws IllegalStateException {
         synchronized (this) {
             connectOnFirstBeltFound = true;
             state = BeltConnectionState.STATE_SCANNING;
@@ -143,6 +174,7 @@ class BeltConnectionController extends BeltConnectionInterface implements
             state = BeltConnectionState.STATE_DISCONNECTED;
             connectOnFirstBeltFound = false;
         }
+        pairingManager.stopPairing();
         gattController.disconnect();
         notifyState();
     }
@@ -169,14 +201,11 @@ class BeltConnectionController extends BeltConnectionInterface implements
                 case GATT_DISCONNECTED:
                     switch (this.state) {
                         case STATE_DISCONNECTED:
-                            // Ignore event
-                            return;
                         case STATE_SCANNING:
+                        case STATE_PAIRING:
                             // Ignore event
                             return;
                         case STATE_CONNECTING:
-                            state = BeltConnectionState.STATE_DISCONNECTED;
-                            break;
                         case STATE_RECONNECTING:
                         case STATE_HANDSHAKE:
                         case STATE_CONNECTED:
@@ -214,7 +243,8 @@ class BeltConnectionController extends BeltConnectionInterface implements
     public void onGattConnectionFailed() {
         synchronized (this) {
             if (state == BeltConnectionState.STATE_SCANNING ||
-                    state == BeltConnectionState.STATE_DISCONNECTED) {
+                    state == BeltConnectionState.STATE_DISCONNECTED ||
+                    state == BeltConnectionState.STATE_PAIRING) {
                 // Ignore GATT connection event
                 return;
             }
@@ -228,7 +258,8 @@ class BeltConnectionController extends BeltConnectionInterface implements
     public void onGattConnectionLost() {
         synchronized (this) {
             if (state == BeltConnectionState.STATE_SCANNING ||
-                    state == BeltConnectionState.STATE_DISCONNECTED) {
+                    state == BeltConnectionState.STATE_DISCONNECTED ||
+                    state == BeltConnectionState.STATE_PAIRING) {
                 // Ignore GATT connection event
                 return;
             }
@@ -295,7 +326,7 @@ class BeltConnectionController extends BeltConnectionInterface implements
         }
         if (connect) {
             try {
-                connect(device);
+                pairAndConnect(device);
             } catch (Exception e) {
                 // Should not happen
             }
@@ -365,5 +396,34 @@ class BeltConnectionController extends BeltConnectionInterface implements
         } else {
             gattController.reconnect();
         }
+    }
+
+    @Override
+    public void onPairingFinished(BluetoothDevice device) {
+        if (DEBUG) Log.i(DEBUG_TAG, "BeltConnectionController: Pairing completed.");
+        synchronized (this) {
+            if (state != BeltConnectionState.STATE_PAIRING) {
+                // Ignore if not pairing
+                return;
+            }
+        }
+        try {
+            connect(device);
+        } catch (Exception e) {
+            // Should not happen
+        }
+    }
+
+    @Override
+    public void onPairingFailed() {
+        if (DEBUG) Log.e(DEBUG_TAG, "BeltConnectionController: Pairing failed.");
+        synchronized (this) {
+            if (state != BeltConnectionState.STATE_PAIRING) {
+                // Ignore if not pairing
+                return;
+            }
+            state = BeltConnectionState.STATE_DISCONNECTED;
+        }
+        notifyPairingFailed();
     }
 }

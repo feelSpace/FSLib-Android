@@ -96,7 +96,7 @@ public class NavigationController {
             return;
         }
         try {
-            beltConnection.scanAndConnect();
+            beltConnection.scanPairAndConnect();
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "Connection failed", e);
             notifyBeltConnectionFailed();
@@ -950,6 +950,11 @@ public class NavigationController {
 
         @Override
         public void onConnectionFailed() {
+            notifyBeltConnectionFailed();
+        }
+
+        @Override
+        public void onPairingFailed() {
             notifyBeltConnectionFailed();
         }
     }

@@ -9,4 +9,5 @@
     <string name="connected">Connected</string>
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
+    <string name="pairing">Pairing</string>
 </resources>

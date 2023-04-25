@@ -23,6 +23,11 @@ public enum BeltConnectionState {
     STATE_SCANNING(),
 
     /**
+     * Pairing to the belt.
+     */
+    STATE_PAIRING(),
+
+    /**
      * Connecting to a belt.
      */
     STATE_CONNECTING(),
@@ -54,6 +59,8 @@ public enum BeltConnectionState {
                 return "Disconnected";
             case STATE_SCANNING:
                 return "Scanning";
+            case STATE_PAIRING:
+                return "Pairing";
             case STATE_CONNECTING:
                 return "Connecting";
             case STATE_RECONNECTING:
@@ -65,7 +72,7 @@ public enum BeltConnectionState {
             case STATE_CONNECTED:
                 return "Connected";
             default:
-                return "Disconnected";
+                return "Unknown";
         }
     }
 

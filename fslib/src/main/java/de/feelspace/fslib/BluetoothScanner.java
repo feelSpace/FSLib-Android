@@ -7,14 +7,12 @@
  */
 package de.feelspace.fslib;
 
-import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -40,25 +38,23 @@ class BluetoothScanner {
     private boolean scanning = false;
 
     // Callback
-    private BluetoothScannerDelegate callback;
+    private final BluetoothScannerDelegate callback;
 
     // Scan timeout (not null when scanning)
-    private ScheduledFuture scanTimeoutTask;
-    private ScheduledThreadPoolExecutor executor;
-    private long scanTimeoutMs = DEFAULT_SCAN_TIMEOUT_MS;
+    private ScheduledFuture<?> scanTimeoutTask;
+    private final ScheduledThreadPoolExecutor executor;
     private static final long DEFAULT_SCAN_TIMEOUT_MS = 5000;
 
     // BLE scanners
-    private BluetoothLeScanner bleScannerPost21;
-    private ScanSettings bleScanSettingsPost21;
-    private BLEScanCallbackPost21 scanCallBackPost21;
-    private BLEScanCallbackPre21 scanCallBackPre21;
+    private BluetoothLeScanner bleScanner;
+    private ScanSettings bleScanSettings;
+    private BLEScanCallback scanCallBack;
 
     // Device name to identify belt
-    public static final String BELT_NAME_PATTERN = "naviguertel.*"; // Lower-case for comparison
+    public static final String BELT_NAME_PATTERN = "(?i)naviguertel.*"; // Lower-case for comparison
 
     // List of devices to avoid duplicates
-    private ArrayList<BluetoothDevice> beltsFound = new ArrayList<>(5);
+    private final ArrayList<BluetoothDevice> beltsFound = new ArrayList<>(5);
 
     /**
      * Constructor with a callback for results of the scan procedure.
@@ -76,74 +72,70 @@ class BluetoothScanner {
     public void startScan() {
         boolean failed = false;
         synchronized (this) {
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (bluetoothAdapter == null) {
-                // No Bluetooth available
-                Log.e(DEBUG_TAG, "BluetoothScanner: No BT for scan.");
-                callback.onScanFailed();
-                return;
-            }
-            // Set state
-            scanning = true;
-            // Clear list of belts found
-            beltsFound.clear();
-            // TODO Add paired devices?
-            // bluetoothAdapter.getBondedDevices()
-            // Initialize scan callback
-            if (android.os.Build.VERSION.SDK_INT < 21) {
-                if (scanCallBackPre21 == null) {
-                    scanCallBackPre21 = new BLEScanCallbackPre21();
-                }
-            } else {
-                if (bleScannerPost21 == null) {
-                    bleScannerPost21 = bluetoothAdapter.getBluetoothLeScanner();
-                }
-                if (bleScanSettingsPost21 == null) {
-                    bleScanSettingsPost21 = new ScanSettings.Builder()
-                            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
-                }
-                if (scanCallBackPost21 == null) {
-                    scanCallBackPost21 = new BLEScanCallbackPost21();
-                }
-            }
-            // Start scan
-            // Note: No scan filter because it does seem to be broken
-            try {
-                if (android.os.Build.VERSION.SDK_INT < 21) {
-                    //noinspection deprecation
-                    bluetoothAdapter.startLeScan(scanCallBackPre21);
-                } else {
-                    bleScannerPost21.startScan(null, bleScanSettingsPost21,
-                            scanCallBackPost21);
-                }
-            } catch (Exception e) {
-                scanning = false;
-                Log.e(DEBUG_TAG, "Unable to start the scan procedure.", e);
-                callback.onScanFailed();
-                return;
-            }
             // Cancel previous timeout task
             if (scanTimeoutTask != null) {
                 scanTimeoutTask.cancel(true);
                 scanTimeoutTask = null;
             }
+            // Retrieve BLE adapter
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null) {
+                // No Bluetooth available
+                Log.e(DEBUG_TAG, "BluetoothScanner: No BT for scan.");
+                failed = true;
+            }
+            // Start scan
+            if (!failed) {
+                // Set state
+                scanning = true;
+                // Clear list of belts found
+                beltsFound.clear();
+                // Initialize scan callback
+                if (bleScanner == null) {
+                    bleScanner = bluetoothAdapter.getBluetoothLeScanner();
+                }
+                if (bleScanSettings == null) {
+                    bleScanSettings = new ScanSettings.Builder()
+                            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+                }
+                if (scanCallBack == null) {
+                    scanCallBack = new BLEScanCallback();
+                }
+                // Start scan
+                // Note: No scan filter because it does seem to be broken
+                try {
+                    bleScanner.startScan(null, bleScanSettings,
+                            scanCallBack);
+                } catch (SecurityException securityException) {
+                    scanning = false;
+                    Log.e(DEBUG_TAG, "Missing permissions for scanning.", securityException);
+                    failed = true;
+                } catch (Exception e) {
+                    scanning = false;
+                    Log.e(DEBUG_TAG, "Unable to start the scan procedure.", e);
+                    failed = true;
+                }
+            }
             // Start timeout task
-            try {
-                scanTimeoutTask = executor.schedule(
-                        new Runnable() {
-                            @Override
-                            public void run() {
+            if (!failed) {
+                try {
+                    scanTimeoutTask = executor.schedule(
+                            () -> {
                                 synchronized (BluetoothScanner.this) {
                                     scanTimeoutTask = null;
                                 }
                                 stopScan(false);
-                            }
-                        }, scanTimeoutMs, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                Log.e(DEBUG_TAG, "Unable to start the scan timeout task.", e);
+                            }, DEFAULT_SCAN_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    Log.e(DEBUG_TAG, "Unable to start the scan timeout task.", e);
+                }
             }
         }
-        callback.onScanStarted();
+        if (failed) {
+            callback.onScanFailed();
+        } else {
+            callback.onScanStarted();
+        }
     }
 
     /**
@@ -172,16 +164,11 @@ class BluetoothScanner {
             }
             // Stop BLE scan, even if not scanning
             try {
-                if (android.os.Build.VERSION.SDK_INT < 21) {
-                    if (scanCallBackPre21 != null) {
-                        //noinspection deprecation
-                        bluetoothAdapter.stopLeScan(scanCallBackPre21);
-                    }
-                } else {
-                    if (bleScannerPost21 != null && scanCallBackPost21 != null) {
-                        bleScannerPost21.stopScan(scanCallBackPost21);
-                    }
+                if (bleScanner != null) {
+                    bleScanner.stopScan(scanCallBack);
                 }
+            } catch (SecurityException s) {
+                if (DEBUG) Log.e(DEBUG_TAG, "Missing permission for stopping scan.", s);
             } catch (IllegalStateException i) {
                 if (DEBUG) Log.d(DEBUG_TAG, "Scan procedure already stopped.");
             } catch (Exception e) {
@@ -215,7 +202,12 @@ class BluetoothScanner {
         // Check name
         boolean isNewBelt = false;
         synchronized (this) {
-            String deviceName = device.getName();
+            String deviceName = null;
+            try {
+                deviceName = device.getName();
+            } catch (SecurityException s) {
+                if (DEBUG) Log.e(DEBUG_TAG, "Missing permission to get device name.", s);
+            }
             if (deviceName != null && deviceName.toLowerCase().matches(BELT_NAME_PATTERN) &&
                     scanTimeoutTask != null) {
                 // Check for duplicate
@@ -234,24 +226,10 @@ class BluetoothScanner {
         }
     }
 
-
-    /**
-     * Callback methods for BLE scan results, when API < 21.
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    private class BLEScanCallbackPre21 implements BluetoothAdapter.LeScanCallback {
-
-        @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            checkAndNotifyBeltFound(device);
-        }
-    }
-
     /**
      * Callback methods for BLE scan results, when API >= 21.
      */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private class BLEScanCallbackPost21 extends ScanCallback {
+    private class BLEScanCallback extends ScanCallback {
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {

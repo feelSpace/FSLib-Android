@@ -39,10 +39,11 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     private boolean debugNotificationsEnabled = false;
 
     // Sensor calibration
-    private Float[] magOffsets = {null, null, null};
-    private Float[] magGains = {null, null, null};
-    private Float magCalibError = null;
-    private Float[] gyroOffsets = {null, null, null};
+    private final Float[] magOffsets = {null, null, null};
+    private final Float[] magGains = {null, null, null};
+    private Float magError = null;
+    private final Float[] gyroOffsets = {null, null, null};
+    private Integer gyroStatus = null;
 
     // Raw sensor notification sequence
     private Integer sensorSequence = null;
@@ -84,17 +85,19 @@ public class AdvancedBeltController implements GattController.GattEventListener 
             if (sensorNotifChar == null || sensorRequestChar == null) {
                 Log.e(DEBUG_TAG, "AdvancedBeltController: Missing sensor characteristic!");
             } else {
-                // Enable notification
+                // Enable/Disable notification
                 if (gattController.setCharacteristicNotification(sensorNotifChar, enable)) {
-                    // Command to start notifications
-                    if (!gattController.request(
-                            sensorRequestChar,
-                            sensorNotifChar,
-                            new byte[] {0x01, 0x01},
-                            new Byte[] {0x01},
-                            START_SENSOR_NOTIFICATION_REQUEST_ID
-                    )) {
-                        Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to send sensor command!");
+                    if (enable) {
+                        // Command to start notifications
+                        if (!gattController.request(
+                                sensorRequestChar,
+                                sensorNotifChar,
+                                new byte[] {0x01, 0x01},
+                                new Byte[] {0x01},
+                                START_SENSOR_NOTIFICATION_REQUEST_ID
+                        )) {
+                            Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to send sensor command!");
+                        }
                     }
                 } else {
                     Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to set sensor notification state!");
@@ -135,6 +138,7 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     }
 
     public void getSensorCalibration() {
+        boolean ret = true;
         // TODO
     }
 
@@ -155,7 +159,20 @@ public class AdvancedBeltController implements GattController.GattEventListener 
 
     @Override
     public void onGattConnectionStateChange(GattConnectionState state) {
-
+        if (state == GattConnectionState.GATT_CONNECTED) {
+            setDebugNotificationsEnable(true);
+            getSensorCalibration();
+        } else {
+            // Reset state
+            rawSensorNotificationsEnabled = false;
+            debugNotificationsEnabled = false;
+            magOffsets[0] = null; magOffsets[1] = null; magOffsets[2] = null;
+            magGains[0] = null; magGains[1] = null; magGains[2] = null;
+            magError = null;
+            gyroOffsets[0] = null; gyroOffsets[1] = null; gyroOffsets[2] = null;
+            gyroStatus = null;
+            sensorSequence = null;
+        }
     }
 
     @Override

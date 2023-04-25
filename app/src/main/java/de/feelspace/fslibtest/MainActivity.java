@@ -1,5 +1,6 @@
 package de.feelspace.fslibtest;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,6 +31,9 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     // UI update parameters
     private static final int MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
     private long lastErrorToastTimeMillis = 0;
+    private static final int MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS = 300;
+    private long lastRecordsCountUpdateTimeMillis = 0;
+    private int recordsCount = 0;
 
     // MARK: Activity methods overriding
 
@@ -109,6 +113,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateConnectionLabel();
         updateConnectionButtons();
         updateSensorNotificationsButtons();
+        updateRecordsCountTextView();
     }
 
     private void updateConnectionLabel() {
@@ -190,6 +195,12 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
+    @SuppressLint("DefaultLocale")
+    private void updateRecordsCountTextView() {
+        runOnUiThread(() -> sensorRecordingCountTextView.setText(
+                String.format("Records: %d", recordsCount)));
+    }
+
     // MARK: Implementation of NavigationEventListener
 
     @Override
@@ -226,10 +237,8 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     public void onBeltConnectionStateChanged(BeltConnectionState state) {
         updateUI();
         if (state == BeltConnectionState.STATE_CONNECTED) {
-            // Enable debug notifications
-            appController.getAdvancedBeltController().setDebugNotificationsEnable(true);
-            // Retrieve calibration
-            appController.getAdvancedBeltController().getSensorCalibration();
+            // Reset record count
+            recordsCount = 0;
         }
     }
 
@@ -292,8 +301,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     }
 
     @Override
-    public void onRawSensorRecordNotified(int sensorId, int[] values) {
-
+    public void onRawSensorRecordNotified(int[][] records) {
+        recordsCount += records.length;
+        long timeMillis = (System.nanoTime()/1000000);
+        if ((timeMillis-lastRecordsCountUpdateTimeMillis) > MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS) {
+            updateRecordsCountTextView();
+            lastRecordsCountUpdateTimeMillis = timeMillis;
+        }
     }
 
     @Override

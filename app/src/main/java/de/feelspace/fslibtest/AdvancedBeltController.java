@@ -35,6 +35,8 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     private final ArrayList<AdvancedBeltListener> listeners = new ArrayList<>();
 
     // Characteristics
+    private @Nullable BluetoothGattCharacteristic paramRequestCharacteristic;
+    private @Nullable BluetoothGattCharacteristic paramNotificationCharacteristic;
     private @Nullable BluetoothGattCharacteristic sensorNotificationCharacteristic;
     private @Nullable BluetoothGattCharacteristic sensorCommandCharacteristic;
     private @Nullable BluetoothGattCharacteristic debugInputCharacteristic;
@@ -56,6 +58,7 @@ public class AdvancedBeltController implements GattController.GattEventListener 
 
     // Request IDs
     private final static int START_SENSOR_NOTIFICATION_REQUEST_ID = 1;
+    private final static int MAG_OFFSET_REQUEST_ID = 2;
 
     public AdvancedBeltController(@NonNull BeltConnectionInterface connectionInterface) {
         this.connectionInterface = connectionInterface;
@@ -137,6 +140,13 @@ public class AdvancedBeltController implements GattController.GattEventListener 
 
     public void getSensorCalibration() {
         boolean ret = true;
+        gattController.request(
+                paramRequestCharacteristic,
+                paramNotificationCharacteristic,
+                new byte[] {0x10, 1, 13}, // Command ID, count, param ID
+                new Byte[] {0x10, 13},
+                MAG_OFFSET_REQUEST_ID
+        );
         // TODO
     }
 
@@ -146,6 +156,12 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     public void onGattConnectionStateChange(GattConnectionState state) {
         if (state == GattConnectionState.GATT_CONNECTED) {
             // Retrieve characteristics
+            paramRequestCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.BELT_CONTROL_SERVICE_UUID,
+                    BeltCommunicationController.SENSOR_PARAM_REQUEST_CHAR_UUID);
+            paramNotificationCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.BELT_CONTROL_SERVICE_UUID,
+                    BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
             sensorNotificationCharacteristic = gattController.getCharacteristic(
                     BeltCommunicationController.SENSOR_SERVICE_UUID,
                     BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
@@ -164,6 +180,8 @@ public class AdvancedBeltController implements GattController.GattEventListener 
             getSensorCalibration();
         } else {
             // Reset state
+            paramRequestCharacteristic = null;
+            paramNotificationCharacteristic = null;
             sensorNotificationCharacteristic = null;
             sensorCommandCharacteristic = null;
             debugInputCharacteristic = null;

@@ -27,6 +27,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private Button startSensorRecordingButton;
     private Button stopSensorRecordingButton;
     private TextView sensorRecordingCountTextView;
+    private TextView magOffsetsTextView;
+    private TextView magGainsTextView;
+    private TextView magErrorTextView;
+    private TextView gyroOffsetsTextView;
+    private TextView gyroStatusTextView;
 
     // UI update parameters
     private static final int MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
@@ -97,6 +102,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         // Recordings count
         sensorRecordingCountTextView = findViewById(R.id.activity_main_sensor_recording_count_text_view);
 
+        // Calibration
+        magOffsetsTextView = findViewById(R.id.activity_main_mag_offset_text_view);
+        magGainsTextView = findViewById(R.id.activity_main_mag_gain_text_view);
+        magErrorTextView = findViewById(R.id.activity_main_mag_error_text_view);
+        gyroOffsetsTextView = findViewById(R.id.activity_main_gyro_offset_text_view);
+        gyroStatusTextView = findViewById(R.id.activity_main_gyro_status_text_view);
+
         // Update UI
         updateUI();
     }
@@ -114,6 +126,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateConnectionButtons();
         updateSensorNotificationsButtons();
         updateRecordsCountTextView();
+        updateCalibrationTextViews();
     }
 
     private void updateConnectionLabel() {
@@ -199,6 +212,59 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateRecordsCountTextView() {
         runOnUiThread(() -> sensorRecordingCountTextView.setText(
                 String.format("Records: %d", recordsCount)));
+    }
+
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
+    private void updateCalibrationTextViews() {
+        runOnUiThread(() -> {
+            AdvancedBeltController beltController = appController.getAdvancedBeltController();
+            if (beltController != null) {
+                Float[] magOffsets = beltController.getMagOffsets();
+                if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
+                    magOffsetsTextView.setText(
+                            String.format("Mag. offsets: [%.2f, %.2f, %.2f]",
+                                    magOffsets[0], magOffsets[1], magOffsets[2]));
+                } else {
+                    magOffsetsTextView.setText("Mag. offsets: ?");
+                }
+                Float[] magGains = beltController.getMagGains();
+                if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
+                    magGainsTextView.setText(
+                            String.format("Mag. gains: [%.2f, %.2f, %.2f]",
+                                    magGains[0], magGains[1], magGains[2]));
+                } else {
+                    magGainsTextView.setText("Mag. gains: ?");
+                }
+                Float magError = beltController.getMagError();
+                if (magError != null) {
+                    magErrorTextView.setText(
+                            String.format("Mag. error: %.4f", magError));
+                } else {
+                    magErrorTextView.setText("Mag. error: ?");
+                }
+                Float[] gyroOffsets = beltController.getGyroOffsets();
+                if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
+                    gyroOffsetsTextView.setText(
+                            String.format("Gyro. offsets: [%.2f, %.2f, %.2f]",
+                                    gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
+                } else {
+                    gyroOffsetsTextView.setText("Gyro. offsets: ?");
+                }
+                Integer gyroStatus = beltController.getGyroStatus();
+                if (gyroStatus != null) {
+                    gyroStatusTextView.setText(
+                            String.format("Gyro. status: %d", gyroStatus));
+                } else {
+                    gyroStatusTextView.setText("Gyro. status: ?");
+                }
+            } else {
+                magOffsetsTextView.setText("");
+                magGainsTextView.setText("");
+                magErrorTextView.setText("");
+                gyroOffsetsTextView.setText("");
+                gyroStatusTextView.setText("");
+            }
+        });
     }
 
     // MARK: Implementation of NavigationEventListener
@@ -296,8 +362,8 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     }
 
     @Override
-    public void onSensorCalibrationRetrieved(float[] magOffsets, float[] magGains, float magCalibError, float[] gyroOffsets) {
-
+    public void onSensorCalibrationUpdated() {
+        updateCalibrationTextViews();
     }
 
     @Override

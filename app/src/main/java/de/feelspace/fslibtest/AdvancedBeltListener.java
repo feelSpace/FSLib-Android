@@ -6,8 +6,7 @@ public interface AdvancedBeltListener {
 
     void onDebugNotificationsStateChanged(boolean enable);
 
-    void onSensorCalibrationRetrieved(float[] magOffsets, float[] magGains, float magCalibError,
-                                      float[] gyroOffsets);
+    void onSensorCalibrationUpdated();
 
     void onRawSensorRecordNotified(int[][] records);
 

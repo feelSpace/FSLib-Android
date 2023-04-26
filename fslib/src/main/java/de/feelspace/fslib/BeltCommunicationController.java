@@ -79,12 +79,12 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     private boolean buttonPressNotificationsActive = false;
 
     /** Parameter request characteristic UUID. */
-    private static final UUID PARAMETER_REQUEST_CHAR_UUID =
+    public static final UUID PARAMETER_REQUEST_CHAR_UUID =
             UUID.fromString("0000FE05-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic parameterRequestChar;
 
     /** Parameter notification characteristic UUID. */
-    private static final UUID PARAMETER_NOTIFICATION_CHAR_UUID =
+    public static final UUID PARAMETER_NOTIFICATION_CHAR_UUID =
             UUID.fromString("0000FE06-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic parameterNotificationChar;
     private boolean parameterNotificationsActive = false;

@@ -14,25 +14,34 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+import de.feelspace.fslib.BeltBatteryStatus;
+import de.feelspace.fslib.BeltButtonPressEvent;
+import de.feelspace.fslib.BeltCommandListener;
 import de.feelspace.fslib.BeltCommunicationController;
 import de.feelspace.fslib.BeltConnectionInterface;
 import de.feelspace.fslib.BeltConnectionState;
+import de.feelspace.fslib.BeltMode;
+import de.feelspace.fslib.BeltOrientation;
 import de.feelspace.fslib.GattConnectionState;
 import de.feelspace.fslib.GattController;
 import de.feelspace.fslib.NavigationEventListener;
 import de.feelspace.fslib.NavigationState;
 
-public class AdvancedBeltController implements GattController.GattEventListener {
+public class AdvancedBeltController implements GattController.GattEventListener,
+        BeltCommandListener {
     // Debug
     @SuppressWarnings("unused")
     private static final String DEBUG_TAG = "FeelSpace-Debug";
     @SuppressWarnings("unused")
     private static final boolean DEBUG = true;
 
-    private @NonNull BeltConnectionInterface connectionInterface;
-    private @NonNull GattController gattController;
+    private final @NonNull BeltConnectionInterface connectionInterface;
+    private final @NonNull GattController gattController;
 
     private final ArrayList<AdvancedBeltListener> listeners = new ArrayList<>();
+
+    // Belt mode for calibration
+    private BeltMode beltMode = BeltMode.UNKNOWN;
 
     // Characteristics
     private @Nullable BluetoothGattCharacteristic paramRequestCharacteristic;
@@ -59,12 +68,17 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     // Request IDs
     private final static int START_SENSOR_NOTIFICATION_REQUEST_ID = 1;
     private final static int MAG_OFFSET_REQUEST_ID = 2;
+    private final static int MAG_GAIN_REQUEST_ID = 3;
+    private final static int MAG_ERROR_REQUEST_ID = 4;
+    private final static int GYRO_OFFSET_REQUEST_ID = 5;
+    private final static int GYRO_STATUS_REQUEST_ID = 6;
 
     public AdvancedBeltController(@NonNull BeltConnectionInterface connectionInterface) {
         this.connectionInterface = connectionInterface;
         gattController = ((BeltCommunicationController)
                 connectionInterface.getCommunicationInterface()).getGattController();
         gattController.addGattEventListener(this);
+        connectionInterface.getCommandInterface().addCommandListener(this);
     }
 
     public void addAdvancedBeltListener(AdvancedBeltListener listener) {
@@ -147,7 +161,72 @@ public class AdvancedBeltController implements GattController.GattEventListener 
                 new Byte[] {0x10, 13},
                 MAG_OFFSET_REQUEST_ID
         );
-        // TODO
+        gattController.request(
+                paramRequestCharacteristic,
+                paramNotificationCharacteristic,
+                new byte[] {0x10, 1, 14}, // Command ID, count, param ID
+                new Byte[] {0x10, 14},
+                MAG_GAIN_REQUEST_ID
+        );
+        gattController.request(
+                paramRequestCharacteristic,
+                paramNotificationCharacteristic,
+                new byte[] {0x10, 1, 15}, // Command ID, count, param ID
+                new Byte[] {0x10, 15},
+                MAG_ERROR_REQUEST_ID
+        );
+        gattController.request(
+                paramRequestCharacteristic,
+                paramNotificationCharacteristic,
+                new byte[] {0x10, 1, 16}, // Command ID, count, param ID
+                new Byte[] {0x10, 16},
+                GYRO_OFFSET_REQUEST_ID
+        );
+        gattController.request(
+                paramRequestCharacteristic,
+                paramNotificationCharacteristic,
+                new byte[] {0x10, 1, 17}, // Command ID, count, param ID
+                new Byte[] {0x10, 17},
+                GYRO_STATUS_REQUEST_ID
+        );
+    }
+
+    public Float[] getMagOffsets() {
+        return magOffsets;
+    }
+
+    public Float[] getMagGains() {
+        return magGains;
+    }
+
+    public Float getMagError() {
+        return magError;
+    }
+
+    public Float[] getGyroOffsets() {
+        return gyroOffsets;
+    }
+
+    public Integer getGyroStatus() {
+        return gyroStatus;
+    }
+
+    private float getFloatFromBytes(byte b0, byte b1, byte  b2, byte b3) {
+        byte[] bytes = {b0, b1, b2, b3};
+        return ByteBuffer.wrap(bytes).getFloat();
+    }
+
+    private void informListenersCalibrationUpdated() {
+        ArrayList<AdvancedBeltListener> targets;
+        synchronized (this) {
+            if (listeners.isEmpty()) {
+                return;
+            }
+            targets = new ArrayList<>(listeners);
+        }
+        for (AdvancedBeltListener l: targets) {
+            l.onSensorCalibrationUpdated();
+        }
     }
 
     // MARK: Implementation of `GattEventListener`
@@ -158,10 +237,10 @@ public class AdvancedBeltController implements GattController.GattEventListener 
             // Retrieve characteristics
             paramRequestCharacteristic = gattController.getCharacteristic(
                     BeltCommunicationController.BELT_CONTROL_SERVICE_UUID,
-                    BeltCommunicationController.SENSOR_PARAM_REQUEST_CHAR_UUID);
+                    BeltCommunicationController.PARAMETER_REQUEST_CHAR_UUID);
             paramNotificationCharacteristic = gattController.getCharacteristic(
                     BeltCommunicationController.BELT_CONTROL_SERVICE_UUID,
-                    BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
+                    BeltCommunicationController.PARAMETER_NOTIFICATION_CHAR_UUID);
             sensorNotificationCharacteristic = gattController.getCharacteristic(
                     BeltCommunicationController.SENSOR_SERVICE_UUID,
                     BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
@@ -349,11 +428,87 @@ public class AdvancedBeltController implements GattController.GattEventListener 
             for (AdvancedBeltListener l: targets) {
                 l.onRawSensorNotificationsStateChanged(true);
             }
+        } else if (requestId == MAG_OFFSET_REQUEST_ID && success) {
+            if (notifiedValue != null && notifiedValue.length >= 14) {
+                magOffsets[0] = getFloatFromBytes(
+                        notifiedValue[5], notifiedValue[4], notifiedValue[3], notifiedValue[2]);
+                magOffsets[1] = getFloatFromBytes(
+                        notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
+                magOffsets[2] = getFloatFromBytes(
+                        notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
+                informListenersCalibrationUpdated();
+            }
+        } else if (requestId == MAG_GAIN_REQUEST_ID && success) {
+            if (notifiedValue != null && notifiedValue.length >= 14) {
+                magGains[0] = getFloatFromBytes(
+                        notifiedValue[5], notifiedValue[4], notifiedValue[3], notifiedValue[2]);
+                magGains[1] = getFloatFromBytes(
+                        notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
+                magGains[2] = getFloatFromBytes(
+                        notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
+                informListenersCalibrationUpdated();
+            }
+        } else if (requestId == MAG_ERROR_REQUEST_ID && success) {
+            if (notifiedValue != null && notifiedValue.length >= 6) {
+                magError = getFloatFromBytes(
+                        notifiedValue[5], notifiedValue[4], notifiedValue[3], notifiedValue[2]);
+                informListenersCalibrationUpdated();
+            }
+        } else if (requestId == GYRO_OFFSET_REQUEST_ID && success) {
+            if (notifiedValue != null && notifiedValue.length >= 14) {
+                gyroOffsets[0] = getFloatFromBytes(
+                        notifiedValue[5], notifiedValue[4], notifiedValue[3], notifiedValue[2]);
+                gyroOffsets[1] = getFloatFromBytes(
+                        notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
+                gyroOffsets[2] = getFloatFromBytes(
+                        notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
+                informListenersCalibrationUpdated();
+            }
+        } else if (requestId == GYRO_STATUS_REQUEST_ID && success) {
+            if (notifiedValue != null && notifiedValue.length >= 3) {
+                gyroStatus = notifiedValue[2] & 0xFF;
+                informListenersCalibrationUpdated();
+            }
         }
     }
 
     @Override
     public void onMtuChanged(int mtu, boolean success) {
+
+    }
+
+    // MARK: Implementation of `BeltCommandListener`
+    @Override
+    public void onBeltModeChanged(BeltMode mode) {
+        if (beltMode == BeltMode.CALIBRATION && mode != BeltMode.CALIBRATION) {
+            // Retrieve new calibration
+            getSensorCalibration();
+        }
+        beltMode = mode;
+    }
+
+    @Override
+    public void onBeltButtonPressed(BeltButtonPressEvent beltButtonPressEvent) {
+
+    }
+
+    @Override
+    public void onBeltDefaultVibrationIntensityChanged(int intensity) {
+
+    }
+
+    @Override
+    public void onBeltBatteryStatusUpdated(BeltBatteryStatus status) {
+
+    }
+
+    @Override
+    public void onBeltOrientationUpdated(BeltOrientation orientation) {
+
+    }
+
+    @Override
+    public void onBeltCompassAccuracySignalStateNotified(boolean signalEnabled) {
 
     }
 }

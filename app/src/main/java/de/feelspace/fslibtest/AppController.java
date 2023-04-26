@@ -30,7 +30,8 @@ public class AppController {
     // Advanced belt controller
     private AdvancedBeltController advancedBeltController;
 
-    private boolean rawSensorNotificationsActive = false;
+    // Logger
+    private SimpleLogger logger = new SimpleLogger();
 
     /**
      * Private constructor for singleton.
@@ -79,4 +80,7 @@ public class AppController {
         return advancedBeltController;
     }
 
+    public SimpleLogger getLogger() {
+        return logger;
+    }
 }

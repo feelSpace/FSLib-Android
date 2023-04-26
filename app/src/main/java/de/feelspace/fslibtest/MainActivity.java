@@ -1,10 +1,19 @@
 package de.feelspace.fslibtest;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import de.feelspace.fslib.BeltConnectionState;
 import de.feelspace.fslib.NavigationController;
@@ -13,7 +22,12 @@ import de.feelspace.fslib.NavigationState;
 import de.feelspace.fslib.PowerStatus;
 
 public class MainActivity extends BluetoothCheckActivity implements BluetoothCheckCallback,
-        NavigationEventListener, AdvancedBeltListener {
+        NavigationEventListener, AdvancedBeltListener, SimpleLoggerListener {
+    // Debug
+    @SuppressWarnings("unused")
+    private static final String DEBUG_TAG = "FeelSpace-Debug";
+    @SuppressWarnings("unused")
+    private static final boolean DEBUG = true;
 
     // Application controller
     private AppController appController;
@@ -40,6 +54,9 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private long lastRecordsCountUpdateTimeMillis = 0;
     private int recordsCount = 0;
 
+    // Request ID
+    private static final int CREATE_FILE_REQUEST_CODE = 11;
+
     // MARK: Activity methods overriding
 
     @Override
@@ -50,6 +67,9 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         // Application controller
         appController = AppController.getInstance();
         appController.init(getApplicationContext());
+
+        // Logger
+        appController.getLogger().addListener(this);
 
         // Navigation controller
         appController.getNavigationController().addNavigationEventListener(this);
@@ -90,13 +110,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         // Start recording
         startSensorRecordingButton = findViewById(R.id.activity_main_start_sensor_recording_button);
         startSensorRecordingButton.setOnClickListener(view -> {
-            // TODO
+            requestLogFileCreation();
         });
 
         // Stop recording
         stopSensorRecordingButton = findViewById(R.id.activity_main_stop_sensor_recording_button);
         stopSensorRecordingButton.setOnClickListener(view -> {
-            // TODO
+            AppController.getInstance().getLogger().stopLog();
         });
 
         // Recordings count
@@ -113,8 +133,61 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateUI();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing()) {
+            AppController.getInstance().getLogger().stopLog();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CREATE_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                // Start logging
+                try {
+                    Uri logFileUri = data.getData();
+                    AppController.getInstance().getLogger().startLog(
+                            this, logFileUri, null);
+                    writeLogFileHeader();
+                } catch (Exception e) {
+                    Log.e(DEBUG_TAG, "MainActivity: Unable to create log file.", e);
+                    showToast("Log file creation failed!");
+                }
+            }
+        }
+    }
 
     // MARK: Private methods
+
+    private void requestLogFileCreation() {
+        // Use Storage Access Framework
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
+        // Generate log file name
+        SimpleDateFormat logFileFormat = new SimpleDateFormat(
+                this.getString(R.string.log_file_date_pattern_prefix), Locale.getDefault());
+        String logFilePrefix = logFileFormat.format(new Date());
+        String logFileName = "Raw_sensor_"+logFilePrefix+".txt";
+        intent.putExtra(Intent.EXTRA_TITLE, logFileName);
+        try {
+            Uri uri = Uri.parse(
+                    "content://com.android.externalstorage.documents/document/primary:Download");
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+        } catch (Exception e) {
+            Log.w(DEBUG_TAG, "MainActivity: Unable to set default directory");
+        }
+        startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
+    }
+
+    private void writeLogFileHeader() {
+        // TODO: Write Date-time, Calibration
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        logger.log(this, " ", "\n", "# Hello world");
+    }
 
     private void showToast(final String message) {
         runOnUiThread(() -> Toast.makeText(
@@ -127,6 +200,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateSensorNotificationsButtons();
         updateRecordsCountTextView();
         updateCalibrationTextViews();
+        updateRecordingButtons();
     }
 
     private void updateConnectionLabel() {
@@ -267,6 +341,19 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
+    private void updateRecordingButtons() {
+        runOnUiThread(() -> {
+            SimpleLogger logger = AppController.getInstance().getLogger();
+            if (logger.isLogging()) {
+                startSensorRecordingButton.setEnabled(false);
+                stopSensorRecordingButton.setEnabled(true);
+            } else {
+                startSensorRecordingButton.setEnabled(true);
+                stopSensorRecordingButton.setEnabled(false);
+            }
+        });
+    }
+
     // MARK: Implementation of NavigationEventListener
 
     @Override
@@ -306,11 +393,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             // Reset record count
             recordsCount = 0;
         }
+        // TODO Log state change as comment
     }
 
     @Override
     public void onBeltConnectionLost() {
         showToast("Belt connection lost!");
+        // TODO Log event as comment
     }
 
     @Override
@@ -364,6 +453,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     @Override
     public void onSensorCalibrationUpdated() {
         updateCalibrationTextViews();
+        // TODO Log calibration as comments
     }
 
     @Override
@@ -374,6 +464,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             updateRecordsCountTextView();
             lastRecordsCountUpdateTimeMillis = timeMillis;
         }
+        // TODO Log records
     }
 
     @Override
@@ -383,6 +474,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             showToast("Error on sensor notification sequence!");
             lastErrorToastTimeMillis = timeMillis;
         }
+        // TODO Log error
     }
 
     @Override
@@ -392,5 +484,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             showToast("Error belt: 0x"+Integer.toHexString(errorCode));
             lastErrorToastTimeMillis = timeMillis;
         }
+        // TODO Log error
+    }
+
+    // MARK: Implementation of `SimpleLoggerListener`
+
+    @Override
+    public void onLogStateChanged(boolean isLogging) {
+        updateRecordingButtons();
     }
 }

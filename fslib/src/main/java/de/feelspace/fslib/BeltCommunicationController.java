@@ -269,32 +269,14 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
      * some characteristics or services are missing.
      */
     private boolean retrieveGattCharacteristics() {
-        BluetoothGatt gattServer = gattController.getGattServer();
-        if (gattServer == null) {
-            Log.e(DEBUG_TAG, "BeltCommunicationController: No GATT server after " +
-                    "connection event.");
-            return false;
-        }
-        BluetoothGattService controlService = gattServer.getService(
-                BELT_CONTROL_SERVICE_UUID);
-        if (controlService == null) {
-            Log.e(DEBUG_TAG, "BeltCommunicationController: No control service found " +
-                    "in GATT profile.");
-            return false;
-        }
-        firmwareInfoChar = controlService.getCharacteristic(FIRMWARE_INFO_CHAR_UUID);
-        keepAliveChar = controlService.getCharacteristic(KEEP_ALIVE_CHAR_UUID);
-        vibrationCommandChar = controlService.getCharacteristic(
-                VIBRATION_COMMAND_CHAR_UUID);
-        buttonPressNotificationChar = controlService.getCharacteristic(
-                BUTTON_PRESS_NOTIFICATION_CHAR_UUID);
-        parameterRequestChar = controlService.getCharacteristic(
-                PARAMETER_REQUEST_CHAR_UUID);
-        parameterNotificationChar = controlService.getCharacteristic(
-                PARAMETER_NOTIFICATION_CHAR_UUID);
-        buzzerLedCommandChar = controlService.getCharacteristic(
-                BUZZER_LED_COMMAND_CHAR_UUID);
-        batteryStatusChar = controlService.getCharacteristic(BATTERY_STATUS_CHAR_UUID);
+        firmwareInfoChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, FIRMWARE_INFO_CHAR_UUID);
+        keepAliveChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, KEEP_ALIVE_CHAR_UUID);
+        vibrationCommandChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, VIBRATION_COMMAND_CHAR_UUID);
+        buttonPressNotificationChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, BUTTON_PRESS_NOTIFICATION_CHAR_UUID);
+        parameterRequestChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, PARAMETER_REQUEST_CHAR_UUID);
+        parameterNotificationChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, PARAMETER_NOTIFICATION_CHAR_UUID);
+        buzzerLedCommandChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, BUZZER_LED_COMMAND_CHAR_UUID);
+        batteryStatusChar = gattController.getCharacteristic(BELT_CONTROL_SERVICE_UUID, BATTERY_STATUS_CHAR_UUID);
         if (firmwareInfoChar == null ||
                 keepAliveChar == null ||
                 vibrationCommandChar == null ||
@@ -307,17 +289,9 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                     "in GATT profile.");
             return false;
         }
-        BluetoothGattService sensorService = gattServer.getService(SENSOR_SERVICE_UUID);
-        if (sensorService == null) {
-            Log.e(DEBUG_TAG, "BeltCommunicationController: No sensor service found " +
-                    "in GATT profile.");
-            return false;
-        }
-        sensorParamRequestChar = sensorService.getCharacteristic(
-                SENSOR_PARAM_REQUEST_CHAR_UUID);
-        sensorParamNotificationChar = sensorService.getCharacteristic(
-                SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
-        orientationDataChar = sensorService.getCharacteristic(ORIENTATION_DATA_CHAR_UUID);
+        sensorParamRequestChar = gattController.getCharacteristic(SENSOR_SERVICE_UUID, SENSOR_PARAM_REQUEST_CHAR_UUID);
+        sensorParamNotificationChar = gattController.getCharacteristic(SENSOR_SERVICE_UUID, SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
+        orientationDataChar = gattController.getCharacteristic(SENSOR_SERVICE_UUID, ORIENTATION_DATA_CHAR_UUID);
         if (sensorParamRequestChar == null ||
                 sensorParamNotificationChar == null ||
                 orientationDataChar == null) {
@@ -325,21 +299,13 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                     "in GATT profile.");
             return false;
         }
-        BluetoothGattService debugService = gattServer.getService(DEBUG_SERVICE_UUID);
-        if (debugService == null) {
-            Log.e(DEBUG_TAG, "BeltCommunicationController: No debug service found " +
-                    "in GATT profile.");
+        debugInputChar = gattController.getCharacteristic(DEBUG_SERVICE_UUID, DEBUG_INPUT_CHAR_UUID);
+        debugOutputChar = gattController.getCharacteristic(DEBUG_SERVICE_UUID, DEBUG_OUTPUT_CHAR_UUID);
+        if (debugInputChar == null || debugOutputChar == null) {
             /* Not critical */
-        } else {
-            debugInputChar = debugService.getCharacteristic(DEBUG_INPUT_CHAR_UUID);
-            debugOutputChar = debugService.getCharacteristic(DEBUG_OUTPUT_CHAR_UUID);
-            if (debugInputChar == null || debugOutputChar == null) {
-                /* Not critical */
-                Log.e(DEBUG_TAG, "BeltCommunicationController: Missing debug characteristic " +
-                        "in GATT profile.");
-            }
+            Log.e(DEBUG_TAG, "BeltCommunicationController: Missing debug characteristic " +
+                    "in GATT profile.");
         }
-
         return true;
     }
 
@@ -1635,6 +1601,11 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     @Override
     public void onRequestCompleted(int requestId, @Nullable byte[] notifiedValue, boolean success) {
         // Nothing to do, the notifications are handled in 'onCharacteristicChanged'
+    }
+
+    @Override
+    public void onMtuChanged(int mtu, boolean success) {
+        // MTU request not used.
     }
 
     /**

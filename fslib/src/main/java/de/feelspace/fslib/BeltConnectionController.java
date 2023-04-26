@@ -299,6 +299,11 @@ class BeltConnectionController extends BeltConnectionInterface implements
     }
 
     @Override
+    public void onMtuChanged(int mtu, boolean success) {
+        // Nothing to do
+    }
+
+    @Override
     public void onScanStarted() {
         if (DEBUG) Log.i(DEBUG_TAG, "BeltConnectionController: Scan started.");
         synchronized (this) {

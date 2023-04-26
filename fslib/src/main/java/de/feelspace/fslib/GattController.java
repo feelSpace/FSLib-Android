@@ -24,8 +24,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -160,14 +162,6 @@ public class GattController extends BluetoothGattCallback {
             notifyConnectionFailed();
         }
         notifyGattConnectionStateChange();
-    }
-
-    /**
-     * Returns the GATT server managed by this controller.
-     * @return the GATT server.
-     */
-    public BluetoothGatt getBluetoothGatt() {
-        return gattServer;
     }
 
     /**
@@ -476,19 +470,28 @@ public class GattController extends BluetoothGattCallback {
     }
 
     /**
-     * Returns the GATT server.
-     * @return the GATT server.
-     */
-    public @Nullable BluetoothGatt getGattServer() {
-        return gattServer;
-    }
-
-    /**
      * Returns the connected device.
      * @return the connected device.
      */
     public @Nullable BluetoothDevice getDevice() {
         return device;
+    }
+
+    /**
+     * Returns a reference to a given characteristic from its UUID.
+     * @param serviceUuid The service UUID.
+     * @param charUuid The characteristic UUID.
+     * @return The characteristic.
+     */
+    public @Nullable BluetoothGattCharacteristic getCharacteristic(UUID serviceUuid, UUID charUuid) {
+        if (gattServer == null) {
+            return null;
+        }
+        BluetoothGattService service = gattServer.getService(serviceUuid);
+        if (service == null) {
+            return null;
+        }
+        return service.getCharacteristic(charUuid);
     }
 
     /**
@@ -564,6 +567,7 @@ public class GattController extends BluetoothGattCallback {
                 if (runningOperation == operation) {
                     cancelGattOperationTimeout();
                     runningOperation.setState(GattOperationState.STATE_CANCELLED);
+                    Log.w(DEBUG_TAG, "GattController: Operation timeout for "+runningOperation.toString());
                 } else {
                     // Should not happen
                     Log.w(DEBUG_TAG, "GattController: Timeout of non running operation.");
@@ -638,6 +642,11 @@ public class GattController extends BluetoothGattCallback {
                 for (GattEventListener l : targets) {
                     l.onRequestCompleted(request.getRequestId(),
                             request.getNotifiedValue(), operation.succeed());
+                }
+            } else if (operation instanceof GattOperationRequestMtu) {
+                GattOperationRequestMtu mtuRequest = (GattOperationRequestMtu) operation;
+                for (GattEventListener l : targets) {
+                    l.onMtuChanged(mtuRequest.getRequestedMtu(), operation.succeed());
                 }
             } else {
                 // Should not happen
@@ -767,6 +776,28 @@ public class GattController extends BluetoothGattCallback {
             }
             operationQueue.add(new GattOperationRequest(gattServer, writeCharacteristic,
                     notifyCharacteristic, writeValue, notifyPattern, requestId));
+        }
+        checkAndStartGattOperation();
+        return true;
+    }
+
+    /**
+     * Requests a new MTU size.
+     *
+     * @param mtu The request MTU size.
+     * @return <code>true</code> if the request has been correctly been sent.
+     */
+    public boolean requestMtu(int mtu) {
+        synchronized (this) {
+            if (connectionState != GATT_CONNECTED) {
+                Log.w(DEBUG_TAG, "GattController: No connection for the operation.");
+                return false;
+            }
+            if (gattServer == null) {
+                Log.w(DEBUG_TAG, "GattController: No GATT server for the operation.");
+                return false;
+            }
+            operationQueue.add(new GattOperationRequestMtu(gattServer, mtu));
         }
         checkAndStartGattOperation();
         return true;
@@ -922,6 +953,8 @@ public class GattController extends BluetoothGattCallback {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt,
                                         BluetoothGattCharacteristic characteristic) {
+//        Log.d(DEBUG_TAG, "GattController: Notification on " + characteristic.getUuid() +
+//                ", value: " + Arrays.toString(characteristic.getValue()));
         synchronized (this) {
             // Update last GATT server activity time and reset reconnection count
             lastGattServerActivityTimeNano = System.nanoTime();
@@ -933,7 +966,7 @@ public class GattController extends BluetoothGattCallback {
             }
         }
         checkAndStartGattOperation();
-        // Notification callback
+        // Inform listeners
         ArrayList<GattEventListener> targets;
         synchronized (listeners) {
             if (listeners.isEmpty()) {
@@ -988,6 +1021,23 @@ public class GattController extends BluetoothGattCallback {
             // Propagate event to operation
             if (runningOperation != null) {
                 runningOperation.onReliableWriteCompleted(gatt, status);
+            }
+        }
+        checkAndStartGattOperation();
+    }
+
+    @Override
+    public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+        synchronized (this) {
+            // Update last GATT server activity time and reset reconnection count
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                lastGattServerActivityTimeNano = System.nanoTime();
+                reconnectionCount = 0;
+                initialConnection = false;
+            }
+            // Propagate event to operation
+            if (runningOperation != null) {
+                runningOperation.onMtuChanged(gatt, mtu, status);
             }
         }
         checkAndStartGattOperation();
@@ -1134,9 +1184,17 @@ public class GattController extends BluetoothGattCallback {
 
         /**
          * Callback for the completion of a request.
-         * @param notifiedCharacteristic The notified characteristic.
+         * @param requestId The request ID.
          * @param notifiedValue The notified value.
          */
         void onRequestCompleted(int requestId, @Nullable byte[] notifiedValue, boolean success);
+
+        /**
+         * Callback for the completion of MTU size request.
+         *
+         * @param mtu The requested MTU size.
+         * @param success Success flag.
+         */
+        void onMtuChanged(int mtu, boolean success);
     }
 }

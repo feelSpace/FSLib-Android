@@ -34,6 +34,12 @@ public class AdvancedBeltController implements GattController.GattEventListener 
 
     private final ArrayList<AdvancedBeltListener> listeners = new ArrayList<>();
 
+    // Characteristics
+    private @Nullable BluetoothGattCharacteristic sensorNotificationCharacteristic;
+    private @Nullable BluetoothGattCharacteristic sensorCommandCharacteristic;
+    private @Nullable BluetoothGattCharacteristic debugInputCharacteristic;
+    private @Nullable BluetoothGattCharacteristic debugOutputCharacteristic;
+
     // Notification state
     private boolean rawSensorNotificationsEnabled = false;
     private boolean debugNotificationsEnabled = false;
@@ -75,23 +81,17 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     public void setRawSensorNotificationsEnable(boolean enable) {
         // Enable notifications, and send command for starting notifications
         if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
-            BluetoothGattCharacteristic sensorNotifChar = getCharacteristic(
-                    BeltCommunicationController.SENSOR_SERVICE_UUID,
-                    BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
-            BluetoothGattCharacteristic sensorRequestChar = getCharacteristic(
-                    BeltCommunicationController.SENSOR_SERVICE_UUID,
-                    BeltCommunicationController.SENSOR_PARAM_REQUEST_CHAR_UUID);
-
-            if (sensorNotifChar == null || sensorRequestChar == null) {
+            if (sensorNotificationCharacteristic == null || sensorCommandCharacteristic == null) {
                 Log.e(DEBUG_TAG, "AdvancedBeltController: Missing sensor characteristic!");
             } else {
                 // Enable/Disable notification
-                if (gattController.setCharacteristicNotification(sensorNotifChar, enable)) {
+                if (gattController.setCharacteristicNotification(
+                        sensorNotificationCharacteristic, enable)) {
                     if (enable) {
                         // Command to start notifications
                         if (!gattController.request(
-                                sensorRequestChar,
-                                sensorNotifChar,
+                                sensorCommandCharacteristic,
+                                sensorNotificationCharacteristic,
                                 new byte[] {0x01, 0x01},
                                 new Byte[] {0x01},
                                 START_SENSOR_NOTIFICATION_REQUEST_ID
@@ -116,13 +116,11 @@ public class AdvancedBeltController implements GattController.GattEventListener 
 
     public void setDebugNotificationsEnable(boolean enable) {
         if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
-            BluetoothGattCharacteristic debugChar = getCharacteristic(
-                    BeltCommunicationController.DEBUG_SERVICE_UUID,
-                    BeltCommunicationController.DEBUG_OUTPUT_CHAR_UUID);
-            if (debugChar == null) {
+            if (debugOutputCharacteristic == null) {
                 Log.e(DEBUG_TAG, "AdvancedBeltController: No debug output char!");
             } else {
-                if (!gattController.setCharacteristicNotification(debugChar, enable)) {
+                if (!gattController.setCharacteristicNotification(
+                        debugOutputCharacteristic, enable)) {
                     Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to set debug output char notification state!");
                 }
             }
@@ -142,28 +140,34 @@ public class AdvancedBeltController implements GattController.GattEventListener 
         // TODO
     }
 
-    private @Nullable BluetoothGattCharacteristic getCharacteristic(UUID serviceUuid,
-                                                                    UUID charUuid) {
-        BluetoothGatt gattServer = gattController.getBluetoothGatt();
-        if (gattServer == null) {
-            return null;
-        }
-        BluetoothGattService service = gattServer.getService(serviceUuid);
-        if (service == null) {
-            return null;
-        }
-        return service.getCharacteristic(charUuid);
-    }
-
     // MARK: Implementation of `GattEventListener`
 
     @Override
     public void onGattConnectionStateChange(GattConnectionState state) {
         if (state == GattConnectionState.GATT_CONNECTED) {
+            // Retrieve characteristics
+            sensorNotificationCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.SENSOR_SERVICE_UUID,
+                    BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID);
+            sensorCommandCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.SENSOR_SERVICE_UUID,
+                    BeltCommunicationController.SENSOR_PARAM_REQUEST_CHAR_UUID);
+            debugInputCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.DEBUG_SERVICE_UUID,
+                    BeltCommunicationController.DEBUG_INPUT_CHAR_UUID);
+            debugOutputCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.DEBUG_SERVICE_UUID,
+                    BeltCommunicationController.DEBUG_OUTPUT_CHAR_UUID);
+            // Setup
+            gattController.requestMtu(512);
             setDebugNotificationsEnable(true);
             getSensorCalibration();
         } else {
             // Reset state
+            sensorNotificationCharacteristic = null;
+            sensorCommandCharacteristic = null;
+            debugInputCharacteristic = null;
+            debugOutputCharacteristic = null;
             rawSensorNotificationsEnabled = false;
             debugNotificationsEnabled = false;
             magOffsets[0] = null; magOffsets[1] = null; magOffsets[2] = null;
@@ -188,7 +192,7 @@ public class AdvancedBeltController implements GattController.GattEventListener 
     @Override
     public void onCharacteristicNotificationSet(@NonNull BluetoothGattCharacteristic characteristic,
                                                 boolean enable, boolean success) {
-        if (characteristic.getUuid() == BeltCommunicationController.DEBUG_OUTPUT_CHAR_UUID) {
+        if (characteristic == debugOutputCharacteristic) {
             // Set value
             debugNotificationsEnabled = enable;
             // Notify listeners
@@ -203,9 +207,8 @@ public class AdvancedBeltController implements GattController.GattEventListener 
                 l.onDebugNotificationsStateChanged(enable);
             }
 
-        } else if (characteristic.getUuid() ==
-                BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID) {
-            if (!enable) { // NOTE: Code for starting notification in `onRequestCompleted`
+        } else if (characteristic == sensorNotificationCharacteristic) {
+            if (success && !enable) { // NOTE: Code for starting notification in `onRequestCompleted`
                 // Set value
                 rawSensorNotificationsEnabled = false;
                 // Notify listeners
@@ -242,13 +245,13 @@ public class AdvancedBeltController implements GattController.GattEventListener 
         if (characteristic == null || value == null) {
             return;
         }
-        if (characteristic.getUuid() == BeltCommunicationController.DEBUG_OUTPUT_CHAR_UUID) {
+        if (characteristic == debugOutputCharacteristic) {
             if (value.length >= 5 && value[0] == (byte) 0xA0) {
                 // Error notification
                 int errorCode = (
-                        (((int) value[4]) << 24) |
-                        (((int) value[3]) << 16) |
-                        (((int) value[2]) << 8) |
+                        ((value[4] & 0xFF) << 24) |
+                        ((value[3] & 0xFF) << 16) |
+                        ((value[2] & 0xFF) << 8) |
                                 (0xFF & value[1]));
                 // Notify listeners
                 ArrayList<AdvancedBeltListener> targets;
@@ -263,8 +266,7 @@ public class AdvancedBeltController implements GattController.GattEventListener 
                 }
             }
 
-        } else if (characteristic.getUuid() ==
-                BeltCommunicationController.SENSOR_PARAM_NOTIFICATION_CHAR_UUID) {
+        } else if (characteristic == sensorNotificationCharacteristic) {
             if (value.length >= 2 && value[0] == (byte) 0x01) {
                 // Raw sensor record notification
                 // Check sequence
@@ -292,15 +294,9 @@ public class AdvancedBeltController implements GattController.GattEventListener 
                 int[][] records = new int[records_count][4];
                 for (int r = 0; r < records_count; r++) {
                     records[r][0] = value[(r * 7) + 2] & 0xFF;
-                    records[r][1] = ByteBuffer.wrap(Arrays.copyOfRange(value,
-                                    (r * 7) + 3, (r * 7) + 5))
-                            .order(ByteOrder.LITTLE_ENDIAN).getInt();
-                    records[r][2] = ByteBuffer.wrap(Arrays.copyOfRange(value,
-                                    (r * 7) + 5, (r * 7) + 7))
-                            .order(ByteOrder.LITTLE_ENDIAN).getInt();
-                    records[r][3] = ByteBuffer.wrap(Arrays.copyOfRange(value,
-                                    (r * 7) + 7, (r * 7) + 9))
-                            .order(ByteOrder.LITTLE_ENDIAN).getInt();
+                    records[r][1] = (((int) value[(r * 7) + 4]) << 8) | (0xFF & value[(r * 7) + 3]);
+                    records[r][2] = (((int) value[(r * 7) + 6]) << 8) | (0xFF & value[(r * 7) + 5]);
+                    records[r][3] = (((int) value[(r * 7) + 8]) << 8) | (0xFF & value[(r * 7) + 7]);
                 }
                 // Notify listeners
                 ArrayList<AdvancedBeltListener> targets;
@@ -336,5 +332,10 @@ public class AdvancedBeltController implements GattController.GattEventListener 
                 l.onRawSensorNotificationsStateChanged(true);
             }
         }
+    }
+
+    @Override
+    public void onMtuChanged(int mtu, boolean success) {
+
     }
 }

@@ -489,7 +489,11 @@ public class AdvancedBeltController implements GattController.GattEventListener,
 
     @Override
     public void onBeltButtonPressed(BeltButtonPressEvent beltButtonPressEvent) {
-
+        if (beltMode == BeltMode.CALIBRATION && beltButtonPressEvent.getSubsequentMode() != BeltMode.CALIBRATION) {
+            // Retrieve new calibration
+            getSensorCalibration();
+        }
+        beltMode = beltButtonPressEvent.getSubsequentMode();
     }
 
     @Override

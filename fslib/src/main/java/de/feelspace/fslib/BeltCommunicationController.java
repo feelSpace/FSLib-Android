@@ -95,7 +95,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     private @Nullable BluetoothGattCharacteristic buzzerLedCommandChar;
 
     /** Battery level characteristic UUID. */
-    private static final UUID BATTERY_STATUS_CHAR_UUID =
+    public static final UUID BATTERY_STATUS_CHAR_UUID =
             UUID.fromString("0000FE09-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic batteryStatusChar;
     private boolean batteryStatusNotificationsActive = false;
@@ -117,7 +117,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     private boolean sensorParamNotificationsActive = false;
 
     /** Orientation data characteristic UUID. */
-    private static final UUID ORIENTATION_DATA_CHAR_UUID =
+    public static final UUID ORIENTATION_DATA_CHAR_UUID =
             UUID.fromString("0000FE0C-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic orientationDataChar;
     private boolean orientationDataNotificationsActive = false;

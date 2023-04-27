@@ -116,6 +116,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         // Stop recording
         stopSensorRecordingButton = findViewById(R.id.activity_main_stop_sensor_recording_button);
         stopSensorRecordingButton.setOnClickListener(view -> {
+            SimpleLogger logger = AppController.getInstance().getLogger();
+            if (logger.isLogging()) {
+                logger.log(this, "", "\n", "# " + SimpleLogger.getTimeStamp(this));
+                logger.log(this, "", "\n", "# Recording stopped.");
+            }
             AppController.getInstance().getLogger().stopLog();
         });
 
@@ -194,7 +199,6 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         logger.log(this, "", "\n", "");
     }
 
-    @SuppressLint("DefaultLocale")
     private void logCalibrationData() {
         SimpleLogger logger = AppController.getInstance().getLogger();
         AdvancedBeltController beltController = appController.getAdvancedBeltController();
@@ -202,7 +206,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             Float[] magOffsets = beltController.getMagOffsets();
             if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
                 logger.log(this, "", "\n",
-                        String.format("# Mag. offsets: [%.2f, %.2f, %.2f]",
+                        String.format(Locale.ENGLISH, "# Mag. offsets: [%.2f, %.2f, %.2f]",
                                 magOffsets[0], magOffsets[1], magOffsets[2]));
             } else {
                 logger.log(this, "", "\n", "# Mag. offsets: ?");
@@ -210,7 +214,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             Float[] magGains = beltController.getMagGains();
             if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
                 logger.log(this, "", "\n",
-                        String.format("# Mag. gains: [%.2f, %.2f, %.2f]",
+                        String.format(Locale.ENGLISH, "# Mag. gains: [%.2f, %.2f, %.2f]",
                                 magGains[0], magGains[1], magGains[2]));
             } else {
                 logger.log(this, "", "\n", "# Mag. gains: ?");
@@ -218,14 +222,14 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             Float magError = beltController.getMagError();
             if (magError != null) {
                 logger.log(this, "", "\n",
-                        String.format("# Mag. error: %.4f", magError));
+                        String.format(Locale.ENGLISH, "# Mag. error: %.4f", magError));
             } else {
                 logger.log(this, "", "\n", "# Mag. error: ?");
             }
             Float[] gyroOffsets = beltController.getGyroOffsets();
             if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
                 logger.log(this, "", "\n",
-                        String.format("# Gyro. offsets: [%.2f, %.2f, %.2f]",
+                        String.format(Locale.ENGLISH, "# Gyro. offsets: [%.2f, %.2f, %.2f]",
                                 gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
             } else {
                 logger.log(this, "", "\n", "# Gyro. offsets: ?");
@@ -233,7 +237,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             Integer gyroStatus = beltController.getGyroStatus();
             if (gyroStatus != null) {
                 logger.log(this, "", "\n",
-                        String.format("# Gyro. status: %d", gyroStatus));
+                        String.format(Locale.ENGLISH, "# Gyro. status: %d", gyroStatus));
             } else {
                 logger.log(this, "", "\n", "# Gyro. status: ?");
             }
@@ -333,13 +337,12 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
-    @SuppressLint("DefaultLocale")
     private void updateRecordsCountTextView() {
         runOnUiThread(() -> sensorRecordingCountTextView.setText(
-                String.format("Records: %d", recordsCount)));
+                String.format(Locale.ENGLISH, "Records: %d", recordsCount)));
     }
 
-    @SuppressLint({"DefaultLocale", "SetTextI18n"})
+    @SuppressLint({"SetTextI18n"})
     private void updateCalibrationTextViews() {
         runOnUiThread(() -> {
             AdvancedBeltController beltController = appController.getAdvancedBeltController();
@@ -347,7 +350,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
                 Float[] magOffsets = beltController.getMagOffsets();
                 if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
                     magOffsetsTextView.setText(
-                            String.format("Mag. offsets: [%.2f, %.2f, %.2f]",
+                            String.format(Locale.ENGLISH, "Mag. offsets: [%.2f, %.2f, %.2f]",
                                     magOffsets[0], magOffsets[1], magOffsets[2]));
                 } else {
                     magOffsetsTextView.setText("Mag. offsets: ?");
@@ -355,7 +358,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
                 Float[] magGains = beltController.getMagGains();
                 if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
                     magGainsTextView.setText(
-                            String.format("Mag. gains: [%.2f, %.2f, %.2f]",
+                            String.format(Locale.ENGLISH, "Mag. gains: [%.2f, %.2f, %.2f]",
                                     magGains[0], magGains[1], magGains[2]));
                 } else {
                     magGainsTextView.setText("Mag. gains: ?");
@@ -363,14 +366,14 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
                 Float magError = beltController.getMagError();
                 if (magError != null) {
                     magErrorTextView.setText(
-                            String.format("Mag. error: %.4f", magError));
+                            String.format(Locale.ENGLISH, "Mag. error: %.4f", magError));
                 } else {
                     magErrorTextView.setText("Mag. error: ?");
                 }
                 Float[] gyroOffsets = beltController.getGyroOffsets();
                 if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
                     gyroOffsetsTextView.setText(
-                            String.format("Gyro. offsets: [%.2f, %.2f, %.2f]",
+                            String.format(Locale.ENGLISH, "Gyro. offsets: [%.2f, %.2f, %.2f]",
                                     gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
                 } else {
                     gyroOffsetsTextView.setText("Gyro. offsets: ?");
@@ -378,7 +381,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
                 Integer gyroStatus = beltController.getGyroStatus();
                 if (gyroStatus != null) {
                     gyroStatusTextView.setText(
-                            String.format("Gyro. status: %d", gyroStatus));
+                            String.format(Locale.ENGLISH, "Gyro. status: %d", gyroStatus));
                 } else {
                     gyroStatusTextView.setText("Gyro. status: ?");
                 }

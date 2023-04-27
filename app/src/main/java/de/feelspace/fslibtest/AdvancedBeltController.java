@@ -50,6 +50,8 @@ public class AdvancedBeltController implements GattController.GattEventListener,
     private @Nullable BluetoothGattCharacteristic sensorCommandCharacteristic;
     private @Nullable BluetoothGattCharacteristic debugInputCharacteristic;
     private @Nullable BluetoothGattCharacteristic debugOutputCharacteristic;
+    private @Nullable BluetoothGattCharacteristic batteryNotificationCharacteristic;
+    private @Nullable BluetoothGattCharacteristic orientationNotificationCharacteristic;
 
     // Notification state
     private boolean rawSensorNotificationsEnabled = false;
@@ -105,6 +107,12 @@ public class AdvancedBeltController implements GattController.GattEventListener,
                 if (gattController.setCharacteristicNotification(
                         sensorNotificationCharacteristic, enable)) {
                     if (enable) {
+                        // Disable battery notifications
+                        gattController.setCharacteristicNotification(
+                                batteryNotificationCharacteristic, false);
+                        // Disable orientation notifications
+                        gattController.setCharacteristicNotification(
+                                orientationNotificationCharacteristic, false);
                         // Command to start notifications
                         if (!gattController.request(
                                 sensorCommandCharacteristic,
@@ -253,6 +261,12 @@ public class AdvancedBeltController implements GattController.GattEventListener,
             debugOutputCharacteristic = gattController.getCharacteristic(
                     BeltCommunicationController.DEBUG_SERVICE_UUID,
                     BeltCommunicationController.DEBUG_OUTPUT_CHAR_UUID);
+            batteryNotificationCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.BELT_CONTROL_SERVICE_UUID,
+                    BeltCommunicationController.BATTERY_STATUS_CHAR_UUID);
+            orientationNotificationCharacteristic = gattController.getCharacteristic(
+                    BeltCommunicationController.SENSOR_SERVICE_UUID,
+                    BeltCommunicationController.ORIENTATION_DATA_CHAR_UUID);
             // Setup
             gattController.requestMtu(512);
             setDebugNotificationsEnable(true);
@@ -265,6 +279,8 @@ public class AdvancedBeltController implements GattController.GattEventListener,
             sensorCommandCharacteristic = null;
             debugInputCharacteristic = null;
             debugOutputCharacteristic = null;
+            batteryNotificationCharacteristic = null;
+            orientationNotificationCharacteristic = null;
             rawSensorNotificationsEnabled = false;
             debugNotificationsEnabled = false;
             magOffsets[0] = null; magOffsets[1] = null; magOffsets[2] = null;

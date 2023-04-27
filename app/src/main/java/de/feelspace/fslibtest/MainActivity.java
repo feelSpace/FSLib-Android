@@ -184,9 +184,60 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     }
 
     private void writeLogFileHeader() {
-        // TODO: Write Date-time, Calibration
         SimpleLogger logger = AppController.getInstance().getLogger();
-        logger.log(this, " ", "\n", "# Hello world");
+        logger.log(this, "", "\n", "# RAW SENSOR RECORDS FROM NAVIBELT 2");
+        logger.log(this, "", "\n", "#");
+        logger.log(this, "", "\n", "# Start time: "+SimpleLogger.getTimeStamp(this));
+        logger.log(this, "", "\n", "#");
+        logger.log(this, "", "\n", "# Calibration data: ");
+        logCalibrationData();
+        logger.log(this, "", "\n", "");
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void logCalibrationData() {
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        AdvancedBeltController beltController = appController.getAdvancedBeltController();
+        if (logger.isLogging() && beltController != null) {
+            Float[] magOffsets = beltController.getMagOffsets();
+            if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
+                logger.log(this, "", "\n",
+                        String.format("# Mag. offsets: [%.2f, %.2f, %.2f]",
+                                magOffsets[0], magOffsets[1], magOffsets[2]));
+            } else {
+                logger.log(this, "", "\n", "# Mag. offsets: ?");
+            }
+            Float[] magGains = beltController.getMagGains();
+            if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
+                logger.log(this, "", "\n",
+                        String.format("# Mag. gains: [%.2f, %.2f, %.2f]",
+                                magGains[0], magGains[1], magGains[2]));
+            } else {
+                logger.log(this, "", "\n", "# Mag. gains: ?");
+            }
+            Float magError = beltController.getMagError();
+            if (magError != null) {
+                logger.log(this, "", "\n",
+                        String.format("# Mag. error: %.4f", magError));
+            } else {
+                logger.log(this, "", "\n", "# Mag. error: ?");
+            }
+            Float[] gyroOffsets = beltController.getGyroOffsets();
+            if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
+                logger.log(this, "", "\n",
+                        String.format("# Gyro. offsets: [%.2f, %.2f, %.2f]",
+                                gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
+            } else {
+                logger.log(this, "", "\n", "# Gyro. offsets: ?");
+            }
+            Integer gyroStatus = beltController.getGyroStatus();
+            if (gyroStatus != null) {
+                logger.log(this, "", "\n",
+                        String.format("# Gyro. status: %d", gyroStatus));
+            } else {
+                logger.log(this, "", "\n", "# Gyro. status: ?");
+            }
+        }
     }
 
     private void showToast(final String message) {
@@ -393,13 +444,21 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             // Reset record count
             recordsCount = 0;
         }
-        // TODO Log state change as comment
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
+            logger.log(this, "", "\n", "# Connection state changed: " + state.toString());
+        }
     }
 
     @Override
     public void onBeltConnectionLost() {
         showToast("Belt connection lost!");
-        // TODO Log event as comment
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
+            logger.log(this, "", "\n", "# Belt connection lost.");
+        }
     }
 
     @Override
@@ -453,7 +512,12 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     @Override
     public void onSensorCalibrationUpdated() {
         updateCalibrationTextViews();
-        // TODO Log calibration as comments
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
+            logger.log(this, "", "\n", "# Calibration updated: ");
+            logCalibrationData();
+        }
     }
 
     @Override
@@ -464,7 +528,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             updateRecordsCountTextView();
             lastRecordsCountUpdateTimeMillis = timeMillis;
         }
-        // TODO Log records
+        // Log records
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            for (int i=0; i<records.length; i++) {
+                logger.log(this, " ", "\n", records[i][0], records[i][1], records[i][2], records[i][3]);
+            }
+        }
     }
 
     @Override
@@ -474,7 +544,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             showToast("Error on sensor notification sequence!");
             lastErrorToastTimeMillis = timeMillis;
         }
-        // TODO Log error
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
+            logger.log(this, "", "\n", "# ERROR: Missing sensor notification (bad sequence).");
+        }
     }
 
     @Override
@@ -484,7 +558,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             showToast("Error belt: 0x"+Integer.toHexString(errorCode));
             lastErrorToastTimeMillis = timeMillis;
         }
-        // TODO Log error
+        SimpleLogger logger = AppController.getInstance().getLogger();
+        if (logger.isLogging()) {
+            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
+            logger.log(this, "", "\n", "# ERROR: Belt error ("+errorCode+"): 0x"+Integer.toHexString(errorCode));
+        }
     }
 
     // MARK: Implementation of `SimpleLoggerListener`

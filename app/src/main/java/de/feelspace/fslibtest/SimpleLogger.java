@@ -234,8 +234,12 @@ public class SimpleLogger {
                 } else if (o instanceof String) {
                     // Replace separator and terminator occurrences
                     String s = (String)o;
-                    s = s.replace(separator, "@SEP");
-                    s = s.replace(terminator, "@TER");
+                    if (separator.length() > 0) {
+                        s = s.replace(separator, "@SEP");
+                    }
+                    if (terminator.length() > 0) {
+                        s = s.replace(terminator, "@TER");
+                    }
                     logFileWriter.write(s);
                 } else if (o instanceof  Boolean) {
                     logFileWriter.write(((Boolean)o).toString());

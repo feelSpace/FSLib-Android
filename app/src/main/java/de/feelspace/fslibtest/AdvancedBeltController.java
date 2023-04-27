@@ -436,7 +436,6 @@ public class AdvancedBeltController implements GattController.GattEventListener,
                         notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
                 magOffsets[2] = getFloatFromBytes(
                         notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
-                informListenersCalibrationUpdated();
             }
         } else if (requestId == MAG_GAIN_REQUEST_ID && success) {
             if (notifiedValue != null && notifiedValue.length >= 14) {
@@ -446,13 +445,11 @@ public class AdvancedBeltController implements GattController.GattEventListener,
                         notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
                 magGains[2] = getFloatFromBytes(
                         notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
-                informListenersCalibrationUpdated();
             }
         } else if (requestId == MAG_ERROR_REQUEST_ID && success) {
             if (notifiedValue != null && notifiedValue.length >= 6) {
                 magError = getFloatFromBytes(
                         notifiedValue[5], notifiedValue[4], notifiedValue[3], notifiedValue[2]);
-                informListenersCalibrationUpdated();
             }
         } else if (requestId == GYRO_OFFSET_REQUEST_ID && success) {
             if (notifiedValue != null && notifiedValue.length >= 14) {
@@ -462,11 +459,11 @@ public class AdvancedBeltController implements GattController.GattEventListener,
                         notifiedValue[9], notifiedValue[8], notifiedValue[7], notifiedValue[6]);
                 gyroOffsets[2] = getFloatFromBytes(
                         notifiedValue[13], notifiedValue[12], notifiedValue[11], notifiedValue[10]);
-                informListenersCalibrationUpdated();
             }
         } else if (requestId == GYRO_STATUS_REQUEST_ID && success) {
             if (notifiedValue != null && notifiedValue.length >= 3) {
                 gyroStatus = notifiedValue[2] & 0xFF;
+                // Inform listener only on the last parameter request
                 informListenersCalibrationUpdated();
             }
         }

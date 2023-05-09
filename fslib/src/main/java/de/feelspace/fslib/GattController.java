@@ -75,8 +75,10 @@ public class GattController extends BluetoothGattCallback {
 
     // Service discovery timeout
     private long serviceDiscoveryTimeoutMs = DEFAULT_SERVICE_DISCOVERY_TIMEOUT_MS;
-    public static final long DEFAULT_SERVICE_DISCOVERY_TIMEOUT_MS = 4000;
+    public static final long DEFAULT_SERVICE_DISCOVERY_TIMEOUT_MS = 5000;
     private ScheduledFuture serviceDiscoveryTimeoutTask;
+    private long retryServiceDiscoveryDelayMillis = DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS;
+    public static final long DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS = 1500;
 
     // GATT supervision timeout
     private long gattSupervisionTimeoutMs = DEFAULT_GATT_SUPERVISION_TIMEOUT_MS;
@@ -346,6 +348,36 @@ public class GattController extends BluetoothGattCallback {
                     " timeout.");
         }
     }
+
+    /**
+     * Hey, it's so f***ing buggy on API 30 that we should implement stupidly complex things.
+     */
+    private void startServiceDiscoverRetryer() {
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.postDelayed(retryServiceDiscovery, retryServiceDiscoveryDelayMillis);
+    }
+    private final Runnable retryServiceDiscovery = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if (connectionState == GATT_DISCOVERING_SERVICES) {
+                    try {
+                        Log.w(DEBUG_TAG, "GattController: Retry service discovery.");
+                        gattServer.discoverServices();
+                    } catch (SecurityException s) {
+                        Log.e(DEBUG_TAG, "GattController: No permission to retry service discovery!", s);
+                    } catch (Exception e) {
+                        Log.e(DEBUG_TAG, "GattController: Unable to retry service discovery!", e);
+                    }
+                }
+            } finally {
+                if (connectionState == GATT_DISCOVERING_SERVICES) {
+                    Handler mainHandler = new Handler(Looper.getMainLooper());
+                    mainHandler.postDelayed(retryServiceDiscovery, retryServiceDiscoveryDelayMillis);
+                }
+            }
+        }
+    };
 
     /**
      * Starts the GATT supervision task.
@@ -827,30 +859,27 @@ public class GattController extends BluetoothGattCallback {
                             return;
                         case GATT_CONNECTING:
                         case GATT_RECONNECTING:
-                            // Continue with service discovery
+                            // Continue with service discovery (forced on Main thread)
                             cancelConnectionTimeout();
-
-                            // TODO To be refactored
-
                             Handler mainHandler = new Handler(Looper.getMainLooper());
                             Runnable disc = new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (gatt.discoverServices()) {
-                                        connectionState = GATT_DISCOVERING_SERVICES;
-                                        scheduleServiceDiscoveryTimeout();
-                                    } else {
+                                    try {
+                                        if (gatt.discoverServices()) {
+                                            connectionState = GATT_DISCOVERING_SERVICES;
+                                            scheduleServiceDiscoveryTimeout();
+                                            startServiceDiscoverRetryer();
+                                        } else {
+                                            reconnect();
+                                        }
+                                    } catch (SecurityException e) {
+                                        Log.e(DEBUG_TAG, "GattController: Failed to start service discovery!", e);
                                         reconnect();
                                     }
                                 }
                             };
                             mainHandler.post(disc);
-//                            if (gatt.discoverServices()) {
-//                                connectionState = GATT_DISCOVERING_SERVICES;
-//                                scheduleServiceDiscoveryTimeout();
-//                            } else {
-//                                reconnect = true;
-//                            }
                             break;
                         case GATT_DISCOVERING_SERVICES:
                         case GATT_CONNECTED:

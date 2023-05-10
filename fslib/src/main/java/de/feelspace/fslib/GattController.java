@@ -79,6 +79,8 @@ public class GattController extends BluetoothGattCallback {
     private ScheduledFuture serviceDiscoveryTimeoutTask;
     private long retryServiceDiscoveryDelayMillis = DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS;
     public static final long DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS = 1500;
+    private long serviceDiscoveryInitialDelayMillis = DEFAULT_SERVICE_DISCOVERY_INITIAL_DELAY_MS;
+    public static final long DEFAULT_SERVICE_DISCOVERY_INITIAL_DELAY_MS = 1000;
 
     // GATT supervision timeout
     private long gattSupervisionTimeoutMs = DEFAULT_GATT_SUPERVISION_TIMEOUT_MS;
@@ -879,7 +881,7 @@ public class GattController extends BluetoothGattCallback {
                                     }
                                 }
                             };
-                            mainHandler.post(disc);
+                            mainHandler.postDelayed(disc, serviceDiscoveryInitialDelayMillis);
                             break;
                         case GATT_DISCOVERING_SERVICES:
                         case GATT_CONNECTED:

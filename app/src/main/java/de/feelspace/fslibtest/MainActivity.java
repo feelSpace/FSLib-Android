@@ -15,7 +15,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import de.feelspace.fslib.BeltCommandInterface;
 import de.feelspace.fslib.BeltConnectionState;
+import de.feelspace.fslib.BeltOrientation;
 import de.feelspace.fslib.NavigationController;
 import de.feelspace.fslib.NavigationEventListener;
 import de.feelspace.fslib.NavigationState;
@@ -46,13 +48,17 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private TextView magErrorTextView;
     private TextView gyroOffsetsTextView;
     private TextView gyroStatusTextView;
+    private TextView beltHeadingTextView;
+    private TextView boxOrientationTextView;
 
     // UI update parameters
-    private static final int MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
+    private static final long MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
     private long lastErrorToastTimeMillis = 0;
-    private static final int MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS = 300;
+    private static final long MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS = 300;
     private long lastRecordsCountUpdateTimeMillis = 0;
-    private int recordsCount = 0;
+    private long recordsCount = 0;
+    private long lastOrientationUpdateTimeMillis;
+    private static final long MIN_PERIOD_ORIENTATION_UPDATE_MILLIS = 250;
 
     // Request ID
     private static final int CREATE_FILE_REQUEST_CODE = 11;
@@ -133,6 +139,8 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         magErrorTextView = findViewById(R.id.activity_main_mag_error_text_view);
         gyroOffsetsTextView = findViewById(R.id.activity_main_gyro_offset_text_view);
         gyroStatusTextView = findViewById(R.id.activity_main_gyro_status_text_view);
+        beltHeadingTextView = findViewById(R.id.activity_main_belt_heading_text_view);
+        boxOrientationTextView = findViewById(R.id.activity_main_box_orientation_text_view);
 
         // Update UI
         updateUI();
@@ -256,6 +264,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateRecordsCountTextView();
         updateCalibrationTextViews();
         updateRecordingButtons();
+        updateOrientationTextView();
     }
 
     private void updateConnectionLabel() {
@@ -340,6 +349,31 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateRecordsCountTextView() {
         runOnUiThread(() -> sensorRecordingCountTextView.setText(
                 String.format(Locale.ENGLISH, "Records: %d", recordsCount)));
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateOrientationTextView() {
+        runOnUiThread(() -> {
+            BeltCommandInterface beltCommand = appController.getNavigationController()
+                    .getBeltConnection().getCommandInterface();
+            BeltOrientation orientation = beltCommand.getOrientation();
+            Integer h = (orientation==null)?null:orientation.getControlBoxHeading();
+            Integer p = (orientation==null)?null:orientation.getControlBoxPitch();
+            Integer r = (orientation==null)?null:orientation.getControlBoxRoll();
+            if (orientation == null) {
+                beltHeadingTextView.setText("Belt orientation: -");
+            } else {
+                beltHeadingTextView.setText(
+                        String.format(Locale.ENGLISH, "Belt orientation: %+03d",
+                                orientation.getBeltHeading()));
+            }
+            if (h == null || p == null || r == null) {
+                boxOrientationTextView.setText("H.: -, P: -, R: -");
+            } else {
+                boxOrientationTextView.setText(
+                        String.format(Locale.ENGLISH, "H.: %+03d, P: %+03d, R: %+03d", h, p, r));
+            }
+        });
     }
 
     @SuppressLint({"SetTextI18n"})
@@ -427,7 +461,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
 
     @Override
     public void onBeltOrientationUpdated(int beltHeading, boolean accurate) {
-
+        long timeMillis = (System.nanoTime()/1000000);
+        if ((timeMillis-lastOrientationUpdateTimeMillis) > MIN_PERIOD_ORIENTATION_UPDATE_MILLIS) {
+            updateOrientationTextView();
+            lastOrientationUpdateTimeMillis = timeMillis;
+        }
     }
 
     @Override

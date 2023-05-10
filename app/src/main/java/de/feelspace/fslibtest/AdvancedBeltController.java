@@ -123,6 +123,13 @@ public class AdvancedBeltController implements GattController.GattEventListener,
                         )) {
                             Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to send sensor command!");
                         }
+                    } else {
+                        // Re-enable battery notifications
+                        gattController.setCharacteristicNotification(
+                                batteryNotificationCharacteristic, true);
+                        // Re-enable orientation notifications
+                        gattController.setCharacteristicNotification(
+                                orientationNotificationCharacteristic, true);
                     }
                 } else {
                     Log.e(DEBUG_TAG, "AdvancedBeltController: Unable to set sensor notification state!");

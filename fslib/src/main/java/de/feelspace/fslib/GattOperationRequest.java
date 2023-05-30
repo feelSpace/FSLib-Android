@@ -9,6 +9,7 @@ package de.feelspace.fslib;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -80,6 +81,7 @@ class GattOperationRequest extends GattOperation {
 
     @Override
     protected void start() {
+        if (DEBUG) Log.d(DEBUG_TAG, "GattOperationRequest: BLE operation started: "+toString());
         setState(STATE_STARTED);
         try {
             writeCharacteristic.setValue(writeValue);
@@ -121,8 +123,12 @@ class GattOperationRequest extends GattOperation {
                                       BluetoothGattCharacteristic characteristic, int status) {
         if (getState() == STATE_STARTED && characteristic == this.writeCharacteristic) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                // Write ok; wait for notification
+                // Write ok
                 writeAcknowledged = true;
+                if (notifyValue != null) {
+                    // Notification already received
+                    setState(STATE_SUCCESS);
+                } // Else, wait for notification
             } else {
                 // Operation callback
                 setState(STATE_FAILED);
@@ -133,8 +139,11 @@ class GattOperationRequest extends GattOperation {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt,
                                         BluetoothGattCharacteristic characteristic) {
-        if (getState() == STATE_STARTED && characteristic == this.notifyCharacteristic &&
-                writeAcknowledged) {
+        // Here we check the notification without waiting the write acknowledgment.
+        // Condition for waiting acknowledgment should be:
+        // > if (getState() == STATE_STARTED && characteristic == this.notifyCharacteristic &&
+        // >       writeAcknowledged) {
+        if (getState() == STATE_STARTED && characteristic == this.notifyCharacteristic) {
             // Check notification pattern
             byte[] notified = characteristic.getValue();
             if (notified == null) {
@@ -158,14 +167,18 @@ class GattOperationRequest extends GattOperation {
                 notifyValue = Arrays.copyOf(characteristic.getValue(),
                         characteristic.getValue().length);
             }
-            setState(STATE_SUCCESS);
+            // Check for write acknowledged
+            if (writeAcknowledged) {
+                setState(STATE_SUCCESS);
+            }
+            if (DEBUG) Log.d(DEBUG_TAG, "GattOperationRequest: BLE request completed: "+toString());
         }
     }
 
     @Override
     public String toString() {
         try {
-            return "Write characteristic '"+ writeCharacteristic.getUuid().toString()+"' with '"+
+            return "Request characteristic '"+ writeCharacteristic.getUuid().toString()+"' with '"+
                     Arrays.toString(writeValue)+"' and wait notification on '" +
                     notifyCharacteristic.getUuid().toString()+"'";
         } catch (Exception e) {

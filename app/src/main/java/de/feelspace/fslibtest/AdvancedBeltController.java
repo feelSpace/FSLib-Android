@@ -138,6 +138,16 @@ public class AdvancedBeltController implements GattController.GattEventListener,
         }
     }
 
+    public void startSelfTest() {
+        // TODO
+        if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
+            gattController.writeCharacteristic(
+                    debugInputCharacteristic,
+                    new byte[] {0x02} // Start self-test command
+            );
+        }
+    }
+
     public boolean areRawSensorNotificationsEnabled() {
         if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
             return rawSensorNotificationsEnabled;

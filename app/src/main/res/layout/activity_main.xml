@@ -31,6 +31,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/disconnect" />
 
+            <Button
+                android:id="@+id/activity_main_test_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_self_tests" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
@@ -114,6 +120,17 @@
 
             <TextView
                 android:id="@+id/activity_main_box_orientation_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/activity_main_sensor_status_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text=""

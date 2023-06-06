@@ -37,6 +37,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     // UI components
     private Button connectButton;
     private Button disconnectButton;
+    private Button startSelfTestButton;
     private TextView connectionStateTextView;
     private Button startSensorNotificationsButton;
     private Button stopSensorNotificationsButton;
@@ -50,6 +51,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private TextView gyroStatusTextView;
     private TextView beltHeadingTextView;
     private TextView boxOrientationTextView;
+    private TextView sensorStatusTextView;
 
     // UI update parameters
     private static final long MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
@@ -101,6 +103,14 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             }
         });
 
+        startSelfTestButton = findViewById(R.id.activity_main_test_button);
+        startSelfTestButton.setOnClickListener(view -> {
+            if (appController.getNavigationController().getConnectionState() ==
+                    BeltConnectionState.STATE_CONNECTED) {
+                appController.getAdvancedBeltController().startSelfTest();
+            }
+        });
+
         // Start notifications button
         startSensorNotificationsButton = findViewById(R.id.activity_main_start_sensor_notifications_button);
         startSensorNotificationsButton.setOnClickListener(view -> {
@@ -141,6 +151,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         gyroStatusTextView = findViewById(R.id.activity_main_gyro_status_text_view);
         beltHeadingTextView = findViewById(R.id.activity_main_belt_heading_text_view);
         boxOrientationTextView = findViewById(R.id.activity_main_box_orientation_text_view);
+        sensorStatusTextView = findViewById(R.id.activity_main_sensor_status_text_view);
 
         // Update UI
         updateUI();
@@ -260,11 +271,13 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateUI() {
         updateConnectionLabel();
         updateConnectionButtons();
+        updateTestButton();
         updateSensorNotificationsButtons();
         updateRecordsCountTextView();
         updateCalibrationTextViews();
         updateRecordingButtons();
         updateOrientationTextView();
+        updateSensorStatusTextView();
     }
 
     private void updateConnectionLabel() {
@@ -328,6 +341,29 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
+    private void updateTestButton() {
+        runOnUiThread(() -> {
+            BeltConnectionState state = BeltConnectionState.STATE_DISCONNECTED;
+            NavigationController navController = appController.getNavigationController();
+            if (navController != null) {
+                state = navController.getConnectionState();
+            }
+            switch (state) {
+                case STATE_DISCONNECTED:
+                case STATE_SCANNING:
+                case STATE_CONNECTING:
+                case STATE_RECONNECTING:
+                case STATE_DISCOVERING_SERVICES:
+                case STATE_HANDSHAKE:
+                    startSelfTestButton.setEnabled(false);
+                    break;
+                case STATE_CONNECTED:
+                    startSelfTestButton.setEnabled(true);
+                    break;
+            }
+        });
+    }
+
     private void updateSensorNotificationsButtons() {
         runOnUiThread(() -> {
             AdvancedBeltController beltController = appController.getAdvancedBeltController();
@@ -362,16 +398,41 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             Integer r = (orientation==null)?null:orientation.getControlBoxRoll();
             if (orientation == null) {
                 beltHeadingTextView.setText("Belt orientation: -");
+                beltHeadingTextView.setBackgroundResource(R.color.white);
             } else {
                 beltHeadingTextView.setText(
-                        String.format(Locale.ENGLISH, "Belt orientation: %+03d",
-                                orientation.getBeltHeading()));
+                        String.format(Locale.ENGLISH, "Belt orientation: %+03d ± %+02d",
+                                orientation.getBeltHeading(),
+                                ((orientation.getAccuracy() == null) ? 0 : orientation.getAccuracy())));
+                if (orientation.isOrientationAccurate() == null) {
+                    beltHeadingTextView.setBackgroundResource(R.color.white);
+                } else if (orientation.isOrientationAccurate()) {
+                    beltHeadingTextView.setBackgroundResource(R.color.bg_accurate);
+                } else {
+                    beltHeadingTextView.setBackgroundResource(R.color.bg_inaccurate);
+                }
             }
             if (h == null || p == null || r == null) {
                 boxOrientationTextView.setText("H.: -, P: -, R: -");
             } else {
                 boxOrientationTextView.setText(
                         String.format(Locale.ENGLISH, "H.: %+03d, P: %+03d, R: %+03d", h, p, r));
+            }
+        });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateSensorStatusTextView() {
+        runOnUiThread(() -> {
+            BeltCommandInterface beltCommand = appController.getNavigationController()
+                    .getBeltConnection().getCommandInterface();
+            BeltOrientation orientation = beltCommand.getOrientation();
+            if (orientation == null || orientation.getMagnetometerStatus() == null) {
+                sensorStatusTextView.setText("Mag. status: -");
+            } else {
+                sensorStatusTextView.setText(
+                        String.format(Locale.ENGLISH, "Mag. Status: %d",
+                                orientation.getMagnetometerStatus()));
             }
         });
     }
@@ -464,6 +525,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         long timeMillis = (System.nanoTime()/1000000);
         if ((timeMillis-lastOrientationUpdateTimeMillis) > MIN_PERIOD_ORIENTATION_UPDATE_MILLIS) {
             updateOrientationTextView();
+            updateSensorStatusTextView();
             lastOrientationUpdateTimeMillis = timeMillis;
         }
     }

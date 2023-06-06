@@ -51,7 +51,7 @@ class BluetoothScanner {
     private BLEScanCallback scanCallBack;
 
     // Device name to identify belt
-    public static final String BELT_NAME_PATTERN = "(?i)naviguertel.*"; // Lower-case for comparison
+    public static final String BELT_NAME_PATTERN = "(?i)naviguertel-ez.*"; // Lower-case for comparison
 
     // List of devices to avoid duplicates
     private final ArrayList<BluetoothDevice> beltsFound = new ArrayList<>(5);

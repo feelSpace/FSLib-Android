@@ -16,4 +16,5 @@
     <string name="stop_sensor_recording">Stop sensor recording</string>
     <string name="log_timestamp_pattern">yyyy-MM-dd HH:mm:ss.SSS</string>
     <string name="log_file_date_pattern_prefix">yyyyMMdd\'_\'HH\'_\'mm\'_\'ss</string>
+    <string name="start_self_tests">Start self-tests</string>
 </resources>

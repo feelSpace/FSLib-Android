@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Raw sensor recorder</string>
+    <string name="app_name">FSLib test</string>
     <string name="disconnected">Disconnected</string>
     <string name="scanning">Scanning</string>
     <string name="connecting">Connecting</string>

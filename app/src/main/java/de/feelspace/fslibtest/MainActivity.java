@@ -24,7 +24,7 @@ import de.feelspace.fslib.NavigationState;
 import de.feelspace.fslib.PowerStatus;
 
 public class MainActivity extends BluetoothCheckActivity implements BluetoothCheckCallback,
-        NavigationEventListener, AdvancedBeltListener, SimpleLoggerListener {
+        NavigationEventListener {
     // Debug
     @SuppressWarnings("unused")
     private static final String DEBUG_TAG = "FeelSpace-Debug";
@@ -37,34 +37,14 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     // UI components
     private Button connectButton;
     private Button disconnectButton;
-    private Button startSelfTestButton;
-    private Button startCalibrationButton;
     private TextView connectionStateTextView;
-    private Button startSensorNotificationsButton;
-    private Button stopSensorNotificationsButton;
-    private Button startSensorRecordingButton;
-    private Button stopSensorRecordingButton;
-    private TextView sensorRecordingCountTextView;
-    private TextView magOffsetsTextView;
-    private TextView magGainsTextView;
-    private TextView magErrorTextView;
-    private TextView gyroOffsetsTextView;
-    private TextView gyroStatusTextView;
     private TextView beltHeadingTextView;
     private TextView boxOrientationTextView;
     private TextView sensorStatusTextView;
 
     // UI update parameters
-    private static final long MIN_PERIOD_ERROR_TOAST_MILLIS = 1000;
-    private long lastErrorToastTimeMillis = 0;
-    private static final long MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS = 300;
-    private long lastRecordsCountUpdateTimeMillis = 0;
-    private long recordsCount = 0;
     private long lastOrientationUpdateTimeMillis;
     private static final long MIN_PERIOD_ORIENTATION_UPDATE_MILLIS = 250;
-
-    // Request ID
-    private static final int CREATE_FILE_REQUEST_CODE = 11;
 
     // MARK: Activity methods overriding
 
@@ -77,14 +57,8 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         appController = AppController.getInstance();
         appController.init(getApplicationContext());
 
-        // Logger
-        appController.getLogger().addListener(this);
-
         // Navigation controller
         appController.getNavigationController().addNavigationEventListener(this);
-
-        // Advanced belt controller
-        appController.getAdvancedBeltController().addAdvancedBeltListener(this);
 
         // Connection state
         connectionStateTextView = findViewById(R.id.activity_main_connection_state_text_view);
@@ -104,60 +78,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             }
         });
 
-        startSelfTestButton = findViewById(R.id.activity_main_test_button);
-        startSelfTestButton.setOnClickListener(view -> {
-            if (appController.getNavigationController().getConnectionState() ==
-                    BeltConnectionState.STATE_CONNECTED) {
-                appController.getAdvancedBeltController().startSelfTest();
-            }
-        });
-
-        startCalibrationButton = findViewById(R.id.activity_main_start_calibration_button);
-        startCalibrationButton.setOnClickListener(view -> {
-            if (appController.getNavigationController().getConnectionState() ==
-                    BeltConnectionState.STATE_CONNECTED) {
-                appController.getAdvancedBeltController().startAdvancedCalibration();
-            }
-        });
-
-        // Start notifications button
-        startSensorNotificationsButton = findViewById(R.id.activity_main_start_sensor_notifications_button);
-        startSensorNotificationsButton.setOnClickListener(view -> {
-            appController.getAdvancedBeltController().setRawSensorNotificationsEnable(true);
-        });
-
-        // Stop notification button
-        stopSensorNotificationsButton = findViewById(R.id.activity_main_stop_sensor_notifications_button);
-        stopSensorNotificationsButton.setOnClickListener(view -> {
-            appController.getAdvancedBeltController().setRawSensorNotificationsEnable(false);
-        });
-
-        // Start recording
-        startSensorRecordingButton = findViewById(R.id.activity_main_start_sensor_recording_button);
-        startSensorRecordingButton.setOnClickListener(view -> {
-            requestLogFileCreation();
-        });
-
-        // Stop recording
-        stopSensorRecordingButton = findViewById(R.id.activity_main_stop_sensor_recording_button);
-        stopSensorRecordingButton.setOnClickListener(view -> {
-            SimpleLogger logger = AppController.getInstance().getLogger();
-            if (logger.isLogging()) {
-                logger.log(this, "", "\n", "# " + SimpleLogger.getTimeStamp(this));
-                logger.log(this, "", "\n", "# Recording stopped.");
-            }
-            AppController.getInstance().getLogger().stopLog();
-        });
-
-        // Recordings count
-        sensorRecordingCountTextView = findViewById(R.id.activity_main_sensor_recording_count_text_view);
-
         // Calibration
-        magOffsetsTextView = findViewById(R.id.activity_main_mag_offset_text_view);
-        magGainsTextView = findViewById(R.id.activity_main_mag_gain_text_view);
-        magErrorTextView = findViewById(R.id.activity_main_mag_error_text_view);
-        gyroOffsetsTextView = findViewById(R.id.activity_main_gyro_offset_text_view);
-        gyroStatusTextView = findViewById(R.id.activity_main_gyro_status_text_view);
         beltHeadingTextView = findViewById(R.id.activity_main_belt_heading_text_view);
         boxOrientationTextView = findViewById(R.id.activity_main_box_orientation_text_view);
         sensorStatusTextView = findViewById(R.id.activity_main_sensor_status_text_view);
@@ -166,111 +87,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         updateUI();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (isFinishing()) {
-            AppController.getInstance().getLogger().stopLog();
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CREATE_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if (data != null) {
-                // Start logging
-                try {
-                    Uri logFileUri = data.getData();
-                    AppController.getInstance().getLogger().startLog(
-                            this, logFileUri, null);
-                    writeLogFileHeader();
-                } catch (Exception e) {
-                    Log.e(DEBUG_TAG, "MainActivity: Unable to create log file.", e);
-                    showToast("Log file creation failed!");
-                }
-            }
-        }
-    }
-
     // MARK: Private methods
-
-    private void requestLogFileCreation() {
-        // Use Storage Access Framework
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("text/plain");
-        // Generate log file name
-        SimpleDateFormat logFileFormat = new SimpleDateFormat(
-                this.getString(R.string.log_file_date_pattern_prefix), Locale.getDefault());
-        String logFilePrefix = logFileFormat.format(new Date());
-        String logFileName = "Raw_sensor_"+logFilePrefix+".txt";
-        intent.putExtra(Intent.EXTRA_TITLE, logFileName);
-        try {
-            Uri uri = Uri.parse(
-                    "content://com.android.externalstorage.documents/document/primary:Download");
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-        } catch (Exception e) {
-            Log.w(DEBUG_TAG, "MainActivity: Unable to set default directory");
-        }
-        startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
-    }
-
-    private void writeLogFileHeader() {
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        logger.log(this, "", "\n", "# RAW SENSOR RECORDS FROM NAVIBELT 2");
-        logger.log(this, "", "\n", "#");
-        logger.log(this, "", "\n", "# Start time: "+SimpleLogger.getTimeStamp(this));
-        logger.log(this, "", "\n", "#");
-        logger.log(this, "", "\n", "# Calibration data: ");
-        logCalibrationData();
-        logger.log(this, "", "\n", "");
-    }
-
-    private void logCalibrationData() {
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        AdvancedBeltController beltController = appController.getAdvancedBeltController();
-        if (logger.isLogging() && beltController != null) {
-            Float[] magOffsets = beltController.getMagOffsets();
-            if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
-                logger.log(this, "", "\n",
-                        String.format(Locale.ENGLISH, "# Mag. offsets: [%.2f, %.2f, %.2f]",
-                                magOffsets[0], magOffsets[1], magOffsets[2]));
-            } else {
-                logger.log(this, "", "\n", "# Mag. offsets: ?");
-            }
-            Float[] magGains = beltController.getMagGains();
-            if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
-                logger.log(this, "", "\n",
-                        String.format(Locale.ENGLISH, "# Mag. gains: [%.2f, %.2f, %.2f]",
-                                magGains[0], magGains[1], magGains[2]));
-            } else {
-                logger.log(this, "", "\n", "# Mag. gains: ?");
-            }
-            Float magError = beltController.getMagError();
-            if (magError != null) {
-                logger.log(this, "", "\n",
-                        String.format(Locale.ENGLISH, "# Mag. error: %.4f", magError));
-            } else {
-                logger.log(this, "", "\n", "# Mag. error: ?");
-            }
-            Float[] gyroOffsets = beltController.getGyroOffsets();
-            if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
-                logger.log(this, "", "\n",
-                        String.format(Locale.ENGLISH, "# Gyro. offsets: [%.2f, %.2f, %.2f]",
-                                gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
-            } else {
-                logger.log(this, "", "\n", "# Gyro. offsets: ?");
-            }
-            Integer gyroStatus = beltController.getGyroStatus();
-            if (gyroStatus != null) {
-                logger.log(this, "", "\n",
-                        String.format(Locale.ENGLISH, "# Gyro. status: %d", gyroStatus));
-            } else {
-                logger.log(this, "", "\n", "# Gyro. status: ?");
-            }
-        }
-    }
 
     private void showToast(final String message) {
         runOnUiThread(() -> Toast.makeText(
@@ -280,11 +97,6 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateUI() {
         updateConnectionLabel();
         updateConnectionButtons();
-        updateCommandsButton();
-        updateSensorNotificationsButtons();
-        updateRecordsCountTextView();
-        updateCalibrationTextViews();
-        updateRecordingButtons();
         updateOrientationTextView();
         updateSensorStatusTextView();
     }
@@ -350,54 +162,6 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
-    private void updateCommandsButton() {
-        runOnUiThread(() -> {
-            BeltConnectionState state = BeltConnectionState.STATE_DISCONNECTED;
-            NavigationController navController = appController.getNavigationController();
-            if (navController != null) {
-                state = navController.getConnectionState();
-            }
-            switch (state) {
-                case STATE_DISCONNECTED:
-                case STATE_SCANNING:
-                case STATE_CONNECTING:
-                case STATE_RECONNECTING:
-                case STATE_DISCOVERING_SERVICES:
-                case STATE_HANDSHAKE:
-                    startSelfTestButton.setEnabled(false);
-                    startCalibrationButton.setEnabled(false);
-                    break;
-                case STATE_CONNECTED:
-                    startSelfTestButton.setEnabled(true);
-                    startCalibrationButton.setEnabled(true);
-                    break;
-            }
-        });
-    }
-
-    private void updateSensorNotificationsButtons() {
-        runOnUiThread(() -> {
-            AdvancedBeltController beltController = appController.getAdvancedBeltController();
-            if (beltController != null) {
-                if (beltController.areRawSensorNotificationsEnabled()) {
-                    startSensorNotificationsButton.setEnabled(false);
-                    stopSensorNotificationsButton.setEnabled(true);
-                } else {
-                    startSensorNotificationsButton.setEnabled(true);
-                    stopSensorNotificationsButton.setEnabled(false);
-                }
-            } else {
-                startSensorNotificationsButton.setEnabled(false);
-                stopSensorNotificationsButton.setEnabled(false);
-            }
-        });
-    }
-
-    private void updateRecordsCountTextView() {
-        runOnUiThread(() -> sensorRecordingCountTextView.setText(
-                String.format(Locale.ENGLISH, "Records: %d", recordsCount)));
-    }
-
     @SuppressLint("SetTextI18n")
     private void updateOrientationTextView() {
         runOnUiThread(() -> {
@@ -448,72 +212,6 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
-    @SuppressLint({"SetTextI18n"})
-    private void updateCalibrationTextViews() {
-        runOnUiThread(() -> {
-            AdvancedBeltController beltController = appController.getAdvancedBeltController();
-            if (beltController != null) {
-                Float[] magOffsets = beltController.getMagOffsets();
-                if (magOffsets[0] != null && magOffsets[1] != null && magOffsets[2] != null) {
-                    magOffsetsTextView.setText(
-                            String.format(Locale.ENGLISH, "Mag. offsets: [%.2f, %.2f, %.2f]",
-                                    magOffsets[0], magOffsets[1], magOffsets[2]));
-                } else {
-                    magOffsetsTextView.setText("Mag. offsets: ?");
-                }
-                Float[] magGains = beltController.getMagGains();
-                if (magGains[0] != null && magGains[1] != null && magGains[2] != null) {
-                    magGainsTextView.setText(
-                            String.format(Locale.ENGLISH, "Mag. gains: [%.2f, %.2f, %.2f]",
-                                    magGains[0], magGains[1], magGains[2]));
-                } else {
-                    magGainsTextView.setText("Mag. gains: ?");
-                }
-                Float magError = beltController.getMagError();
-                if (magError != null) {
-                    magErrorTextView.setText(
-                            String.format(Locale.ENGLISH, "Mag. error: %.4f", magError));
-                } else {
-                    magErrorTextView.setText("Mag. error: ?");
-                }
-                Float[] gyroOffsets = beltController.getGyroOffsets();
-                if (gyroOffsets[0] != null && gyroOffsets[1] != null && gyroOffsets[2] != null) {
-                    gyroOffsetsTextView.setText(
-                            String.format(Locale.ENGLISH, "Gyro. offsets: [%.2f, %.2f, %.2f]",
-                                    gyroOffsets[0], gyroOffsets[1], gyroOffsets[2]));
-                } else {
-                    gyroOffsetsTextView.setText("Gyro. offsets: ?");
-                }
-                Integer gyroStatus = beltController.getGyroStatus();
-                if (gyroStatus != null) {
-                    gyroStatusTextView.setText(
-                            String.format(Locale.ENGLISH, "Gyro. status: %d", gyroStatus));
-                } else {
-                    gyroStatusTextView.setText("Gyro. status: ?");
-                }
-            } else {
-                magOffsetsTextView.setText("");
-                magGainsTextView.setText("");
-                magErrorTextView.setText("");
-                gyroOffsetsTextView.setText("");
-                gyroStatusTextView.setText("");
-            }
-        });
-    }
-
-    private void updateRecordingButtons() {
-        runOnUiThread(() -> {
-            SimpleLogger logger = AppController.getInstance().getLogger();
-            if (logger.isLogging()) {
-                startSensorRecordingButton.setEnabled(false);
-                stopSensorRecordingButton.setEnabled(true);
-            } else {
-                startSensorRecordingButton.setEnabled(true);
-                stopSensorRecordingButton.setEnabled(false);
-            }
-        });
-    }
-
     // MARK: Implementation of NavigationEventListener
 
     @Override
@@ -554,25 +252,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     @Override
     public void onBeltConnectionStateChanged(BeltConnectionState state) {
         updateUI();
-        if (state == BeltConnectionState.STATE_CONNECTED) {
-            // Reset record count
-            recordsCount = 0;
-        }
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
-            logger.log(this, "", "\n", "# Connection state changed: " + state.toString());
-        }
     }
 
     @Override
     public void onBeltConnectionLost() {
         showToast("Belt connection lost!");
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
-            logger.log(this, "", "\n", "# Belt connection lost.");
-        }
     }
 
     @Override
@@ -610,79 +294,4 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         showToast("Unsupported BLE feature!");
     }
 
-
-    // MARK: Implementation of `AdvancedBeltListener`
-
-    @Override
-    public void onRawSensorNotificationsStateChanged(boolean enable) {
-        updateSensorNotificationsButtons();
-    }
-
-    @Override
-    public void onDebugNotificationsStateChanged(boolean enable) {
-
-    }
-
-    @Override
-    public void onSensorCalibrationUpdated() {
-        updateCalibrationTextViews();
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
-            logger.log(this, "", "\n", "# Calibration updated: ");
-            logCalibrationData();
-        }
-    }
-
-    @Override
-    public void onRawSensorRecordNotified(int[][] records) {
-        recordsCount += records.length;
-        long timeMillis = (System.nanoTime()/1000000);
-        if ((timeMillis-lastRecordsCountUpdateTimeMillis) > MIN_PERIOD_RECORDS_COUNT_UPDATE_MILLIS) {
-            updateRecordsCountTextView();
-            lastRecordsCountUpdateTimeMillis = timeMillis;
-        }
-        // Log records
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            for (int i=0; i<records.length; i++) {
-                logger.log(this, " ", "\n", records[i][0], records[i][1], records[i][2], records[i][3]);
-            }
-        }
-    }
-
-    @Override
-    public void onRawSensorNotificationSequenceError() {
-        long timeMillis = (System.nanoTime()/1000000);
-        if ((timeMillis-lastErrorToastTimeMillis) > MIN_PERIOD_ERROR_TOAST_MILLIS) {
-            showToast("Error on sensor notification sequence!");
-            lastErrorToastTimeMillis = timeMillis;
-        }
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
-            logger.log(this, "", "\n", "# ERROR: Missing sensor notification (bad sequence).");
-        }
-    }
-
-    @Override
-    public void onErrorNotified(int errorCode) {
-        long timeMillis = (System.nanoTime()/1000000);
-        if ((timeMillis-lastErrorToastTimeMillis) > MIN_PERIOD_ERROR_TOAST_MILLIS) {
-            showToast("Error belt: 0x"+Integer.toHexString(errorCode));
-            lastErrorToastTimeMillis = timeMillis;
-        }
-        SimpleLogger logger = AppController.getInstance().getLogger();
-        if (logger.isLogging()) {
-            logger.log(this, "", "\n", "# "+SimpleLogger.getTimeStamp(this));
-            logger.log(this, "", "\n", "# ERROR: Belt error ("+errorCode+"): 0x"+Integer.toHexString(errorCode));
-        }
-    }
-
-    // MARK: Implementation of `SimpleLoggerListener`
-
-    @Override
-    public void onLogStateChanged(boolean isLogging) {
-        updateRecordingButtons();
-    }
 }

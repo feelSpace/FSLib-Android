@@ -31,18 +31,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/disconnect" />
 
-            <Button
-                android:id="@+id/activity_main_test_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start_self_tests" />
-
-            <Button
-                android:id="@+id/activity_main_start_calibration_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start_advanced_calibration" />
-
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
@@ -53,61 +41,6 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_mag_offset_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_mag_gain_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_mag_error_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_gyro_offset_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_gyro_status_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
             <Space
                 android:layout_width="match_parent"
@@ -141,45 +74,6 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <Button
-                android:id="@+id/activity_main_start_sensor_notifications_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start_sensor_notifications" />
-
-            <Button
-                android:id="@+id/activity_main_stop_sensor_notifications_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/stop_sensor_notifications" />
-
-            <Button
-                android:id="@+id/activity_main_start_sensor_recording_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/start_sensor_recording" />
-
-            <Button
-                android:id="@+id/activity_main_stop_sensor_recording_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/stop_sensor_recording" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/activity_main_sensor_recording_count_text_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <Space
                 android:layout_width="match_parent"

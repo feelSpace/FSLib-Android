@@ -44,40 +44,36 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 ## Structure of the repository
 
-The repository contains three directories:
+The repository contains an Android Studio project with additional directories:
 * **docs**: The documentation of the FSLib for Android.
-* **fslib-aar**: The FSLib module as an AAR archive. Two JAR files are also provided with the javadoc and the source-code of the public interfaces. These two JAR files can be used in Android Studio to obtain contextual documentation.
-* **fslib-source**: An Android Studio project containing the source code of the FSLib and a demo application.
+* **fslib**: The FSLib module that you can link to your project.
+* **app**: A test application module.
 
 ## Integration of the FSLib module in an Android project
 
-You have three options to integrate the FSLib into your project. You can 1) add FSLib in your dependencies, 2) use the AAR package of the library, or 3) link the source code of the FSLib in your project. Note that the first option, using the dependency, is recommended.
+Since JCenter is not available anymore (versions of FSLib from JCenter are obsolete), the best way to use FSLib it to add it as a module with linked sources.
 
-### Adding FSLib in your project dependency
+### Linking the source code of the module
 
-In the `build.gradle` of your application module, add the following dependency:
+In ` settings.gradle` adds:
+```gradle
+include ':fslib'
+project(':fslib').projectDir = new File('PathToFSLibModule')
+```
 
+In ` app/build.gradle`
 ```gradle
 dependencies {
-    implementation 'de.feelspace:fslib:2.2.0'
-    // ...
+    implementation project(':fslib')
+    ...
 }
 ```
 
-You should also check that `jcenter` is listed in your repositories. In the top-level `build.gradle` you must have `jcenter()` in the `repositories` section:
-
-```gradle
-allprojects {
-    repositories {
-        jcenter()
-        // ...
-    }
-}
-```
+:anger: If you find it unintuitive, it is normal, Google didn't find it useful to provide simple way to reuse source code between projects.
 
 ### Using the AAR package
 
-The AAR package of the FSLib is attached to the [release](https://github.com/feelSpace/FSLib-Android/releases). To import the package:
+An alternative to linked source is to use an AAR package. For some release, an AAR package of the FSLib is attached to the [release](https://github.com/feelSpace/FSLib-Android/releases). To import the package:
 
 * Select in menu “File” > “New Module”,
 * Select the option “Import .JAR/.AAR Package” then “Next” ,
@@ -96,46 +92,30 @@ dependencies {
 
 For additional information on adding module in Android Studio please refer to: https://developer.android.com/studio/projects/android-library#AddDependency
 
-### Linking the source code of the module
-
-In ` settings.gradle` adds:
-```gradle
-include ':fslib
-project(':fslib').projectDir = new File('PathToFSLibModule')
-```
-
-In ` app/build.gradle`
-```gradle
-dependencies {
-    implementation project(':fslib')
-    ...
-}
-```
-
-:anger: If you find it unintuitive, it is normal, Google didn't find it useful to provide simple way to reuse source code between projects.
-
 ## Setup of your project
 
 ### Minimum Android SDK version
 
-Note that the minimum Android SDK version for the FSLib is 18 because Bluetooth low-energy is only supported from SDK version version 18. In the `build.gradle` of your application the minSdkVersion must have a value of 18 or higher.
+Note that the minimum Android SDK version for the FSLib is 28 because Bluetooth permissions are an nightmare. In the `build.gradle` of your application the minSdkVersion must have a value of 28 or higher.
 
 ### Application permissions
 
-The FSLib module uses 4 permissions declared in its own “AndroidManifest.xml”:
+The FSLib module uses 6 permissions declared in its own “AndroidManifest.xml”:
 
 ```xml
-<uses-permission android:name="android.permission.BLUETOOTH" />
-<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 ```
 
 These permissions are automatically merged: https://developer.android.com/studio/build/manifest-merge.html
 
 :anger: Note that the Location permissions are necessary for Bluetooth Low-Energy scan. In addition, the Location service must be enabled for scanning. (This is a joke from Google: https://issuetracker.google.com/issues/37065090.) 
 
-In the FSLib, the `BluetoothActivationFragment` is provided to simplify the activation of required services.
+You can check the `BluetoothCheckActivity` provided in the app for some hints on how to manage permissions and services.
 
 ## Structure of the FSLib module
 

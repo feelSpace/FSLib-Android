@@ -37,6 +37,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/start_self_tests" />
 
+            <Button
+                android:id="@+id/activity_main_start_calibration_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_advanced_calibration" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />

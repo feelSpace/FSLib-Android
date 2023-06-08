@@ -38,6 +38,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private Button connectButton;
     private Button disconnectButton;
     private Button startSelfTestButton;
+    private Button startCalibrationButton;
     private TextView connectionStateTextView;
     private Button startSensorNotificationsButton;
     private Button stopSensorNotificationsButton;
@@ -108,6 +109,14 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
             if (appController.getNavigationController().getConnectionState() ==
                     BeltConnectionState.STATE_CONNECTED) {
                 appController.getAdvancedBeltController().startSelfTest();
+            }
+        });
+
+        startCalibrationButton = findViewById(R.id.activity_main_start_calibration_button);
+        startCalibrationButton.setOnClickListener(view -> {
+            if (appController.getNavigationController().getConnectionState() ==
+                    BeltConnectionState.STATE_CONNECTED) {
+                appController.getAdvancedBeltController().startAdvancedCalibration();
             }
         });
 
@@ -271,7 +280,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
     private void updateUI() {
         updateConnectionLabel();
         updateConnectionButtons();
-        updateTestButton();
+        updateCommandsButton();
         updateSensorNotificationsButtons();
         updateRecordsCountTextView();
         updateCalibrationTextViews();
@@ -341,7 +350,7 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
         });
     }
 
-    private void updateTestButton() {
+    private void updateCommandsButton() {
         runOnUiThread(() -> {
             BeltConnectionState state = BeltConnectionState.STATE_DISCONNECTED;
             NavigationController navController = appController.getNavigationController();
@@ -356,9 +365,11 @@ public class MainActivity extends BluetoothCheckActivity implements BluetoothChe
                 case STATE_DISCOVERING_SERVICES:
                 case STATE_HANDSHAKE:
                     startSelfTestButton.setEnabled(false);
+                    startCalibrationButton.setEnabled(false);
                     break;
                 case STATE_CONNECTED:
                     startSelfTestButton.setEnabled(true);
+                    startCalibrationButton.setEnabled(true);
                     break;
             }
         });

@@ -139,11 +139,19 @@ public class AdvancedBeltController implements GattController.GattEventListener,
     }
 
     public void startSelfTest() {
-        // TODO
         if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
             gattController.writeCharacteristic(
                     debugInputCharacteristic,
                     new byte[] {0x02} // Start self-test command
+            );
+        }
+    }
+
+    public void startAdvancedCalibration() {
+        if (connectionInterface.getState() == BeltConnectionState.STATE_CONNECTED) {
+            gattController.writeCharacteristic(
+                    paramRequestCharacteristic,
+                    new byte[] {(byte) 0x01, (byte) 0x81, (byte) 0x09}
             );
         }
     }

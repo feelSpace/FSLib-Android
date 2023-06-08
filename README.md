@@ -16,14 +16,7 @@ The naviBelt can be used in various domains, for instance:
 
 ## Installation
 
-You can add FSLib to your dependencies in your `build.gradle`:
-```
-dependencies {
-    implementation 'de.feelspace:fslib:2.2.0'
-}
-```
-
-* For more details and alternatives, see the documentation: [Adding FSLib to your project](docs/README.md#integration-of-the-fslib-module-in-an-android-project)
+You can add FSLib as a module by linking the source code to your project, see the documentation: [Adding FSLib to your project](docs/README.md#integration-of-the-fslib-module-in-an-android-project)
 
 ## Coding convention
 

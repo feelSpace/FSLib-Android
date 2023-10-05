@@ -136,16 +136,11 @@ It is recommended to look at the demo application that illustrates how to use th
 
 ## Bluetooth activation and permission granting
 
-In order to search for a belt (i.e. scan) your application requires a permission for location data (Not a joke, thanks Google). For more details see [here]( https://developer.android.com/guide/topics/connectivity/bluetooth-le#permissions). You can implement your own procedure for location permission and Bluetooth activation, or use the `BluetoothActivationFragment` provided by the FSLib.
+In order to search for a belt (i.e. scan) your application requires a permission for location data (Not a joke, thanks Google). For more details see [here]( https://developer.android.com/guide/topics/connectivity/bluetooth-le#permissions). You can implement your own procedure for location permission and Bluetooth activation, or adapt the `BluetoothCheckActivity` available in the [test application within the `app` package](https://github.com/feelSpace/FSLib-Android/tree/master/app/src/main/java/de/feelspace/fslibtest). It is, however, recommended to adapt or implement your own solution to manage Android permissions.
 
-Create and attach a `BluetoothActivationFragment` to the activity that will initiate the connection. The activity must implement the interface `OnBluetoothActivationCallback`.
+To use the `BluetoothCheckActivity`, your main Activity must extends it and you must implement the `BluetoothCheckCallback`. Before starting the connection with the belt, call `activateBluetooth` and start the connection only in the callback `onBluetoothReady`.
 ```java
-public class MainActivity extends AppCompatActivity implements OnBluetoothActivationCallback {
-
-    // Fragment to check BT activation and check permissions
-    private BluetoothActivationFragment bluetoothActivationFragment;
-    protected static final String BLUETOOTH_ACTIVATION_FRAGMENT_TAG =
-            "MainActivity.BLUETOOTH_ACTIVATION_FRAGMENT_TAG";
+public class MainActivity extends BluetoothCheckActivity implements BluetoothCheckCallback {
 
     // Belt navigation controller
     private NavigationController navigationController;
@@ -153,56 +148,49 @@ public class MainActivity extends AppCompatActivity implements OnBluetoothActiva
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add BT activation and permission-checker fragment
-        FragmentManager fm = getSupportFragmentManager();
-        bluetoothActivationFragment = (BluetoothActivationFragment) fm.findFragmentByTag(
-                BLUETOOTH_ACTIVATION_FRAGMENT_TAG);
-        if (bluetoothActivationFragment == null) {
-            bluetoothActivationFragment = new BluetoothActivationFragment();
-            fm.beginTransaction().add(bluetoothActivationFragment,
-                    BLUETOOTH_ACTIVATION_FRAGMENT_TAG).commit();
-        }
+
         // Create the navigation controller
-        navigationController = new NavigationController(getApplicationContext(), false);
+        navigationController = new NavigationController(getApplicationContext());
+
+        // Connect button
+        connectButton = findViewById(R.id.activity_main_connect_button);
+        connectButton.setOnClickListener(view -> {
+            activateBluetooth(this);
+        });
     }
-    
+
     @Override
-    public void onBluetoothActivated() {
+    public void onBluetoothReady() {
         // Bluetooth is active, continue with connection
         navigationController.searchAndConnectBelt();
     }
 
     @Override
     public void onBluetoothActivationRejected() {
-        // Inform user that the connection cannot be performed without Bluetooth
+        // Inform user that the Bluetooth activation has failed
     }
 
     @Override
     public void onBluetoothActivationFailed() {
         // Inform user that the Bluetooth activation has failed
     }
+
+    @Override
+    public void onUnsupportedFeature() {
+        // Inform user that the connection cannot be performed without Bluetooth
+    }
+
 }
 ``` 
 
-Before you start the connection procedure you must call the method `activateBluetooth()` of the `BluetoothActivationFragment`, and then start the connection procedure in the callback `onBluetoothActivated()`.
-
-```
-    private void connectBelt() {
-        bluetoothActivationFragment.activateBluetooth();
-    }
-    @Override
-    public void onBluetoothActivated() {
-        // Bluetooth is active, continue with connection
-        navigationController.searchAndConnectBelt();
-    }
-```
-
-If you want to implement your own procedure for location permission and Bluetooth activation, pay attention to the following:
+If you implement your own procedure for location permission and Bluetooth activation, pay attention to the following:
 - Scanning for a belt requires a location permission granted (not only declared in the `AndroidManifest.xml` but also asked via `requestPermissions()`). See documentation: [Request app permissions]( https://developer.android.com/training/permissions/requesting).
 - Scanning for a belt cannot work without location service enabled. See documentation: [Prompt the user to change location settings](https://developer.android.com/training/location/change-location-settings#prompt)
 - You may scan with a filter to avoid the activation of the location service, but scan filters seem broken.
 - Bluetooth must be activated. See documentation: [Set up BLE](https://developer.android.com/guide/topics/connectivity/bluetooth-le#setup)
 - Other Bluetooth problems are listed [here](https://github.com/iDevicesInc/SweetBlue/wiki/Android-BLE-Issues). :tada:
+- Also, the procedure and required permissions depend on the Android API version (and sometimes the behavior is different from one brand to another).
+- Finally, if BLE connection does not work on your smartphone, check the Logcat, clean/remove the application, remove pairing to the belt, and reboot your phone.
 
 ## Connection and disconnection of a belt
 

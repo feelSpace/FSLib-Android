@@ -127,6 +127,9 @@ public class BeltOrientation {
     /**
      * Returns the status of the magnetometer. <code>0</code> for inaccurate or not calibrated, to
      * <code>3</code> for accurate. <code>-1</code> if unknown.
+     * <br/>
+     * This value is only for development purpose. Use the `getAccuracy()` or
+     * `isOrientationAccurate()` to obtain more information about belt orientation.
      *
      * @return the status of the magnetometer, or <code>null</code> if unknown.
      */
@@ -137,26 +140,35 @@ public class BeltOrientation {
     /**
      * Returns the status of the accelerometer. <code>0</code> for inaccurate or not calibrated, to
      * <code>3</code> for accurate. <code>-1</code> if unknown.
+     * <br/>
+     * This value is only for development purpose. Use the `getAccuracy()` or
+     * `isOrientationAccurate()` to obtain more information about belt orientation.
      *
      * @return the status of the accelerometer, or <code>null</code> if unknown.
      */
-    protected Integer getAccelerometerStatus() {
+    public Integer getAccelerometerStatus() {
         return accelerometerStatus;
     }
 
     /**
      * Returns the status of the gyroscope. <code>0</code> for inaccurate or not calibrated, to
      * <code>3</code> for accurate. <code>-1</code> if unknown.
+     * <br/>
+     * This value is only for development purpose. Use the `getAccuracy()` or
+     * `isOrientationAccurate()` to obtain more information about belt orientation.
      *
      * @return the status of the gyroscope, or <code>null</code> if unknown.
      */
-    protected Integer getGyroscopeStatus() {
+    public Integer getGyroscopeStatus() {
         return gyroscopeStatus;
     }
 
     /**
      * Returns the status of the fusion. <code>0</code> for inaccurate or not calibrated, to
      * <code>3</code> for accurate. <code>-1</code> if unknown.
+     * <br/>
+     * This value is only for development purpose. Use the `getAccuracy()` or
+     * `isOrientationAccurate()` to obtain more information about belt orientation.
      *
      * @return the status of the gyroscope, or <code>null</code> if unknown.
      */

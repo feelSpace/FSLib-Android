@@ -779,7 +779,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             if (channelIndex != 0 || vibration.isRepeated() || stopOtherChannels) {
                 Log.e(DEBUG_TAG, "BeltCommunicationController: The vibration command is " +
                         "invalid outside App mode.");
-                return false;
+                // Continue because the command may be queued after a change mode request
             }
         }
         // Stop vibration if intensity is 0 or binary mask is 0

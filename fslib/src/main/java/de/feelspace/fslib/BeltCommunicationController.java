@@ -68,7 +68,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
     private boolean keepAliveNotificationsActive = false;
 
     /** Vibration command characteristic UUID. */
-    private static final UUID VIBRATION_COMMAND_CHAR_UUID =
+    public static final UUID VIBRATION_COMMAND_CHAR_UUID =
             UUID.fromString("0000FE03-0000-1000-8000-00805F9B34FB");
     private @Nullable BluetoothGattCharacteristic vibrationCommandChar;
 

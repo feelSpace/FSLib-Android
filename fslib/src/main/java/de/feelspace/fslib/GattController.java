@@ -7,6 +7,7 @@
  */
 package de.feelspace.fslib;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -23,8 +24,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -124,6 +125,7 @@ public class GattController extends BluetoothGattCallback {
      *                must be given.
      * @param device The device to connect to.
      */
+    @SuppressLint("MissingPermission")
     public void connect(@NonNull Context context, @NonNull BluetoothDevice device) {
         if (DEBUG) Log.i(DEBUG_TAG, "GattController: Connection request.");
         List<GattOperation> canceledOperations = null;
@@ -285,6 +287,7 @@ public class GattController extends BluetoothGattCallback {
     private boolean scheduleReconnection() {
         try {
             reconnectionTask = executor.schedule(new Runnable() {
+                @SuppressLint("MissingPermission")
                 @Override
                 public void run() {
                     if (DEBUG) Log.i(DEBUG_TAG, "GattController: Reconnection attempt.");
@@ -358,12 +361,31 @@ public class GattController extends BluetoothGattCallback {
         Handler mainHandler = new Handler(Looper.getMainLooper());
         mainHandler.postDelayed(retryServiceDiscovery, retryServiceDiscoveryDelayMillis);
     }
+
+    /**
+     * On service discovery. Android cache services, and it's full of bugs. When service discovery
+     * fails, we could try clearing the cache:
+     * <a href="https://stackoverflow.com/a/50745997/8477032">How to refresh services / clear cache?</a>
+     */
     private final Runnable retryServiceDiscovery = new Runnable() {
         @Override
         public void run() {
             try {
                 if (connectionState == GATT_DISCOVERING_SERVICES) {
                     try {
+                        Log.w(DEBUG_TAG, "GattController: Clear GATT cache before retrying service discovery.");
+                        // From: https://stackoverflow.com/a/50745997/8477032
+                        try {
+                            final Method refresh = gattServer.getClass().getMethod("refresh");
+                            if (refresh != null) {
+                                refresh.invoke(gattServer);
+                                Thread.sleep(1000);
+                            } else {
+                                Log.w(DEBUG_TAG, "GattController: No method to clear GATT cache.");
+                            }
+                        } catch (Exception e) {
+                            Log.w(DEBUG_TAG, "GattController: Unable to clear GATT cache.");
+                        }
                         Log.w(DEBUG_TAG, "GattController: Retry service discovery.");
                         gattServer.discoverServices();
                     } catch (SecurityException s) {
@@ -425,6 +447,7 @@ public class GattController extends BluetoothGattCallback {
     /**
      * Closes and clears the GATT server.
      */
+    @SuppressLint("MissingPermission")
     private void closeAndClearGattServer() {
         if (gattServer != null) {
             gattServer.disconnect();
@@ -649,9 +672,9 @@ public class GattController extends BluetoothGattCallback {
                 }
                 targets = new ArrayList<>(listeners);
             }
-            if (operation instanceof GattOperationSetNotification) {
-                GattOperationSetNotification setNotification =
-                        (GattOperationSetNotification) operation;
+            if (operation instanceof GattOperationSetNotificationIndication) {
+                GattOperationSetNotificationIndication setNotification =
+                        (GattOperationSetNotificationIndication) operation;
                 for (GattEventListener l: targets) {
                     l.onCharacteristicNotificationSet(
                             setNotification.getCharacteristic(), setNotification.getValue(),
@@ -694,12 +717,15 @@ public class GattController extends BluetoothGattCallback {
      *
      * @param characteristic The characteristic on which the notifications must be enabled or
      *                       disabled.
-     * @param enable <code>true</code> to enable the notifications, <code>false</code> to disable.
+     * @param enableNotification <code>true</code> to enable notifications, <code>false</code>
+     *                           to disable them.
+     * @param enableIndication <code>true</code> to enable indications, <code>false</code>
+     *                         to disable them.
      * @return <code>true</code> if the request has been sent.
      */
-    public boolean setCharacteristicNotification(
+    public boolean setCharacteristicNotificationIndication(
             @Nullable BluetoothGattCharacteristic characteristic,
-            boolean enable) {
+            boolean enableNotification, boolean enableIndication) {
         synchronized (this) {
             if (characteristic == null) {
                 Log.e(DEBUG_TAG, "GattController: Operation on null characteristic.");
@@ -718,7 +744,8 @@ public class GattController extends BluetoothGattCallback {
                 return false;
             }
             BluetoothGattDescriptor descriptor = characteristic.getDescriptors().get(0);
-            operationQueue.add(new GattOperationSetNotification(gattServer, descriptor, enable));
+            operationQueue.add(new GattOperationSetNotificationIndication(gattServer, descriptor,
+                    enableNotification, enableIndication));
         }
         checkAndStartGattOperation();
         return true;
@@ -818,7 +845,7 @@ public class GattController extends BluetoothGattCallback {
     /**
      * Requests a new MTU size.
      *
-     * @param mtu The request MTU size.
+     * @param mtu The requested MTU size.
      * @return <code>true</code> if the request has been correctly been sent.
      */
     public boolean requestMtu(int mtu) {
@@ -837,6 +864,24 @@ public class GattController extends BluetoothGattCallback {
         return true;
     }
 
+    /**
+     * Requests new connection parameters with fast connection intervals.
+     * @return <code>true</code> if the request has been correctly been sent.
+     */
+    @SuppressLint("MissingPermission")
+    public boolean requestFastConnectionIntervals() {
+        if (connectionState != GATT_CONNECTED) {
+            Log.w(DEBUG_TAG, "GattController: No connection for the operation.");
+            return false;
+        }
+        if (gattServer == null) {
+            Log.w(DEBUG_TAG, "GattController: No GATT server for the operation.");
+            return false;
+        }
+        return gattServer.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+    }
+
+    @SuppressLint("MissingPermission")
     @Override
     public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
         boolean reconnect = false;

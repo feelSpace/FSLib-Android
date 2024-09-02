@@ -26,7 +26,7 @@ public class BeltBatteryStatus implements Parcelable {
     private float tteTtf;
 
     /** Optional extra readings (only for debug purpose) */
-    private Float[] extraProperties = new Float[]{null, null, null, null};
+    private Float[] extraProperties = new Float[]{null, null, null, null, null, null};
 
     /**
      * Constructor.
@@ -59,6 +59,14 @@ public class BeltBatteryStatus implements Parcelable {
             extraProperties[3] = (float) (((packet[12]  & 0xFF) << 8) | (packet[11] & 0xFF)); // uint16 %C
             extraProperties[3] /= 256.f;
         }
+        if (packet.length >= 14) {
+            // VS-L power status
+            extraProperties[4] = (float) packet[13];
+        }
+        if (packet.length >= 16) {
+            // VS-L charge level
+            extraProperties[5] = ((float)(packet[15] & 0xFF)) + (((float)(packet[14] & 0xFF)) / 256.f);
+        }
     }
 
     /**
@@ -74,6 +82,8 @@ public class BeltBatteryStatus implements Parcelable {
         extraProperties[1] = (Float) in.readValue(Float.class.getClassLoader());
         extraProperties[2] = (Float) in.readValue(Float.class.getClassLoader());
         extraProperties[3] = (Float) in.readValue(Float.class.getClassLoader());
+        extraProperties[4] = (Float) in.readValue(Float.class.getClassLoader());
+        extraProperties[5] = (Float) in.readValue(Float.class.getClassLoader());
     }
 
     /**
@@ -138,5 +148,7 @@ public class BeltBatteryStatus implements Parcelable {
         dest.writeValue(extraProperties[1]);
         dest.writeValue(extraProperties[2]);
         dest.writeValue(extraProperties[3]);
+        dest.writeValue(extraProperties[4]);
+        dest.writeValue(extraProperties[5]);
     }
 }

@@ -212,24 +212,24 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
             return;
         }
         // Notifications
-        if (!gattController.setCharacteristicNotification(keepAliveChar, true)) {
+        if (!gattController.setCharacteristicNotificationIndication(keepAliveChar, true, false)) {
             handshakeStarted = false;
             this.handshakeCallback.onHandshakeCompleted(false);
             return;
         }
-        if (!gattController.setCharacteristicNotification(
-                buttonPressNotificationChar, true)) {
+        if (!gattController.setCharacteristicNotificationIndication(
+                buttonPressNotificationChar, true, false)) {
             handshakeStarted = false;
             this.handshakeCallback.onHandshakeCompleted(false);
             return;
         }
-        if (!gattController.setCharacteristicNotification(parameterNotificationChar,
-                true)) {
+        if (!gattController.setCharacteristicNotificationIndication(parameterNotificationChar,
+                true, false)) {
             handshakeStarted = false;
             this.handshakeCallback.onHandshakeCompleted(false);
             return;
         }
-        if (!gattController.setCharacteristicNotification(batteryStatusChar, true)) {
+        if (!gattController.setCharacteristicNotificationIndication(batteryStatusChar, true, false)) {
             handshakeStarted = false;
             this.handshakeCallback.onHandshakeCompleted(false);
             return;
@@ -1292,7 +1292,7 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
 
     @Override
     public boolean setOrientationNotificationsActive(boolean active) {
-        return gattController.setCharacteristicNotification(orientationDataChar, true);
+        return gattController.setCharacteristicNotificationIndication(orientationDataChar, true, false);
     }
 
     @Override

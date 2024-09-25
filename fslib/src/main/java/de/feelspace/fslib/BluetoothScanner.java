@@ -151,6 +151,7 @@ class BluetoothScanner {
      */
     private void stopScan(boolean failed) {
         boolean notify = false;
+        if (DEBUG) Log.i(DEBUG_TAG, "BluetoothScanner: Stop scan.");
         synchronized (this) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {

@@ -7,6 +7,14 @@
  */
 package de.feelspace.fslib;
 
+import static de.feelspace.fslib.GattConnectionState.GATT_CONNECTED;
+import static de.feelspace.fslib.GattConnectionState.GATT_CONNECTING;
+import static de.feelspace.fslib.GattConnectionState.GATT_DISCONNECTED;
+import static de.feelspace.fslib.GattConnectionState.GATT_DISCONNECTING;
+import static de.feelspace.fslib.GattConnectionState.GATT_DISCOVERING_SERVICES;
+import static de.feelspace.fslib.GattConnectionState.GATT_PAIRING;
+import static de.feelspace.fslib.GattConnectionState.GATT_RECONNECTING;
+
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -16,7 +24,6 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -33,16 +40,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static de.feelspace.fslib.GattConnectionState.GATT_CONNECTED;
-import static de.feelspace.fslib.GattConnectionState.GATT_CONNECTING;
-import static de.feelspace.fslib.GattConnectionState.GATT_DISCONNECTED;
-import static de.feelspace.fslib.GattConnectionState.GATT_DISCOVERING_SERVICES;
-import static de.feelspace.fslib.GattConnectionState.GATT_RECONNECTING;
-
 /**
  * Encapsulation of the GATT server with the addition of a queue of operations.
  */
-public class GattController extends BluetoothGattCallback {
+public class GattController extends BluetoothGattCallback implements BluetoothPairingManager.BluetoothPairingDelegate {
 
     // Debug
     @SuppressWarnings("unused")
@@ -59,52 +60,58 @@ public class GattController extends BluetoothGattCallback {
     private @Nullable BluetoothDevice device;
     private @Nullable Context context;
 
+    // Pairing manager
+    private BluetoothPairingManager pairingManager = null;
+
     // Operation queue
-    private @NonNull LinkedList<GattOperation> operationQueue = new LinkedList<>();
+    private final @NonNull LinkedList<GattOperation> operationQueue = new LinkedList<>();
     private @Nullable GattOperation runningOperation;
 
     // Executor for callback and timeout
-    private @NonNull ScheduledThreadPoolExecutor executor;
+    private final @NonNull ScheduledThreadPoolExecutor executor;
 
     // Listeners
     private final @NonNull ArrayList<GattEventListener> listeners = new ArrayList<>();
 
     // Connection timeout
-    private long connectionTimeoutMs = DEFAULT_CONNECTION_TIMEOUT_MS;
-    public static final long DEFAULT_CONNECTION_TIMEOUT_MS = 2000;
-    private ScheduledFuture connectionTimeoutTask;
+    public static final long CONNECTION_TIMEOUT_MS = 2000;
+    private ScheduledFuture<?> connectionTimeoutTask;
+
+    // Disconnection timeout
+    public static final long DISCONNECTION_TIMEOUT_MS = 2000;
+    private ScheduledFuture<?> disconnectionTimeoutTask;
+
+    // Flag for connection termination
+    private boolean initialConnection = true;
+    private boolean connectionLost = false;
+    private boolean connectionFailed = false;
 
     // Service discovery timeout
-    private long serviceDiscoveryTimeoutMs = DEFAULT_SERVICE_DISCOVERY_TIMEOUT_MS;
-    public static final long DEFAULT_SERVICE_DISCOVERY_TIMEOUT_MS = 5000;
-    private ScheduledFuture serviceDiscoveryTimeoutTask;
-    private long retryServiceDiscoveryDelayMillis = DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS;
-    public static final long DEFAULT_SERVICE_DISCOVERY_RETRY_PERIOD_MS = 1500;
-    private long serviceDiscoveryInitialDelayMillis = DEFAULT_SERVICE_DISCOVERY_INITIAL_DELAY_MS;
-    public static final long DEFAULT_SERVICE_DISCOVERY_INITIAL_DELAY_MS = 1000;
+    public static final long SERVICE_DISCOVERY_TIMEOUT_MS = 10000; // 4000;
+    private ScheduledFuture<?> serviceDiscoveryTimeoutTask;
+    public static final long SERVICE_DISCOVERY_DELAY_MS = 1500; // 500 ?
+    private static final boolean CLEAR_GATT_CACHE_ON_DISCOVERY_ERROR = false;
+
+    public static final boolean SERVICE_DISCOVERY_RETRY = true;
+    public static final int SERVICE_DISCOVERY_RETRY_PERIOD_MS = 5000;
+    private ScheduledFuture<?> serviceDiscoveryRetryTask;
 
     // GATT supervision timeout
-    private long gattSupervisionTimeoutMs = DEFAULT_GATT_SUPERVISION_TIMEOUT_MS;
-    public static final long DEFAULT_GATT_SUPERVISION_TIMEOUT_MS = 6000;
-    private ScheduledFuture gattSupervisionTask;
+    public static final long GATT_SUPERVISION_TIMEOUT_MS = 6000;
+    private ScheduledFuture<?> gattSupervisionTask;
     private long lastGattServerActivityTimeNano;
     private long gattSupervisionStartTimeNano;
 
     // Reconnection
-    private boolean reconnectOnInitialConnection = DEFAULT_RECONNECT_ON_INITIAL_CONNECTION;
-    public static final boolean DEFAULT_RECONNECT_ON_INITIAL_CONNECTION = false;
-    private long reconnectionDelayMs = DEFAULT_RECONNECTION_DELAY_MS;
-    public static final long DEFAULT_RECONNECTION_DELAY_MS = 2000;
-    private int reconnectionAttempts = DEFAULT_RECONNECTION_ATTEMPTS;
-    public static final int DEFAULT_RECONNECTION_ATTEMPTS = 2;
-    private ScheduledFuture reconnectionTask;
-    private int reconnectionCount = 0;
-    private boolean initialConnection = true;
+    public static final long RECONNECTION_DELAY_MS = 2000;
+    public static final int RECONNECTION_ATTEMPTS = 2;
+    public static final int INITIAL_RECONNECTION_ATTEMPTS = 1;
+    private ScheduledFuture<?> reconnectionTask;
+    private int remainingReconnectionAttempts = 0;
 
     // Operation timeout
-    private long operationTimeoutMs = DEFAULT_GATT_OPERATION_TIMEOUT_MS;
-    public static final long DEFAULT_GATT_OPERATION_TIMEOUT_MS = 500;
-    private ScheduledFuture gattOperationTimeoutTask;
+    public static final long GATT_OPERATION_TIMEOUT_MS = 500;
+    private ScheduledFuture<?> gattOperationTimeoutTask;
 
     /**
      * Constructor.
@@ -114,8 +121,9 @@ public class GattController extends BluetoothGattCallback {
     }
 
     /**
-     * Requests a connection to the GATT server for the given device. Previous connection will be
-     * closed if necessary.
+     * Requests a connection to the GATT server for the given device.
+     *
+     * The state must be `GATT_DISCONNECTED` to start the connection.
      *
      * Instead of raising an exception or returning a termination code on failure, this method uses
      * the callback {@link GattEventListener#onGattConnectionFailed()}.
@@ -130,38 +138,40 @@ public class GattController extends BluetoothGattCallback {
         if (DEBUG) Log.i(DEBUG_TAG, "GattController: Connection request.");
         List<GattOperation> canceledOperations = null;
         boolean success = true;
+        // Initialize pairing manager
+        if (pairingManager == null) {
+            pairingManager = new BluetoothPairingManager(context, executor, this);
+        }
         synchronized (this) {
             if (connectionState != GattConnectionState.GATT_DISCONNECTED) {
-                cancelAllTimeoutTasks();
-                canceledOperations = cancelAllGattOperations();
-                closeAndClearGattServer();
+                // Do nothing if not disconnected
+                if (DEBUG) Log.e(DEBUG_TAG, "GattController: Not disconnected to attempt a connection!");
+                return;
             }
             connectionState = GATT_CONNECTING;
-            reconnectionCount = 0;
+            remainingReconnectionAttempts = INITIAL_RECONNECTION_ATTEMPTS;
             initialConnection = true;
+            connectionLost = false;
+            connectionFailed = false;
             this.device = device;
             this.context = context;
             try {
-                gattServer = device.connectGatt(context, false, this);
+                gattServer = device.connectGatt(context, false, this,
+                        BluetoothDevice.TRANSPORT_LE, BluetoothDevice.PHY_LE_1M,
+                        new Handler(Looper.getMainLooper()));
             } catch (Exception e) {
                 Log.e(DEBUG_TAG, "GattController: Unable to call connection method for" +
                         " GATT server.", e);
                 gattServer = null;
             }
             if (gattServer != null) {
-                scheduleConnectionTimeout(connectionTimeoutMs);
+                scheduleConnectionTimeout();
             } else {
                 // Yep, 'connectGatt' can return 'null' but it is not documented
                 // No reconnection attempt when an error occurs with the Bluetooth service
                 Log.e(DEBUG_TAG, "GattController: Unable to connect to GATT server.");
-                closeAndClearGattServer();
                 connectionState = GattConnectionState.GATT_DISCONNECTED;
                 success = false;
-            }
-        }
-        if (canceledOperations != null) {
-            for (GattOperation operation: canceledOperations) {
-                notifyOperationCompletion(operation);
             }
         }
         if (!success) {
@@ -172,26 +182,35 @@ public class GattController extends BluetoothGattCallback {
 
     /**
      * Schedules a connection timeout.
-     *
-     * @param timeout The timeout delay.
      */
-    private void scheduleConnectionTimeout(long timeout) {
+    private void scheduleConnectionTimeout() {
         try {
-            connectionTimeoutTask = executor.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    Log.w(DEBUG_TAG, "GattController: Connection timeout.");
-                    synchronized (GattController.this) {
-                        connectionTimeoutTask = null;
-                        if (connectionState != GATT_CONNECTING &&
-                                connectionState != GATT_RECONNECTING) {
-                            // Ignore timeout if not connecting or reconnecting
-                            return;
-                        }
+            connectionTimeoutTask = executor.schedule(() -> {
+                Log.w(DEBUG_TAG, "GattController: Connection timeout.");
+                boolean reconnect = false;
+                synchronized (GattController.this) {
+                    connectionTimeoutTask = null;
+                    if (connectionState != GATT_CONNECTING &&
+                            connectionState != GATT_RECONNECTING) {
+                        // Ignore timeout if not connecting or reconnecting
+                        return;
                     }
-                    reconnect();
+                    if (remainingReconnectionAttempts > 0) {
+                        remainingReconnectionAttempts--;
+                        reconnect = true;
+                    } else if (initialConnection) {
+                        Log.w(DEBUG_TAG, "GattController: Set flag for connection failed.");
+                        connectionFailed = true;
+                    }
                 }
-            }, timeout, TimeUnit.MILLISECONDS);
+                if (reconnect) {
+                    if (DEBUG) Log.i(DEBUG_TAG, "GattController: New connection attempt after connection timeout.");
+                    reconnect();
+                } else {
+                    if (DEBUG) Log.i(DEBUG_TAG, "GattController: Disconnecting after connection timeout.");
+                    disconnect();
+                }
+            }, CONNECTION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "GattController: Unable to schedule the connection timeout.");
         }
@@ -200,6 +219,7 @@ public class GattController extends BluetoothGattCallback {
     /**
      * Requests a disconnection of the GATT server.
      */
+    @SuppressLint("MissingPermission")
     public void disconnect() {
         if (DEBUG) Log.i(DEBUG_TAG, "GattController: Disconnection request.");
         List<GattOperation> canceledOperations = null;
@@ -209,8 +229,12 @@ public class GattController extends BluetoothGattCallback {
             }
             cancelAllTimeoutTasks();
             canceledOperations = cancelAllGattOperations();
-            connectionState = GATT_DISCONNECTED;
-            closeAndClearGattServer();
+            connectionState = GATT_DISCONNECTING;
+            if (gattServer != null) {
+                // First disconnect, then wait asynchronous notification to close
+                scheduleDisconnectionTimeout();
+                gattServer.disconnect();
+            }
         }
         if (canceledOperations != null) {
             for (GattOperation operation: canceledOperations) {
@@ -220,134 +244,271 @@ public class GattController extends BluetoothGattCallback {
         notifyGattConnectionStateChange();
     }
 
+
     /**
-     * Schedules a reconnection if the maximum number of reconnection attempts has not been reached.
+     * Schedules a disconnection timeout.
      */
-    protected void reconnect() {
-        boolean notifyConnectionFailed = false;
-        boolean notifyConnectionLost = false;
-        List<GattOperation> canceledOperations = null;
-        synchronized (this) {
-            // First disconnect
-            cancelAllTimeoutTasks();
-            canceledOperations = cancelAllGattOperations();
-            connectionState = GATT_DISCONNECTED;
-            closeAndClearGattServer();
-            // Check for reconnection condition
-            if (device == null || context == null) {
-                // Should not happen
-                Log.w(DEBUG_TAG, "GattReconnect: Cannot reconnect without initial " +
-                        "connection.");
-                notifyConnectionFailed = true;
-            } else if (initialConnection && (!reconnectOnInitialConnection ||
-                    (reconnectionCount >= reconnectionAttempts))) {
-                // Initial connection failed
-                notifyConnectionFailed = true;
-            } else if (!initialConnection && (reconnectionCount >= reconnectionAttempts)) {
-                // Reconnection attempts failed
-                notifyConnectionLost = true;
-            } else {
-                // Schedule a reconnection attempt
-                reconnectionCount++;
-                if (initialConnection) {
-                    connectionState = GATT_CONNECTING;
-                } else {
-                    connectionState = GATT_RECONNECTING;
-                }
-                if (!scheduleReconnection()) {
-                    // Should not happen
+    @SuppressLint("MissingPermission")
+    private void scheduleDisconnectionTimeout() {
+        try {
+            disconnectionTimeoutTask = executor.schedule(() -> {
+                Log.w(DEBUG_TAG, "GattController: Disconnection timeout.");
+                boolean lost;
+                boolean failed;
+                synchronized (GattController.this) {
+                    disconnectionTimeoutTask = null;
+                    if (connectionState != GATT_DISCONNECTING) {
+                        // Ignore timeout if not disconnecting
+                        return;
+                    }
                     connectionState = GATT_DISCONNECTED;
-                    if (initialConnection) {
-                        notifyConnectionFailed = true;
-                    } else {
-                        notifyConnectionLost = true;
+                    lost = connectionLost;
+                    failed = connectionFailed;
+                    connectionLost = false;
+                    connectionFailed = false;
+                    if (gattServer != null) {
+                        try {
+                            gattServer.close();
+                        } catch (Exception e) {
+                            Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                        }
+                        gattServer = null;
                     }
                 }
+                if (failed) {
+                    notifyConnectionFailed();
+                } else if (lost) {
+                    notifyConnectionLost();
+                }
+                notifyGattConnectionStateChange();
+
+            }, DISCONNECTION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "GattController: Unable to schedule the disconnection timeout.");
+            connectionState = GATT_DISCONNECTED;
+            if (connectionLost) {
+                notifyConnectionLost();
+            } else if (connectionFailed) {
+                notifyConnectionFailed();
             }
+            notifyGattConnectionStateChange();
         }
-        if (canceledOperations != null) {
-            for (GattOperation operation: canceledOperations) {
-                notifyOperationCompletion(operation);
-            }
-        }
-        if (notifyConnectionFailed) {
-            notifyConnectionFailed();
-        }
-        if (notifyConnectionLost) {
-            notifyConnectionLost();
-        }
-        notifyGattConnectionStateChange();
     }
 
     /**
      * Schedules a reconnection.
-     *
-     * @return <code>true</code> if the task has been successfully scheduled.
      */
-    private boolean scheduleReconnection() {
+    @SuppressLint("MissingPermission")
+    protected void reconnect() {
+        if (DEBUG) Log.i(DEBUG_TAG, "GattController: Schedule reconnection.");
+        List<GattOperation> canceledOperations = null;
+        synchronized (this) {
+            // First, disconnect
+            cancelAllTimeoutTasks();
+            canceledOperations = cancelAllGattOperations();
+            connectionState = GATT_RECONNECTING;
+            // After `disconnect` an event will be received to close the GATT server
+            if (gattServer != null) {
+                gattServer.disconnect();
+            }
+            // Schedule reconnection
+            scheduleReconnection();
+        }
+        if (canceledOperations != null) {
+            for (GattOperation operation: canceledOperations) {
+                notifyOperationCompletion(operation);
+            }
+        }
+        notifyGattConnectionStateChange();
+    }
+
+    /**
+     * Clears the GATT cached data.
+     */
+    protected void clearGattCache(BluetoothGatt gatt) {
+        Log.w(DEBUG_TAG, "GattController: Clear GATT cache.");
+        // From: https://stackoverflow.com/a/50745997/8477032
         try {
-            reconnectionTask = executor.schedule(new Runnable() {
-                @SuppressLint("MissingPermission")
-                @Override
-                public void run() {
-                    if (DEBUG) Log.i(DEBUG_TAG, "GattController: Reconnection attempt.");
-                    boolean reconnectionFailed = false;
-                    synchronized (GattController.this) {
-                        reconnectionTask = null;
-                        if (connectionState == GATT_RECONNECTING ||
-                                connectionState == GATT_CONNECTING) {
-                            try {
-                                gattServer = device.connectGatt(context, false,
-                                        GattController.this);
-                            } catch (Exception e) {
-                                Log.e(DEBUG_TAG, "GattController: Unable to call " +
-                                        "connection method for GATT server.", e);
+            final Method refresh = gatt.getClass().getMethod("refresh");
+            if (refresh != null) {
+                refresh.invoke(gatt);
+                Thread.sleep(1000);
+            } else {
+                Log.w(DEBUG_TAG, "GattController: No method to clear GATT cache.");
+            }
+        } catch (Exception e) {
+            Log.w(DEBUG_TAG, "GattController: Unable to clear GATT cache.");
+        }
+    }
+
+    /**
+     * Schedules a reconnection.
+     */
+    @SuppressLint("MissingPermission")
+    private void scheduleReconnection() {
+        try {
+            reconnectionTask = executor.schedule(() -> {
+                if (DEBUG) Log.i(DEBUG_TAG, "GattController: Reconnection attempt.");
+                boolean lost = false;
+                boolean failed = false;
+                boolean reconnect = false;
+                synchronized (GattController.this) {
+                    reconnectionTask = null;
+                    if (connectionState == GATT_RECONNECTING ||
+                            connectionState == GATT_CONNECTING) {
+                        try {
+                            if (device != null) {
+                                gattServer = device.connectGatt(context, false, GattController.this,
+                                        BluetoothDevice.TRANSPORT_LE, BluetoothDevice.PHY_LE_1M,
+                                        new Handler(Looper.getMainLooper()));
+                            } else {
                                 gattServer = null;
                             }
-                            if (gattServer != null) {
-                                scheduleConnectionTimeout(connectionTimeoutMs);
+                        } catch (Exception e) {
+                            Log.e(DEBUG_TAG, "GattController: Unable to call " +
+                                    "connection method for GATT server.", e);
+                            gattServer = null;
+                        }
+                        if (gattServer != null) {
+                            scheduleConnectionTimeout();
+                        } else {
+                            // Yep, 'connectGatt' can return 'null' but it is not documented
+                            // No reconnection attempt when an error occurs with the Bluetooth service
+                            Log.e(DEBUG_TAG, "GattController: Unable to reconnect to " +
+                                    "GATT server.");
+                            // Schedule new reconnection
+                            if (remainingReconnectionAttempts > 0) {
+                                remainingReconnectionAttempts--;
+                                reconnect = true;
+                            } else if (initialConnection) {
+                                failed = true;
+                                connectionState = GATT_DISCONNECTED;
                             } else {
-                                // Yep, 'connectGatt' can return 'null' but it is not documented
-                                // No reconnection attempt when an error occurs with the Bluetooth service
-                                Log.e(DEBUG_TAG, "GattController: Unable to reconnect to " +
-                                        "GATT server.");
-                                closeAndClearGattServer();
-                                connectionState = GattConnectionState.GATT_DISCONNECTED;
-                                reconnectionFailed = true;
+                                lost = true;
+                                connectionState = GATT_DISCONNECTED;
                             }
                         }
                     }
-                    if (reconnectionFailed) {
-                        notifyGattConnectionStateChange();
+                }
+                if (reconnect) {
+                    reconnect();
+                } else if (failed) {
+                    notifyConnectionFailed();
+                    notifyGattConnectionStateChange();
+                } else if (lost) {
+                    notifyConnectionLost();
+                    notifyGattConnectionStateChange();
+                }
+            }, RECONNECTION_DELAY_MS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Log.e(DEBUG_TAG, "GattController: Unable to schedule the reconnection.", e);
+            connectionState = GATT_DISCONNECTED;
+            if (initialConnection) {
+                notifyConnectionFailed();
+                notifyGattConnectionStateChange();
+            } else {
+                notifyConnectionLost();
+                notifyGattConnectionStateChange();
+            }
+        }
+    }
+
+    private void startServiceDiscovery() {
+        if (DEBUG) Log.i(DEBUG_TAG, "GattController: Schedule service discovery.");
+        synchronized (this) {
+            // Change state
+            cancelAllTimeoutTasks();
+            connectionState = GATT_DISCOVERING_SERVICES;
+            // Delayed service discovery in main UI thread
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+            @SuppressLint("MissingPermission") Runnable disc = () -> {
+                boolean reconnect = false;
+                boolean disconnect = false;
+                synchronized (this) {
+                    if (connectionState != GATT_DISCOVERING_SERVICES) {
+                        return;
+                    }
+                    if (DEBUG) Log.i(DEBUG_TAG, "GattController: Request service discovery.");
+                    if (gattServer != null && gattServer.discoverServices()) {
+                        scheduleServiceDiscoveryTimeout();
+                        if (SERVICE_DISCOVERY_RETRY) {
+                            scheduleServiceDiscoveryRetry();
+                        }
+                    } else {
+                        if (DEBUG) Log.i(DEBUG_TAG, "GattController: Failed to request service discovery.");
+                        if (remainingReconnectionAttempts > 0) {
+                            remainingReconnectionAttempts--;
+                            reconnect = true;
+                        } else {
+                            if (initialConnection) {
+                                connectionFailed = true;
+                            } else {
+                                connectionLost = true;
+                            }
+                            disconnect = true;
+                        }
                     }
                 }
-            }, reconnectionDelayMs, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            Log.e(DEBUG_TAG, "GattController: Unable to schedule the reconnection.");
-            return false;
+                if (reconnect) {
+                    if (CLEAR_GATT_CACHE_ON_DISCOVERY_ERROR) {
+                        Log.i(DEBUG_TAG, "GattController: Clear GATT cache after service discovery failure.");
+                        clearGattCache(gattServer);
+                    }
+                    Log.i(DEBUG_TAG, "GattController: Reconnect after service discovery failure.");
+                    reconnect();
+                } else if (disconnect) {
+                    if (CLEAR_GATT_CACHE_ON_DISCOVERY_ERROR) {
+                        Log.i(DEBUG_TAG, "GattController: Clear GATT cache after service discovery failure.");
+                        clearGattCache(gattServer);
+                    }
+                    Log.i(DEBUG_TAG, "GattController: Disconnect after service discovery failure.");
+                    disconnect();
+                }
+            };
+            mainHandler.postDelayed(disc, SERVICE_DISCOVERY_DELAY_MS);
         }
-        return true;
+        notifyGattConnectionStateChange();
     }
 
     /**
      * Schedules a service discovery timeout.
+     * On service discovery. Android caches services, and it's full of bugs. When service discovery
+     * fails, we could try clearing the cache:
+     * <a href="https://stackoverflow.com/a/50745997/8477032">How to refresh services / clear cache?</a>
      */
     private void scheduleServiceDiscoveryTimeout() {
         try {
-            serviceDiscoveryTimeoutTask = executor.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    Log.w(DEBUG_TAG, "GattController: Service discovery timeout.");
-                    synchronized (GattController.this) {
-                        serviceDiscoveryTimeoutTask = null;
-                        if (connectionState != GATT_DISCOVERING_SERVICES) {
-                            // Should not happen, ignore obsolete timeout
-                            return;
-                        }
+            serviceDiscoveryTimeoutTask = executor.schedule(() -> {
+                Log.e(DEBUG_TAG, "GattController: Service discovery timeout!");
+                boolean reconnect = false;
+                synchronized (GattController.this) {
+                    serviceDiscoveryTimeoutTask = null;
+                    if (connectionState != GATT_DISCOVERING_SERVICES) {
+                        // Should not happen, ignore obsolete timeout
+                        return;
                     }
-                    reconnect();
+                    if (remainingReconnectionAttempts > 0) {
+                        remainingReconnectionAttempts--;
+                        reconnect = true;
+                    } else if (initialConnection) {
+                        connectionFailed = true;
+                    } else {
+                        connectionLost = true;
+                    }
                 }
-            }, serviceDiscoveryTimeoutMs, TimeUnit.MILLISECONDS);
+                // Try reconnection after possibly clearing GATT cache
+                if (CLEAR_GATT_CACHE_ON_DISCOVERY_ERROR) {
+                    Log.i(DEBUG_TAG, "GattController: Clear GATT cache after service discovery timeout.");
+                    clearGattCache(gattServer);
+                }
+                if (reconnect) {
+                    Log.i(DEBUG_TAG, "GattController: Reconnect after service discovery timeout.");
+                    reconnect();
+                } else {
+                    Log.i(DEBUG_TAG, "GattController: Disconnect after service discovery timeout.");
+                    disconnect();
+                }
+            }, SERVICE_DISCOVERY_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "GattController: Unable to schedule the service discovery" +
                     " timeout.");
@@ -357,15 +518,13 @@ public class GattController extends BluetoothGattCallback {
     /**
      * Hey, it's so f***ing buggy on API 30 that we should implement stupidly complex things.
      */
-    private void startServiceDiscoverRetryer() {
+    private void scheduleServiceDiscoveryRetry() {
         Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.postDelayed(retryServiceDiscovery, retryServiceDiscoveryDelayMillis);
+        mainHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
     }
 
     /**
-     * On service discovery. Android cache services, and it's full of bugs. When service discovery
-     * fails, we could try clearing the cache:
-     * <a href="https://stackoverflow.com/a/50745997/8477032">How to refresh services / clear cache?</a>
+     * Hey, try it again!
      */
     private final Runnable retryServiceDiscovery = new Runnable() {
         @Override
@@ -373,19 +532,6 @@ public class GattController extends BluetoothGattCallback {
             try {
                 if (connectionState == GATT_DISCOVERING_SERVICES) {
                     try {
-                        Log.w(DEBUG_TAG, "GattController: Clear GATT cache before retrying service discovery.");
-                        // From: https://stackoverflow.com/a/50745997/8477032
-                        try {
-                            final Method refresh = gattServer.getClass().getMethod("refresh");
-                            if (refresh != null) {
-                                refresh.invoke(gattServer);
-                                Thread.sleep(1000);
-                            } else {
-                                Log.w(DEBUG_TAG, "GattController: No method to clear GATT cache.");
-                            }
-                        } catch (Exception e) {
-                            Log.w(DEBUG_TAG, "GattController: Unable to clear GATT cache.");
-                        }
                         Log.w(DEBUG_TAG, "GattController: Retry service discovery.");
                         gattServer.discoverServices();
                     } catch (SecurityException s) {
@@ -397,7 +543,7 @@ public class GattController extends BluetoothGattCallback {
             } finally {
                 if (connectionState == GATT_DISCOVERING_SERVICES) {
                     Handler mainHandler = new Handler(Looper.getMainLooper());
-                    mainHandler.postDelayed(retryServiceDiscovery, retryServiceDiscoveryDelayMillis);
+                    mainHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
                 }
             }
         }
@@ -412,22 +558,29 @@ public class GattController extends BluetoothGattCallback {
         gattSupervisionStartTimeNano = System.nanoTime();
         lastGattServerActivityTimeNano = gattSupervisionStartTimeNano;
         try {
-            gattSupervisionTask = executor.scheduleWithFixedDelay(new Runnable() {
-                @Override
-                public void run() {
-                    if (connectionState != GATT_CONNECTED) {
-                        // Should not happen
-                        cancelGattSupervision();
+            gattSupervisionTask = executor.scheduleWithFixedDelay(() -> {
+                if (connectionState != GATT_CONNECTED) {
+                    // Should not happen
+                    cancelGattSupervision();
+                }
+                // Check last activity time
+                long timeFromLastActivity = (System.nanoTime()-lastGattServerActivityTimeNano)/
+                        1_000_000L;
+                if (timeFromLastActivity > GATT_SUPERVISION_TIMEOUT_MS) {
+                    Log.w(DEBUG_TAG, "GattController: GATT supervision timeout.");
+                    synchronized (GattController.this) {
+                        connectionLost = true;
+                        remainingReconnectionAttempts = RECONNECTION_ATTEMPTS - 1;
                     }
-                    // Check last activity time
-                    long timeFromLastActivity = (System.nanoTime()-lastGattServerActivityTimeNano)/
-                            1_000_000L;
-                    if (timeFromLastActivity > gattSupervisionTimeoutMs) {
-                        Log.w(DEBUG_TAG, "GattController: GATT supervision timeout.");
+                    if (RECONNECTION_ATTEMPTS > 0) {
+                        Log.w(DEBUG_TAG, "GattController: Start reconnection after supervision timeout.");
                         reconnect();
+                    } else {
+                        Log.w(DEBUG_TAG, "GattController: Disconnect after supervision timeout.");
+                        disconnect();
                     }
                 }
-            }, gattSupervisionTimeoutMs, gattSupervisionTimeoutMs, TimeUnit.MILLISECONDS);
+            }, GATT_SUPERVISION_TIMEOUT_MS, GATT_SUPERVISION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "GattController: Unable to schedule the GATT supervision.");
         }
@@ -438,35 +591,43 @@ public class GattController extends BluetoothGattCallback {
      */
     private void cancelAllTimeoutTasks() {
         cancelConnectionTimeout();
+        cancelDisconnectionTimeout();
         cancelServiceDiscoveryTimeout();
         cancelReconnectionTask();
         cancelGattSupervision();
         cancelGattOperationTimeout();
     }
 
-    /**
-     * Closes and clears the GATT server.
-     */
-    @SuppressLint("MissingPermission")
-    private void closeAndClearGattServer() {
-        if (gattServer != null) {
-            gattServer.disconnect();
-            gattServer.close();
-        }
-        gattServer = null;
-    }
+//    /**
+//     * Closes and clears the GATT server.
+//     */
+//    @SuppressLint("MissingPermission")
+//    private void closeAndClearGattServer() {
+//        if (gattServer != null) {
+//            gattServer.disconnect();
+//            gattServer.close();
+//        }
+//        gattServer = null;
+//    }
 
     /**
      * Cancels the timeout for the connection.
      */
     private void cancelConnectionTimeout() {
-        ScheduledFuture task = connectionTimeoutTask;
+        ScheduledFuture<?> task = connectionTimeoutTask;
         connectionTimeoutTask = null;
         if (task != null) {
             task.cancel(false);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                executor.purge();
-            }
+            // Note: `executor.purge();` should not be necessary
+        }
+    }
+
+    private void cancelDisconnectionTimeout() {
+        ScheduledFuture<?> task = disconnectionTimeoutTask;
+        disconnectionTimeoutTask = null;
+        if (task != null) {
+            task.cancel(false);
+            // Note: `executor.purge();` should not be necessary
         }
     }
 
@@ -474,13 +635,11 @@ public class GattController extends BluetoothGattCallback {
      * Cancels the reconnection task
      */
     private void cancelReconnectionTask() {
-        ScheduledFuture task = reconnectionTask;
+        ScheduledFuture<?> task = reconnectionTask;
         reconnectionTask = null;
         if (task != null) {
             task.cancel(false);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                executor.purge();
-            }
+            // Note: `executor.purge();` should not be necessary
         }
     }
 
@@ -488,13 +647,17 @@ public class GattController extends BluetoothGattCallback {
      * Cancels the service discovery timeout.
      */
     private void cancelServiceDiscoveryTimeout() {
-        ScheduledFuture task = serviceDiscoveryTimeoutTask;
+        ScheduledFuture<?> task = serviceDiscoveryTimeoutTask;
         serviceDiscoveryTimeoutTask = null;
         if (task != null) {
             task.cancel(false);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                executor.purge();
-            }
+            // Note: `executor.purge();` should not be necessary
+        }
+        task = serviceDiscoveryRetryTask;
+        serviceDiscoveryRetryTask = null;
+        if (task != null) {
+            task.cancel(false);
+            // Note: `executor.purge();` should not be necessary
         }
     }
 
@@ -502,13 +665,11 @@ public class GattController extends BluetoothGattCallback {
      * Cancels the GATT supervision task.
      */
     private void cancelGattSupervision() {
-        ScheduledFuture task = gattSupervisionTask;
+        ScheduledFuture<?> task = gattSupervisionTask;
         gattSupervisionTask = null;
         if (task != null) {
             task.cancel(false);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                executor.purge();
-            }
+            // Note: `executor.purge();` should not be necessary
         }
     }
 
@@ -516,13 +677,11 @@ public class GattController extends BluetoothGattCallback {
      * Cancels the GATT operation timeout.
      */
     private void cancelGattOperationTimeout() {
-        ScheduledFuture task = gattOperationTimeoutTask;
+        ScheduledFuture<?> task = gattOperationTimeoutTask;
         gattOperationTimeoutTask = null;
         if (task != null) {
             task.cancel(false);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                executor.purge();
-            }
+            // Note: `executor.purge();` should not be necessary
         }
     }
 
@@ -846,7 +1005,7 @@ public class GattController extends BluetoothGattCallback {
      * Requests a new MTU size.
      *
      * @param mtu The requested MTU size.
-     * @return <code>true</code> if the request has been correctly been sent.
+     * @return <code>true</code> if the request has been sent.
      */
     public boolean requestMtu(int mtu) {
         synchronized (this) {
@@ -884,113 +1043,185 @@ public class GattController extends BluetoothGattCallback {
     @SuppressLint("MissingPermission")
     @Override
     public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
-        boolean reconnect = false;
-        synchronized (this) {
-            if (gatt != gattServer) {
-                // Obsolete event
-                if (DEBUG) Log.i(DEBUG_TAG, "GattController: Obsolete connection state " +
-                        "change event. Event ignored.");
-                return;
-            }
-            switch (newState){
 
-                case BluetoothProfile.STATE_CONNECTED:
-                    switch (connectionState) {
-                        case GATT_DISCONNECTED:
-                            // Should not happen
-                            Log.e(DEBUG_TAG, "GattController: Unexpected connection.");
-                            if (gatt != null) {
-                                gatt.disconnect();
-                                gatt.close();
-                            }
-                            return;
-                        case GATT_CONNECTING:
-                        case GATT_RECONNECTING:
-                            // Continue with service discovery (forced on Main thread)
-                            cancelConnectionTimeout();
-                            Handler mainHandler = new Handler(Looper.getMainLooper());
-                            Runnable disc = new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        if (gatt.discoverServices()) {
-                                            connectionState = GATT_DISCOVERING_SERVICES;
-                                            scheduleServiceDiscoveryTimeout();
-                                            startServiceDiscoverRetryer();
-                                        } else {
-                                            reconnect();
-                                        }
-                                    } catch (SecurityException e) {
-                                        Log.e(DEBUG_TAG, "GattController: Failed to start service discovery!", e);
-                                        reconnect();
-                                    }
-                                }
-                            };
-                            mainHandler.postDelayed(disc, serviceDiscoveryInitialDelayMillis);
-                            break;
-                        case GATT_DISCOVERING_SERVICES:
-                        case GATT_CONNECTED:
-                            // Should not happen, ignore event.
-                            Log.w(DEBUG_TAG, "GattController: Unexpected connection " +
-                                    "event.");
-                            return;
-                    }
-                    break;
-
-                case BluetoothProfile.STATE_DISCONNECTED:
-                    switch (connectionState) {
-                        case GATT_DISCONNECTED:
-                            // Ignore event
-                            break;
-                        case GATT_CONNECTING:
-                        case GATT_RECONNECTING:
-                        case GATT_DISCOVERING_SERVICES:
-                        case GATT_CONNECTED:
-                            // Connection lost
-                            reconnect = true;
-                            break;
-                    }
-                    break;
-            }
+        if (gatt != gattServer) {
+            // Obsolete event
+            if (DEBUG) Log.i(DEBUG_TAG, "GattController: Obsolete connection state " +
+                    "change event. Event ignored.");
+            return;
         }
-        if (reconnect) {
-            reconnect();
-        } else {
-            notifyGattConnectionStateChange();
+
+        boolean reconnect = false;
+        boolean failed = false;
+        boolean lost = false;
+
+        switch (newState) {
+
+            case BluetoothProfile.STATE_CONNECTED:
+                switch (connectionState) {
+                    case GATT_DISCONNECTED:
+                    case GATT_DISCONNECTING:
+                        // Should not happen
+                        Log.e(DEBUG_TAG, "GattController: Unexpected connection.");
+                        if (gatt != null) {
+                            gatt.disconnect();
+                            gatt.close();
+                        }
+                        return;
+
+                    case GATT_CONNECTING:
+                    case GATT_RECONNECTING:
+                        // Start service discovery
+                        startServiceDiscovery();
+                        break;
+
+                    case GATT_DISCOVERING_SERVICES:
+                    case GATT_PAIRING:
+                    case GATT_CONNECTED:
+                        // Should not happen, ignore event.
+                        Log.w(DEBUG_TAG, "GattController: Unexpected connection " +
+                                "event.");
+                        return;
+                }
+                break;
+
+            case BluetoothProfile.STATE_DISCONNECTED:
+                switch (connectionState) {
+                    case GATT_DISCONNECTING:
+                        // Expected disconnection event
+                        synchronized (this) {
+                            cancelAllTimeoutTasks();
+                            if (gattServer != null) {
+                                try {
+                                    gattServer.close();
+                                } catch (Exception e) {
+                                    Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                                }
+                                gattServer = null;
+                            }
+                            connectionState = GATT_DISCONNECTED;
+                            failed = connectionFailed;
+                            lost = connectionLost;
+                            remainingReconnectionAttempts = INITIAL_RECONNECTION_ATTEMPTS;
+                            connectionLost = false;
+                            connectionFailed = false;
+                            initialConnection = false;
+                        }
+                        if (failed) {
+                            notifyConnectionFailed();
+                        } else if (lost) {
+                            notifyConnectionLost();
+                        }
+                        notifyGattConnectionStateChange();
+                        break;
+
+                    case GATT_DISCONNECTED:
+                        // Ignore event
+                        break;
+
+                    case GATT_RECONNECTING:
+                        // Expected event, close GATT server without changing state
+                        if (gattServer != null) {
+                            try {
+                                gattServer.close();
+                            } catch (Exception e) {
+                                Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                            }
+                            gattServer = null;
+                        }
+                        break;
+
+                    case GATT_CONNECTING:
+                    case GATT_DISCOVERING_SERVICES:
+                    case GATT_PAIRING:
+                    case GATT_CONNECTED:
+                        synchronized (this) {
+                            cancelAllTimeoutTasks();
+                            if (gattServer != null) {
+                                try {
+                                    gattServer.close();
+                                } catch (Exception e) {
+                                    Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                                }
+                                gattServer = null;
+                            }
+                            if (remainingReconnectionAttempts > 0) {
+                                remainingReconnectionAttempts--;
+                                reconnect = true;
+                            } else {
+                                connectionState = GATT_DISCONNECTED;
+                                failed = initialConnection;
+                                remainingReconnectionAttempts = INITIAL_RECONNECTION_ATTEMPTS;
+                                connectionLost = false;
+                                connectionFailed = false;
+                                initialConnection = false;
+                            }
+                        }
+                        if (reconnect) {
+                            reconnect();
+                        } else {
+                            if (failed) {
+                                notifyConnectionFailed();
+                            } else {
+                                notifyConnectionLost();
+                            }
+                            notifyGattConnectionStateChange();
+                        }
+                        break;
+                }
+                break;
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         Log.i(DEBUG_TAG, "GattController: Service discovered, status :"+status+" (0=OK).");
         // Note: No update of last GATT server activity time because services may be in cache
         boolean reconnect = false;
+        boolean disconnect = false;
         synchronized (this) {
             if (connectionState == GATT_DISCOVERING_SERVICES) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    // Check discovered services
-                    if (gatt.getService(
-                            BeltCommunicationController.BELT_CONTROL_SERVICE_UUID) == null ||
+                // Check status and completion
+                if (status == BluetoothGatt.GATT_SUCCESS &&
                         gatt.getService(
-                                BeltCommunicationController.SENSOR_SERVICE_UUID) == null ||
+                                BeltCommunicationController.BELT_CONTROL_SERVICE_UUID) != null &&
                         gatt.getService(
-                                BeltCommunicationController.DEBUG_SERVICE_UUID) == null) {
-                        // Service discovery not completed
-                        Log.w(DEBUG_TAG, "GattController: Not all service discovered, continue service discovery.");
-                        return;
-                    }
+                                BeltCommunicationController.SENSOR_SERVICE_UUID) != null &&
+                        gatt.getService(
+                                BeltCommunicationController.DEBUG_SERVICE_UUID) != null) {
                     // Service discovery completed
                     cancelServiceDiscoveryTimeout();
-                    connectionState = GATT_CONNECTED;
-                    startGattSupervision();
+                    if (device != null && device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                        connectionState = GATT_PAIRING;
+                        pairingManager.startPairing(device);
+                    } else {
+                        connectionState = GATT_CONNECTED;
+                        remainingReconnectionAttempts = RECONNECTION_ATTEMPTS;
+                        connectionLost = false;
+                        connectionFailed = false;
+                        initialConnection = false;
+                        startGattSupervision();
+                    }
                 } else {
                     Log.e(DEBUG_TAG, "GattController: Service discovery failed.");
-                    reconnect = true;
+                    if (remainingReconnectionAttempts > 0) {
+                        remainingReconnectionAttempts--;
+                        reconnect = true;
+                    } else if (initialConnection) {
+                        connectionFailed = true;
+                        disconnect = true;
+                    } else {
+                        connectionLost = true;
+                        disconnect = true;
+                    }
                 }
             }
         }
         if (reconnect) {
             reconnect();
+        } else if (disconnect) {
+            disconnect();
         } else {
             notifyGattConnectionStateChange();
         }
@@ -1000,11 +1231,9 @@ public class GattController extends BluetoothGattCallback {
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
                                      int status) {
         synchronized (this) {
-            // Update last GATT server activity time and reset reconnection count
+            // Update last GATT server activity time
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 lastGattServerActivityTimeNano = System.nanoTime();
-                reconnectionCount = 0;
-                initialConnection = false;
             }
             // Propagate event to operation
             if (runningOperation != null) {
@@ -1032,10 +1261,8 @@ public class GattController extends BluetoothGattCallback {
 //        Log.d(DEBUG_TAG, "GattController: Notification on " + characteristic.getUuid() +
 //                ", value: " + Arrays.toString(characteristic.getValue()));
         synchronized (this) {
-            // Update last GATT server activity time and reset reconnection count
+            // Update last GATT server activity time
             lastGattServerActivityTimeNano = System.nanoTime();
-            reconnectionCount = 0;
-            initialConnection = false;
             // Propagate event to operation
             if (runningOperation != null) {
                 runningOperation.onCharacteristicChanged(gatt, characteristic);
@@ -1059,11 +1286,9 @@ public class GattController extends BluetoothGattCallback {
     public void onDescriptorRead(BluetoothGatt gatt,
                                  BluetoothGattDescriptor descriptor, int status) {
         synchronized (this) {
-            // Update last GATT server activity time and reset reconnection count
+            // Update last GATT server activity time
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 lastGattServerActivityTimeNano = System.nanoTime();
-                reconnectionCount = 0;
-                initialConnection = false;
             }
             // Propagate event to operation
             if (runningOperation != null) {
@@ -1088,11 +1313,9 @@ public class GattController extends BluetoothGattCallback {
     @Override
     public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
         synchronized (this) {
-            // Update last GATT server activity time and reset reconnection count
+            // Update last GATT server activity time
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 lastGattServerActivityTimeNano = System.nanoTime();
-                reconnectionCount = 0;
-                initialConnection = false;
             }
             // Propagate event to operation
             if (runningOperation != null) {
@@ -1105,11 +1328,9 @@ public class GattController extends BluetoothGattCallback {
     @Override
     public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
         synchronized (this) {
-            // Update last GATT server activity time and reset reconnection count
+            // Update last GATT server activity time
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 lastGattServerActivityTimeNano = System.nanoTime();
-                reconnectionCount = 0;
-                initialConnection = false;
             }
             // Propagate event to operation
             if (runningOperation != null) {
@@ -1273,4 +1494,48 @@ public class GattController extends BluetoothGattCallback {
          */
         void onMtuChanged(int mtu, boolean success);
     }
+
+    // MARK: Implementation of `BluetoothPairingDelegate`
+
+    @Override
+    public void onPairingFinished(BluetoothDevice device) {
+        Log.e(DEBUG_TAG, "GattController: Pairing completed.");
+        synchronized (this) {
+            if (connectionState != GATT_PAIRING) {
+                return;
+            }
+            connectionState = GATT_CONNECTED;
+            remainingReconnectionAttempts = RECONNECTION_ATTEMPTS;
+            connectionLost = false;
+            connectionFailed = false;
+            initialConnection = false;
+            startGattSupervision();
+        }
+        notifyGattConnectionStateChange();
+    }
+
+    @Override
+    public void onPairingFailed() {
+        Log.e(DEBUG_TAG, "GattController: Pairing failed.");
+        boolean reconnect = false;
+        synchronized (this) {
+            if (connectionState != GATT_PAIRING) {
+                return;
+            }
+            if (remainingReconnectionAttempts > 0) {
+                remainingReconnectionAttempts--;
+                reconnect = true;
+            } else if (initialConnection) {
+                connectionFailed = true;
+            } else {
+                connectionLost = true;
+            }
+        }
+        if (reconnect) {
+            reconnect();
+        } else {
+            disconnect();
+        }
+    }
+
 }

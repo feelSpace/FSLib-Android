@@ -28,7 +28,7 @@ public class BluetoothPairingManager {
     // Scan timeout (not null when scanning)
     private ScheduledFuture<?> pairingTimeoutTask;
     private final ScheduledThreadPoolExecutor executor;
-    private static final long DEFAULT_PAIRING_TIMEOUT_MS = 20000;
+    private static final long DEFAULT_PAIRING_TIMEOUT_MS = 30000;
 
     // Context for broadcast receiver
     private final Context context;
@@ -66,9 +66,10 @@ public class BluetoothPairingManager {
                 pairingTimeoutTask = null;
             }
             // Check pairing state
-            if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+            if (device.getBondState() == BluetoothDevice.BOND_NONE) {
                 // Start pairing and listen to bnd events
                 if (pairingListener.register()) {
+                    Log.i(DEBUG_TAG, "BluetoothPairingManager: Request bond (createBond).");
                     pairing = device.createBond();
                 } else {
                     failed = true;
@@ -93,6 +94,33 @@ public class BluetoothPairingManager {
                         Log.e(DEBUG_TAG, "Unable to start the pairing timeout task.", e);
                     }
                 }
+            } else if (device.getBondState() == BluetoothDevice.BOND_BONDING) {
+                Log.i(DEBUG_TAG, "BluetoothPairingManager: Bonding ongoing, start timeout timer.");
+                if (pairingListener.register()) {
+                    Log.i(DEBUG_TAG, "BluetoothPairingManager: Wait for bond finish.");
+                    pairing = true;
+                } else {
+                    failed = true;
+                }
+                try {
+                    pairingTimeoutTask = executor.schedule(
+                            () -> {
+                                boolean notifyFailure;
+                                synchronized (BluetoothPairingManager.this) {
+                                    pairingTimeoutTask = null;
+                                    notifyFailure = pairing;
+                                    pairing = false;
+                                }
+                                stopPairing();
+                                if (notifyFailure) {
+                                    callback.onPairingFailed();
+                                }
+                            }, DEFAULT_PAIRING_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                    Log.e(DEBUG_TAG, "Unable to start the pairing timeout task.", e);
+                }
+            } else {
+                Log.i(DEBUG_TAG, "BluetoothPairingManager: Already bonded.");
             }
         }
         if (failed) {
@@ -165,6 +193,18 @@ public class BluetoothPairingManager {
                             }
                             unregister();
                             callback.onPairingFinished(device);
+                        } else if (pairing && bondState == BluetoothDevice.BOND_NONE) {
+                            // Bond failed
+                            synchronized (BluetoothPairingManager.this) {
+                                pairing = false;
+                                // Cancel timeout task
+                                if (pairingTimeoutTask != null) {
+                                    pairingTimeoutTask.cancel(true);
+                                    pairingTimeoutTask = null;
+                                }
+                            }
+                            unregister();
+                            callback.onPairingFailed();
                         } else if (bondState == BluetoothDevice.BOND_BONDING) {
                             Log.i(DEBUG_TAG, "Bonding start event notified.");
                         }

@@ -96,7 +96,7 @@ public class NavigationController {
             return;
         }
         try {
-            beltConnection.scanPairAndConnect();
+            beltConnection.scanAndConnect();
         } catch (Exception e) {
             Log.e(DEBUG_TAG, "Connection failed", e);
             notifyBeltConnectionFailed();

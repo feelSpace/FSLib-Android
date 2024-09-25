@@ -1367,6 +1367,10 @@ public class BeltCommunicationController implements BeltCommunicationInterface,
                 break;
             case GATT_DISCOVERING_SERVICES:
                 break;
+            case GATT_PAIRING:
+                break;
+            case GATT_DISCONNECTING:
+                break;
             case GATT_CONNECTED:
                 // Note: Characteristics are retrieved when handshake is started (because handshake
                 // may be started before the GATT connection state changed).

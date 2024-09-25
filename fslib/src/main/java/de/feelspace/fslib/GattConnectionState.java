@@ -28,6 +28,11 @@ public enum GattConnectionState {
     GATT_DISCOVERING_SERVICES(),
 
     /**
+     * Pairing.
+     */
+    GATT_PAIRING(),
+
+    /**
      * Connected to GATT services.
      */
     GATT_CONNECTED(),
@@ -36,5 +41,10 @@ public enum GattConnectionState {
      * Reconnecting to GATT server.
      */
     GATT_RECONNECTING(),
+
+    /**
+     * Disconnecting.
+     */
+    GATT_DISCONNECTING(),
 
 }

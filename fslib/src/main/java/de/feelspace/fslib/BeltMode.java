@@ -109,7 +109,7 @@ public enum BeltMode {
             case COMPASS:
                 return "Compass";
             case APP:
-                return "App mode";
+                return "App-mode";
             case PAUSE:
                 return "Pause";
             case CALIBRATION:

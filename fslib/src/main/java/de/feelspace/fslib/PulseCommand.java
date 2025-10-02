@@ -10,7 +10,7 @@ package de.feelspace.fslib;
 /**
  * Command to start a pulse on the belt.
  */
-class PulseCommand {
+public class PulseCommand {
 
     // Channel index
     private int channelIndex;

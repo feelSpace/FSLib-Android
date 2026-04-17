@@ -94,7 +94,7 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
 
     public static final boolean SERVICE_DISCOVERY_RETRY = true;
     public static final int SERVICE_DISCOVERY_RETRY_PERIOD_MS = 5000;
-    private ScheduledFuture<?> serviceDiscoveryRetryTask;
+    private Handler serviceDiscoveryRetryHandler;
 
     // GATT supervision timeout
     public static final long GATT_SUPERVISION_TIMEOUT_MS = 6000;
@@ -234,6 +234,9 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
                 // First disconnect, then wait asynchronous notification to close
                 scheduleDisconnectionTimeout();
                 gattServer.disconnect();
+            } else {
+                // If reconnecting and gattServer is null, consider it disconnected
+                connectionState = GATT_DISCONNECTED;
             }
         }
         if (canceledOperations != null) {
@@ -519,8 +522,8 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
      * Hey, it's so f***ing buggy on API 30 that we should implement stupidly complex things.
      */
     private void scheduleServiceDiscoveryRetry() {
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
+        serviceDiscoveryRetryHandler = new Handler(Looper.getMainLooper());
+        serviceDiscoveryRetryHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
     }
 
     /**
@@ -542,8 +545,10 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
                 }
             } finally {
                 if (connectionState == GATT_DISCOVERING_SERVICES) {
-                    Handler mainHandler = new Handler(Looper.getMainLooper());
-                    mainHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
+                    serviceDiscoveryRetryHandler = new Handler(Looper.getMainLooper());
+                    serviceDiscoveryRetryHandler.postDelayed(retryServiceDiscovery, SERVICE_DISCOVERY_RETRY_PERIOD_MS);
+                } else {
+                    serviceDiscoveryRetryHandler = null;
                 }
             }
         }
@@ -653,11 +658,9 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
             task.cancel(false);
             // Note: `executor.purge();` should not be necessary
         }
-        task = serviceDiscoveryRetryTask;
-        serviceDiscoveryRetryTask = null;
-        if (task != null) {
-            task.cancel(false);
-            // Note: `executor.purge();` should not be necessary
+        if (serviceDiscoveryRetryHandler != null) {
+            serviceDiscoveryRetryHandler.removeCallbacks(retryServiceDiscovery);
+            serviceDiscoveryRetryHandler = null;
         }
     }
 
@@ -1121,13 +1124,15 @@ public class GattController extends BluetoothGattCallback implements BluetoothPa
 
                     case GATT_RECONNECTING:
                         // Expected event, close GATT server without changing state
-                        if (gattServer != null) {
-                            try {
-                                gattServer.close();
-                            } catch (Exception e) {
-                                Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                        synchronized (this) {
+                            if (gattServer != null) {
+                                try {
+                                    gattServer.close();
+                                } catch (Exception e) {
+                                    Log.e(DEBUG_TAG, "GattController: Unable to close GATT server!", e);
+                                }
+                                gattServer = null;
                             }
-                            gattServer = null;
                         }
                         break;
 
